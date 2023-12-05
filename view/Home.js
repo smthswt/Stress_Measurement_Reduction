@@ -1,101 +1,66 @@
 import {Avatar, Card} from "react-native-paper";
-import {
-    Button,
-    Center,
-    Container,
-    Heading,
-    Text,
-    Stack,
-    HStack,
-    VStack,
-    Progress,
-    Box,
-    Spacer,
-    ScrollView
-} from "native-base";
-import {View} from "react-native";
-import React from "react";
+import {Box, Button, Center, HStack, Text, VStack} from "native-base";
+import React, {useEffect} from "react";
+import {useBLE} from "../module/BLEProvider";
+import {DeviceConnectState} from "../components/DeviceConnectState";
+import {ItemComponent} from "./ItemComponent";
+import {Footer} from "../Footer";
 
 const LeftContent = props => <Avatar.Icon {...props} icon="folder"/>
 
-const ItemComponent = () => (
+const AnalysisDataNotFound = () => (
     <Box borderRadius="sm" borderWidth={0} bgColor="blueGray.300" p={3}>
-        <VStack>
-            <Text fontWeight={'bold'}>2023/12/02</Text>
-            <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
-                <Text w={"30%"}>BPM</Text>
-                <Progress flex={1} colorScheme="secondary" shadow={2} value={65}/>
-                <Text>20</Text>
-            </HStack>
-            <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
-                <Text w={"30%"}>Stress Level</Text>
-                <Progress flex={1} shadow={2} value={45}/>
-                <Text>20</Text>
-            </HStack>
-        </VStack>
+        <Center>
+            <Text fontWeight={'bold'}>측정 데이터가 없습니다.</Text>
+        </Center>
     </Box>
 );
 
-const AnalysisResultItemComponent = () => (
-    <Center>
-        <Container>
-            <Heading>2023/03/10</Heading>
-            <Stack direction="column" mb="1.5" mt="1.5" space={1}>
-                <Box w="100%">
-                    <HStack space="md">
-                        <Text>BPM</Text>
-                        <Box w="100%">
-                            <Progress w="100" shadow={2} value={45} mx="4"/>
-                        </Box>
-                        {/*<Progress colorScheme="primary" value={35} />*/}
-                        {/*<Progress colorScheme="secondary" value={45} />*/}
-                        {/*<Progress colorScheme="emerald" value={55} />*/}
-                        {/*<Progress colorScheme="warning" value={65} />*/}
-                        <Text>75</Text>
-                    </HStack>
-                </Box>
-                <Box w="100%">
-                    <HStack space="md">
-                        <Text>Stress Level</Text>
-                        <Progress w="60%" colorScheme="secondary" value={45}/>
-                        <Text>75</Text>
-                    </HStack>
-                </Box>
-                <Stack>
-                    <Text>Stress Level</Text>
-                </Stack>
-            </Stack>
-        </Container>
-    </Center>
-);
+export const HomeScreen = ({navigation}) => {
+    const { connectedDevice, isConnected } = useBLE();
 
-const MyComponent = () => (
-    <Card type={'contained'}>
-        <Card.Title title="Card Title" subtitle="Card Subtitle" left={LeftContent}/>
-        <Card.Content>
-            <Text variant="titleLarge">Card title</Text>
-            <Text variant="bodyMedium">Card content</Text>
-        </Card.Content>
-        <Card.Cover source={{uri: 'https://picsum.photos/700'}}/>
-        <Card.Actions>
-            <Button>Cancel</Button>
-            <Button>Ok</Button>
-        </Card.Actions>
-    </Card>
-);
+    // const sendTestData = () => {
+    //     const message = "Hello World";
+    //     console.log(message);
+    //     sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
+    // };
 
-export const HomeScreen = ({navigation}) => (
-    <View>
-        <ScrollView>
-            {/*<MyComponent/>*/}
-            {/*<Button>측정시작</Button>*/}
-            <VStack space={1} m={2}>
-                <Text fontWeight={'bold'}>최근 측정 데이터 비교</Text>
-                <ItemComponent/>
-                <ItemComponent/>
-                <ItemComponent/>
+    useEffect(() => {
+    }, [connectedDevice]);
+
+    const handleAnalysisStart = () => {
+        navigation.navigate("AnalysisStart");
+    };
+
+    const DeviceNotFound = () => (
+        <Button bg={'gray.400'} onPress={handleAnalysisStart} p={'5'} disabled={true}>
+            <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>디바이스가 연결되어야 측정 할 수 있습니다.</Text>
+        </Button>
+    );
+
+    const DeviceConnected = () => (
+        <Button onPress={handleAnalysisStart} p={'5'}>
+            <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>측정시작</Text>
+        </Button>
+    );
+
+    return (
+        <VStack space={1} p={2} h={'100%'} justifyContent={'space-between'}>
+            <VStack space={1} flex={1}>
+                <DeviceConnectState/>
+                <Box flex={1} bg={'#E6E6E6'} borderRadius={'5'} p={2}>
+                    <VStack space={3} p={1}>
+                        <Text fontWeight={'bold'}>최근 측정 데이터 비교</Text>
+                        {/*<ItemComponent/>*/}
+                        {/*<ItemComponent/>*/}
+                        {/*<ItemComponent/>*/}
+                        <AnalysisDataNotFound/>
+                    </VStack>
+                </Box>
             </VStack>
-        </ScrollView>
-        <Button onPress={() => navigation.navigate('Details')}>Go to Details</Button>
-    </View>
-);
+            <>
+                {isConnected ? DeviceConnected() : DeviceNotFound()}
+            </>
+        </VStack>
+    );
+}

@@ -18,7 +18,4 @@ buildscript {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
     }
-
-    // react-native-vector-icons 폰트를 위한 설정 추가
-    apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 }

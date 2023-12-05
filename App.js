@@ -1,16 +1,32 @@
 import * as React from 'react';
-import {StatusBar, SafeAreaView} from 'react-native';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {useEffect} from 'react';
+import {Animated, PermissionsAndroid, Platform, SafeAreaView} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-// import {DetailsScreen, ProfileScreen,} from './Screen'
-import {NativeBaseProvider, Box, HStack, Center, Pressable, Text, Icon, ZStack, VStack, Spacer} from "native-base";
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {NativeBaseProvider, VStack} from "native-base";
+// react-native-permissions 라이브러리를 사용하는 경우
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 
+
+// 페이지 모듈
 import {HomeScreen} from "./view/Home";
 import {DetailsScreen, ProfileScreen} from "./Screen";
 
-const Tab = createBottomTabNavigator();
+// 블루투스 BLE 모듈
+import {BLEProvider} from "./module/BLEProvider";
+
+// 아이콘
+import {Footer} from "./Footer";
+import {MusicView} from "./view/MusicView";
+import {CalendarView} from "./view/CalendarView";
+import {SettingsView} from "./view/SettingsView";
+import {ElectrocardiogramMeasurementView} from "./view/ElectrocardiogramMeasurementView";
+import {AnalysisResult} from "./view/AnalysisResult";
+import {MassageHealingView} from "./view/MassageHealingView";
+
+
+// const Tab = createBottomTabNavigator();
 
 // function MyTabs() {
 //     return (
@@ -32,93 +48,91 @@ const Tab = createBottomTabNavigator();
 //     );
 // }
 
-const Footer = () => {
-    const navigation = useNavigation();
-    const [selected, setSelected] = React.useState(1);
-    return (
-        <Box bg="white" safeAreaBottom width="100%">
-            <HStack bg="indigo.600" alignItems="center" safeAreaBottom shadow={6}>
-                <Pressable cursor="pointer" opacity={selected === 0 ? 1 : 0.5} py="3" flex={1}
-                           onPress={() => {
-                               setSelected(0);
-                               navigation.navigate('Home');
-                           }}>
-                    <Center>
-                        {/*<Icon name="home" />*/}
-                        <Icon mb="1" as={<MaterialCommunityIcons name={selected === 0 ? 'home' : 'home-outline'}/>}
-                              color="white" size="sm"/>
-                        <Text color="white" fontSize="12">
-                            Home
-                        </Text>
-                    </Center>
-                </Pressable>
-                <Pressable cursor="pointer" opacity={selected === 1 ? 1 : 0.5} py="2" flex={1}
-                           onPress={() => {
-                               setSelected(1);
-                               navigation.navigate('Details');
-                           }}>
-                    <Center>
-                        <Icon mb="1" as={<MaterialCommunityIcons
-                            name={selected === 0 ? 'feature-search' : 'feature-search-outline'}/>} color="white"
-                              size="sm"/>
-                        <Text color="white" fontSize="12">
-                            Search
-                        </Text>
-                    </Center>
-                </Pressable>
-                <Pressable cursor="pointer" opacity={selected === 2 ? 1 : 0.6} py="2" flex={1}
-                           onPress={() => {
-                               setSelected(2);
-                               navigation.navigate('Profile');
-                           }}>
-                    <Center>
-                        <Icon mb="1" as={<MaterialCommunityIcons name={selected === 2 ? 'cart' : 'cart-outline'}/>}
-                              color="white" size="sm"/>
-                        <Text color="white" fontSize="12">
-                            Cart
-                        </Text>
-                    </Center>
-                </Pressable>
-                <Pressable cursor="pointer" opacity={selected === 3 ? 1 : 0.5} py="2" flex={1}
-                           onPress={() => setSelected(3)}>
-                    <Center>
-                        <Icon mb="1"
-                              as={<MaterialCommunityIcons name={selected === 3 ? 'account' : 'account-outline'}/>}
-                              color="white" size="sm"/>
-                        <Text color="white" fontSize="12">
-                            Account
-                        </Text>
-                    </Center>
-                </Pressable>
-            </HStack>
-        </Box>
-    );
-}
-
+// 크로스 페이드 트랜지션 정의
+const crossFadeTransition = {
+    gestureDirection: 'horizontal',
+    headerShown: false,
+    cardStyleInterpolator: ({ current, next, layouts }) => {
+        return {
+            cardStyle: {
+                opacity: Animated.add(
+                    current.progress,
+                    next ? next.progress : 0
+                ).interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: [0, 1, 0],
+                }),
+            },
+        };
+    },
+};
 
 const Stack = createStackNavigator();
 
 const App = () => {
-    return (
-        <NativeBaseProvider>
-            <NavigationContainer>
-                {/*<MyTabs/>*/}
-                <VStack flex={1} justifyContent={"space-between"}>
-                    {/* 여기에 다른 화면 콘텐츠를 배치합니다 */}
-                    {/* 예: <Stack.Navigator>...</Stack.Navigator> */}
-                    <SafeAreaView style={{flex: 1}}>
-                        <Stack.Navigator initialRouteName="Home">
-                            <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-                            <Stack.Screen name="Details" component={DetailsScreen} options={{headerShown: false}}/>
-                            <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: false}}/>
-                        </Stack.Navigator>
-                    </SafeAreaView>
+    const requestLocationPermission = async () => {
+        if (Platform.OS === 'ios') {
+            let locationPermission = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
 
-                    {/* Footer 컴포넌트 */}
-                    <Footer/>
-                </VStack>
-            </NavigationContainer>
-        </NativeBaseProvider>
+            if (locationPermission === RESULTS.DENIED) {
+                const newPermission = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+                return newPermission === RESULTS.GRANTED;
+            }
+
+            return locationPermission === RESULTS.GRANTED;
+        } else if (Platform.OS === 'android' && Platform.Version >= 23) {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                    {
+                        title: "위치 서비스 권한",
+                        message: "이 앱은 BLE 기능을 사용하기 위해 위치 서비스 접근 권한이 필요합니다.",
+                        buttonNeutral: "나중에 묻기",
+                        buttonNegative: "거부",
+                        buttonPositive: "허용"
+                    }
+                );
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    console.log("위치 권한 획득");
+                } else {
+                    console.log("위치 권한 거부");
+                }
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    };
+
+    useEffect(() => {
+        requestLocationPermission();
+    }, []);
+
+    return (
+        <BLEProvider>
+            <NativeBaseProvider>
+                <SafeAreaView style={{flex: 1}}>
+                    <NavigationContainer>
+                        <VStack flex={1} justifyContent={'space-between'}>
+                            <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' } }}>
+                                {/*Main Menu Screen*/}
+                                <Stack.Screen name="Home" component={HomeScreen} options={crossFadeTransition}/>
+                                <Stack.Screen name="Music" component={MusicView} options={crossFadeTransition}/>
+                                <Stack.Screen name="Calendar" component={CalendarView} options={crossFadeTransition}/>
+                                <Stack.Screen name="Settings" component={SettingsView} options={crossFadeTransition}/>
+                                {/*Analysis Sub Screen*/}
+                                <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView} options={crossFadeTransition}/>
+                                <Stack.Screen name="AnalysisEnd" component={AnalysisResult} options={crossFadeTransition}/>
+                                <Stack.Screen name="Healing" component={MassageHealingView} options={crossFadeTransition}/>
+                            </Stack.Navigator>
+                        </VStack>
+                    </NavigationContainer>
+                </SafeAreaView>
+            </NativeBaseProvider>
+        </BLEProvider>
     );
 };
 
