@@ -85,6 +85,7 @@ export const BLEProvider = ({children}) => {
     const handleCharacteristic = (error, characteristic) => {
         if (error) {
             console.error("BLEProvider handleCharacteristic: " + error);
+            setIsConnected(false);
             return;
         }
 

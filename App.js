@@ -3,7 +3,6 @@ import {useEffect} from 'react';
 import {Animated, PermissionsAndroid, Platform, SafeAreaView} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-// import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NativeBaseProvider, VStack} from "native-base";
 // react-native-permissions 라이브러리를 사용하는 경우
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
@@ -11,19 +10,19 @@ import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 
 // 페이지 모듈
 import {HomeScreen} from "./view/Home";
-import {DetailsScreen, ProfileScreen} from "./Screen";
 
 // 블루투스 BLE 모듈
 import {BLEProvider} from "./module/BLEProvider";
 
 // 아이콘
-import {Footer} from "./Footer";
 import {MusicView} from "./view/MusicView";
 import {CalendarView} from "./view/CalendarView";
 import {SettingsView} from "./view/SettingsView";
 import {ElectrocardiogramMeasurementView} from "./view/ElectrocardiogramMeasurementView";
 import {AnalysisResult} from "./view/AnalysisResult";
 import {MassageHealingView} from "./view/MassageHealingView";
+import {Provider} from "react-redux";
+import store from "./Redux/rootReducer";
 
 
 // const Tab = createBottomTabNavigator();
@@ -52,7 +51,7 @@ import {MassageHealingView} from "./view/MassageHealingView";
 const crossFadeTransition = {
     gestureDirection: 'horizontal',
     headerShown: false,
-    cardStyleInterpolator: ({ current, next, layouts }) => {
+    cardStyleInterpolator: ({current, next, layouts}) => {
         return {
             cardStyle: {
                 opacity: Animated.add(
@@ -112,27 +111,37 @@ const App = () => {
     }, []);
 
     return (
-        <BLEProvider>
-            <NativeBaseProvider>
-                <SafeAreaView style={{flex: 1}}>
-                    <NavigationContainer>
-                        <VStack flex={1} justifyContent={'space-between'}>
-                            <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' } }}>
-                                {/*Main Menu Screen*/}
-                                <Stack.Screen name="Home" component={HomeScreen} options={crossFadeTransition}/>
-                                <Stack.Screen name="Music" component={MusicView} options={crossFadeTransition}/>
-                                <Stack.Screen name="Calendar" component={CalendarView} options={crossFadeTransition}/>
-                                <Stack.Screen name="Settings" component={SettingsView} options={crossFadeTransition}/>
-                                {/*Analysis Sub Screen*/}
-                                <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView} options={crossFadeTransition}/>
-                                <Stack.Screen name="AnalysisEnd" component={AnalysisResult} options={crossFadeTransition}/>
-                                <Stack.Screen name="Healing" component={MassageHealingView} options={crossFadeTransition}/>
-                            </Stack.Navigator>
-                        </VStack>
-                    </NavigationContainer>
-                </SafeAreaView>
-            </NativeBaseProvider>
-        </BLEProvider>
+        <Provider store={store}>
+            <BLEProvider>
+                <NativeBaseProvider>
+                    <SafeAreaView style={{flex: 1}}>
+                        <NavigationContainer>
+                            <VStack flex={1} justifyContent={'space-between'}>
+                                <Stack.Navigator initialRouteName="Home" screenOptions={{
+                                    headerShown: false,
+                                    cardStyle: {backgroundColor: 'transparent'}
+                                }}>
+                                    {/*Main Menu Screen*/}
+                                    <Stack.Screen name="Home" component={HomeScreen} options={crossFadeTransition}/>
+                                    <Stack.Screen name="Music" component={MusicView} options={crossFadeTransition}/>
+                                    <Stack.Screen name="Calendar" component={CalendarView}
+                                                  options={crossFadeTransition}/>
+                                    <Stack.Screen name="Settings" component={SettingsView}
+                                                  options={crossFadeTransition}/>
+                                    {/*Analysis Sub Screen*/}
+                                    <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
+                                                  options={crossFadeTransition}/>
+                                    <Stack.Screen name="AnalysisEnd" component={AnalysisResult}
+                                                  options={crossFadeTransition}/>
+                                    <Stack.Screen name="Healing" component={MassageHealingView}
+                                                  options={crossFadeTransition}/>
+                                </Stack.Navigator>
+                            </VStack>
+                        </NavigationContainer>
+                    </SafeAreaView>
+                </NativeBaseProvider>
+            </BLEProvider>
+        </Provider>
     );
 };
 

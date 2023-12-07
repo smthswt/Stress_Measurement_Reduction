@@ -19,17 +19,17 @@ export const ItemComponent = ({stressIndex, sdnn, hr}) => {
                 <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
                     <Text w={"30%"}>HR (BPM)</Text>
                     <Progress flex={1} colorScheme="secondary" shadow={0} value={hr} min={0} max={200}/>
-                    <Text w={"5%"} textAlign={'right'}>{hr}</Text>
+                    <Text w={"10%"} textAlign={'right'}>{hr}</Text>
                 </HStack>
                 <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
                     <Text w={"30%"}>SDNN</Text>
                     <Progress flex={1} colorScheme="secondary" shadow={0} value={sdnn} min={0} max={300}/>
-                    <Text w={"5%"} textAlign={'right'}>{parseFloat(sdnn).toFixed(2)}</Text>
+                    <Text w={"10%"} textAlign={'right'}>{parseFloat(sdnn).toFixed(2)}</Text>
                 </HStack>
                 <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
                     <Text w={"30%"}>Stress Level</Text>
                     <Progress flex={1} colorScheme={"emerald"} shadow={0} value={stressIndex} min={0} max={5}/>
-                    <Text w={"5%"} textAlign={'right'}>{stressIndex}</Text>
+                    <Text w={"10%"} textAlign={'right'}>{stressIndex}</Text>
                 </HStack>
             </VStack>
         </Box>

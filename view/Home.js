@@ -3,8 +3,6 @@ import {Box, Button, Center, HStack, Text, VStack} from "native-base";
 import React, {useEffect} from "react";
 import {useBLE} from "../module/BLEProvider";
 import {DeviceConnectState} from "../components/DeviceConnectState";
-import {ItemComponent} from "./ItemComponent";
-import {Footer} from "../Footer";
 
 const LeftContent = props => <Avatar.Icon {...props} icon="folder"/>
 
@@ -18,12 +16,6 @@ const AnalysisDataNotFound = () => (
 
 export const HomeScreen = ({navigation}) => {
     const { connectedDevice, isConnected } = useBLE();
-
-    // const sendTestData = () => {
-    //     const message = "Hello World";
-    //     console.log(message);
-    //     sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
-    // };
 
     useEffect(() => {
     }, [connectedDevice]);

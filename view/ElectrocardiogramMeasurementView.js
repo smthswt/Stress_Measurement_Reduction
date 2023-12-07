@@ -10,7 +10,7 @@ export const ElectrocardiogramMeasurementView = () => {
     } = useBLE();
 
     // 전체 시간을 정의합니다.
-    const totalTime = 60;
+    const totalTime = 60 * 1;
     const messageRef = React.useRef(null);
 
     const [seconds, setSeconds] = useState(totalTime);
@@ -82,11 +82,11 @@ export const ElectrocardiogramMeasurementView = () => {
     };
 
     const handleAnalysisStop = () => {
-        setIsMessageOpen(false);
-        const timer = setTimeout(() => {
-            navigation.navigate("Home");
-            clearTimeout(timer);
-        }, 500);
+        // setIsMessageOpen(false);
+        // const timer = setTimeout(() => {
+        //     navigation.navigate("Home");
+        //     clearTimeout(timer);
+        // }, 500);
     };
 
     return (
@@ -108,7 +108,7 @@ export const ElectrocardiogramMeasurementView = () => {
             <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpen}>
                 <AlertDialog.Content p={'2%'}>
                     <VStack space={3}>
-                        <Image />
+                        {/*<Image />*/}
                         <Center>
                             <Text fontSize={'xl'} fontWeight={'bold'}>측정이 완료되었습니다.</Text>
                         </Center>
