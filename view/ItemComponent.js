@@ -1,16 +1,37 @@
-import {Box, HStack, Progress, Text, VStack} from "native-base";
 import React from "react";
+import {Box, HStack, Progress, Text, VStack} from "native-base";
 
+/**
+ * Represents an item component that displays stress index, sdnn, and heart rate.
+ *
+ * @param {number} stressIndex - The stress index value.
+ * @param {number} sdnn - The SDNN value.
+ * @param {number} hr - The heart rate value.
+ * @returns {JSX.Element} - The rendered item component.
+ */
 export const ItemComponent = ({stressIndex, sdnn, hr}) => {
-    // 현재 날짜와 시간을 가져옵니다.
+    /**
+     * Represents the current date and time.
+     *
+     * @type {Date}
+     */
     const now = new Date();
 
-    // 날짜와 시간을 원하는 형식의 문자열로 변환합니다.
-
-    // 'YYYY-MM-DD' 형식으로 날짜
+    /**
+     * Converts the current date to a string in the format yyyy-mm-dd.
+     *
+     * @returns {string} The string representation of the current date in yyyy-mm-dd format.
+     */
     const dateString = now.toISOString().split('T')[0];
-    // 'HH:MM:SS' 형식으로 시간
+
+    /**
+     * Retrieves the current time as a string and extracts the first part
+     * of the time string.
+     *
+     * @returns {string} The first part of the time string in the format 'hh:mm:ss'.
+     */
     const timeString = now.toTimeString().split(' ')[0];
+
 
     return (
         <Box borderRadius="sm" borderWidth={0} bgColor="blueGray.300" p={3}>

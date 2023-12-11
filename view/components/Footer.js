@@ -1,12 +1,38 @@
-import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import * as React from "react";
+import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {Box, Center, HStack, Icon, Pressable, Text} from "native-base";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
+/**
+ * Represents the Footer component.
+ *
+ * @returns {React.Component} The Footer component.
+ * @example
+ * ```jsx
+ * <Footer />
+ * ```
+ */
 export const Footer = () => {
+
+    /**
+     * Retrieves the navigation object.
+     *
+     * @returns {Object} The navigation object.
+     */
     const navigation = useNavigation();
+
+
     // const route = useRoute();
+    /**
+     * Represents the currently selected item.
+     *
+     * @typedef {Object} Selected
+     * @property {String} item - The name of the selected item.
+     * @property {Number} quantity - The quantity of the selected item.
+     * @property {Boolean} isActive - Indicates whether the item is currently active or not.
+     */
     const [selected, setSelected] = React.useState(0);
+
 
     useFocusEffect(
         React.useCallback(() => {
@@ -68,7 +94,8 @@ export const Footer = () => {
                                navigation.navigate('Calendar');
                            }}>
                     <Center>
-                        <Icon mb="1" as={<MaterialCommunityIcons name={selected === 2 ? 'calendar-month' : 'calendar-month-outline'}/>}
+                        <Icon mb="1" as={<MaterialCommunityIcons
+                            name={selected === 2 ? 'calendar-month' : 'calendar-month-outline'}/>}
                               color="white" size="sm"/>
                         <Text color="white" fontSize="12">
                             Calendar

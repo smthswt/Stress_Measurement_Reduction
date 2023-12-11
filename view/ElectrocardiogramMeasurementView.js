@@ -1,23 +1,104 @@
 import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image} from "native-base";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
-import {useBLE} from "../module/BLEProvider";
+import {useBLE} from "./module/BLEProvider";
 
+/**
+ * A React component that displays the Electrocardiogram Measurement view.
+ *
+ * @returns {JSX.Element} The Electrocardiogram Measurement view component.
+ */
 export const ElectrocardiogramMeasurementView = () => {
-    const navigation = useNavigation();
-    const {
-        sendDataToArduino, receivedData
-    } = useBLE();
 
-    // 전체 시간을 정의합니다.
-    const totalTime = 60 * 1;
+    /**
+     * Retrieves the navigation object used for navigating within the application.
+     *
+     * @returns {object} The navigation object.
+     */
+    const navigation = useNavigation();
+
+
+    /**
+     * Sends data to an Arduino device.
+     *
+     * @param {string} data - The data to be sent to the Arduino device.
+     * @throws {Error} If connection to the Arduino device fails.
+     * @returns {boolean} True if the data was successfully sent, false otherwise.
+     */
+    const {sendData, receivedData} = useBLE();
+
+
+    /**
+     * Represents the total time in minutes.
+     *
+     * @type {number}
+     */
+    const totalTime = 60;
+
+    /**
+     * Reference to a message element used in a React component.
+     *
+     * @type {React.RefObject<HTMLElement>}
+     * @name messageRef
+     * @description The `messageRef` is a React ref object that can be used to reference
+     *              a message element in a React component. It can be used to access and
+     *              manipulate the message element programmatically.
+     */
     const messageRef = React.useRef(null);
 
+    /**
+     * React useRef hook provides a way to hold a mutable value within a functional component.
+     * The useRef() function returns an object with a 'current' property that can be used to access and modify the value.
+     * This is commonly used to persist a value between renders without causing a re-render of the component.
+     *
+     * @type {React.MutableRefObject<any>}
+     */
+    const interval = useRef();
+
+    /**
+     * Represents a duration in seconds.
+     *
+     * @typedef {number} seconds
+     */
     const [seconds, setSeconds] = useState(totalTime);
+
+
+    /**
+     * Determines if the execution of a process is currently paused.
+     *
+     * @type {boolean}
+     * @description The value of this variable should be set to true when the process is paused, and false when it is running.
+     * @example
+     * // When the process is paused
+     * isPaused = true;
+     *
+     * // When the process is running
+     * isPaused = false;
+     */
     const [isPaused, setIsPaused] = useState(false);
+
+
+    /**
+     * Determines if a certain variable is open or not.
+     *
+     * @param {boolean} isOpen - The variable indicating if something is open or not.
+     * @returns {boolean} - Returns true if the variable is open, otherwise returns false.
+     */
     const [isOpen, setIsOpen] = React.useState(false);
+
+
+    /**
+     * Represents whether a message is open or not.
+     *
+     * @type {boolean}
+     */
     const [isMessageOpen, setIsMessageOpen] = React.useState(false);
 
+
+    /**
+     * Function to handle summit action
+     * @function handleSummit
+     */
     const handleSummit = () => {
         setIsOpen(false);
         const timer = setTimeout(() => {
@@ -26,41 +107,63 @@ export const ElectrocardiogramMeasurementView = () => {
         }, 500);
     };
 
+    /**
+     * Starts the analysis process.
+     *
+     * @function startAnalysis
+     * @returns {void}
+     */
     const startAnalysis = () => {
         const message = "AnalysisStart";
         console.log(message);
-        sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
+        sendData('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
     };
 
+    /**
+     * Logs a message indicating the end of analysis and sends the data to Arduino.
+     *
+     * @function endAnalysis
+     * @returns {void}
+     */
     const endAnalysis = () => {
         const message = "AnalysisEnd";
         console.log(message);
-        sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
+        sendData('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
     };
 
-    // 페이지 로드 시, 분석 시작
+
+    /**
+     * Event called when the page is activated
+     */
     useEffect(() => {
         startAnalysis();
+
+        interval.current = setInterval(() => {
+           setSeconds(prevState => prevState - 1);
+        }, 1000);
+
+        return () => clearInterval(interval.current);
     }, []);
 
-    // 분석 시간 체크 루프
+    /**
+     * Event called when seconds changes
+     */
     useEffect(() => {
-        let timer;
-        if (seconds > 0 && !isPaused) {
-            timer = setTimeout(() => {
-                setSeconds(seconds - 1);
-            }, 1000);
-        } else if (seconds <= 0) {
-            // 시간이 0에 도달하면 측정을 종료 합니다.
-            endAnalysis();
+        console.log("Time: " + seconds);
+
+        if(seconds <= 0)
+        {
+            clearInterval(interval.current);
             setIsOpen(true);
-            // handleSummit();
+            endAnalysis();
         }
+    }, [seconds])
 
-        return () => clearTimeout(timer);
-    }, [seconds, isPaused]);
 
-    // RENST 로 부터 받는 데이터 처리
+    /**
+     * Data processing received from BLE
+     * Called whenever receivedData is updated.
+     */
     useEffect(() => {
         if (receivedData === null || receivedData === '')
             return;
@@ -68,20 +171,38 @@ export const ElectrocardiogramMeasurementView = () => {
         console.log("Received Data: " + receivedData);
     }, [receivedData])
 
-
-    // 경과한 시간에 기반한 프로그레스 값 계산
-    const progressValue = ((totalTime - seconds) / totalTime) * 100;
-
+    /**
+     * This function opens the Stop Analysis message box.
+     * Set the variables 'isPaused' and 'isMessageOpen' to true.
+     *
+     * @function onOpenAnalysisStopMessageBox
+     * @returns {void}
+     */
     const onOpenAnalysisStopMessageBox = () => {
         setIsPaused(true);
         setIsMessageOpen(true);
     };
 
+    /**
+     * Closes the analysis stop message box.
+     * @function
+     * @name onCloseAnalysisStopMessageBox
+     * @returns {void}
+     */
     const onCloseAnalysisStopMessageBox = () => {
         setIsMessageOpen(false);
     };
 
+    /**
+     * Handles the event when analysis stops.
+     * This function should be called when the analysis has finished.
+     * It performs some actions like closing message and navigating to the home page.
+     *
+     * @function handleAnalysisStop
+     * @returns {void}
+     */
     const handleAnalysisStop = () => {
+        // TODO: 분석 종료가 확인되면 호출되는 이벤트를 처리 해야 합니다.
         // setIsMessageOpen(false);
         // const timer = setTimeout(() => {
         //     navigation.navigate("Home");
@@ -89,11 +210,19 @@ export const ElectrocardiogramMeasurementView = () => {
         // }, 500);
     };
 
+    /**
+     * Represents the progress value based on the remaining time.
+     *
+     * @param {number} totalTime - The total time in seconds.
+     * @param {number} seconds - The seconds elapsed.
+     * @returns {number} - The progress value as a percentage (0-100).
+     */
+    const progressValue = ((seconds) / totalTime) * 100;
+
     return (
         <>
             <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'}>
                 <Heading>심전도 측정 중입니다...</Heading>
-
                 <VStack space={1}>
                     <Center>
                         <Text>{seconds}초 남았습니다.</Text>
@@ -105,20 +234,21 @@ export const ElectrocardiogramMeasurementView = () => {
                 </VStack>
             </VStack>
 
+            {/*측정 완료 다이얼로그*/}
             <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpen}>
                 <AlertDialog.Content p={'2%'}>
                     <VStack space={3}>
-                        {/*<Image />*/}
                         <Center>
                             <Text fontSize={'xl'} fontWeight={'bold'}>측정이 완료되었습니다.</Text>
                         </Center>
                         <Button onPress={handleSummit} w={'100%'} p={5}>
-                            <Text fontSize={'lg'} fontWeight={'bold'} color={'white'} >확인</Text>
+                            <Text fontSize={'lg'} fontWeight={'bold'} color={'white'}>확인</Text>
                         </Button>
                     </VStack>
                 </AlertDialog.Content>
             </AlertDialog>
 
+            {/*측정 중지 확인 다이얼로그*/}
             <AlertDialog leastDestructiveRef={messageRef} isOpen={isMessageOpen}
                          onClose={onCloseAnalysisStopMessageBox}>
                 <AlertDialog.Content p={'2%'}>

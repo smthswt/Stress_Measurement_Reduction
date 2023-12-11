@@ -1,52 +1,93 @@
 import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image} from "native-base";
 import React, {useEffect, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
-import {useBLE} from "../module/BLEProvider";
+import {useBLE} from "./module/BLEProvider";
 
+/**
+ * The MassageHealingView component represents the view for a massage healing process.
+ *
+ * The component provides functionality for sending commands to an Arduino device,
+ * displaying a countdown timer, and handling the stoppage of the healing process.
+ *
+ * @component
+ * @example
+ * // Example usage of MassageHealingView component
+ * const App = () => {
+ *     return (
+ *         <MassageHealingView />
+ *     );
+ * }
+ *
+ * @returns {JSX.Element} The MassageHealingView component.
+ */
 export const MassageHealingView = () => {
+
+    /**
+     * Retrieves the navigation object used for navigating within the application.
+     *
+     * @returns {object} The navigation object.
+     */
     const navigation = useNavigation();
 
-    const {
-        sendDataToArduino,
-    } = useBLE();
 
-    // 전체 시간을 정의합니다.
+    /**
+     * Sends data.
+     *
+     * @param {String} data - The data to be sent to Arduino.
+     * @returns {boolean} Returns true if sending data to Arduino is successful,
+     *                    otherwise returns false.
+     *
+     * @throws {TypeError} If the data parameter is not a string.
+     *
+     * @example
+     * sendData('Hello Arduino');
+     */
+    const {sendData} = useBLE();
+
+
+    /**
+     * Represents the total time in seconds.
+     *
+     * @type {number}
+     */
     const totalTime = 10;
+
+
+    /**
+     * A React useRef hook for storing a reference to the cancel function.
+     *
+     * @type {React.RefObject<null>}
+     */
     const cancelRef = React.useRef(null);
+
+
+    /**
+     * A React useRef hook that stores a reference to a message element.
+     *
+     * @type {React.MutableRefObject<HTMLElement|null>}
+     */
     const messageRef = React.useRef(null);
 
     const [seconds, setSeconds] = useState(totalTime);
     const [isOpen, setIsOpen] = React.useState(false);
     const [isMessageOpen, setIsMessageOpen] = React.useState(false);
 
-    const handleSummit = () => {
-        setIsOpen(false);
-        navigation.navigate('Home');
-    };
-
-    const sendTestData = () => {
-        const message = "Hello World";
-        console.log(message);
-        sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
-    };
-
-    const sendHealingStart = () => {
-        const message = "HealingStart";
-        console.log(message);
-        sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
-    };
-
-    const sendHealingStop = () => {
-        const message = "HealingStop";
-        sendDataToArduino('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
-    };
 
     useEffect(() => {
         sendHealingStart();
     }, []);
 
-    // 경과한 시간에 기반한 프로그레스 값 계산
-    const progressValue = ((totalTime - seconds) / totalTime) * 100;
+
+    const sendHealingStart = () => {
+        const message = "HealingStart";
+        console.log(message);
+        sendData('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
+    };
+
+    const sendHealingStop = () => {
+        const message = "HealingStop";
+        sendData('b3a4529f-acc1-4f4e-949b-b4b7a2376f4f', 'ed890871-07e9-4967-81b1-22ce3df7728e', message);
+    };
 
     const onOpenHealingStopMessageBox = () => {
         setIsMessageOpen(true);
@@ -69,12 +110,7 @@ export const MassageHealingView = () => {
         <>
             <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'}>
                 <Heading>힐링을 시작 합니다...</Heading>
-
                 <VStack space={1}>
-                    {/*<Center>*/}
-                    {/*    <Text>{seconds}초 남았습니다.</Text>*/}
-                    {/*</Center>*/}
-                    {/*<Progress value={progressValue}></Progress>*/}
                     <Button p={'5'} onPress={onOpenHealingStopMessageBox}>
                         <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링 중지</Text>
                     </Button>
@@ -94,19 +130,6 @@ export const MassageHealingView = () => {
                     </Center>
                 </AlertDialog.Content>
             </AlertDialog>
-            {/*<AlertDialog leastDestructiveRef={cancelRef} isOpen={isOpen}>*/}
-            {/*    <AlertDialog.Content p={'2%'}>*/}
-            {/*        <VStack space={3}>*/}
-            {/*            <Image />*/}
-            {/*            <Center>*/}
-            {/*                <Text fontSize={'xl'} fontWeight={'bold'}>힐링 마사지가 완료되었습니다.</Text>*/}
-            {/*            </Center>*/}
-            {/*            <Button onPress={handleSummit} w={'100%'} p={5}>*/}
-            {/*                <Text fontSize={'lg'} fontWeight={'bold'} color={'white'} >확인</Text>*/}
-            {/*            </Button>*/}
-            {/*        </VStack>*/}
-            {/*    </AlertDialog.Content>*/}
-            {/*</AlertDialog>*/}
         </>
     );
 };
