@@ -1,7 +1,14 @@
 import {View} from "react-native";
-import {Button, Text} from "native-base";
+import {Text} from "native-base";
 import React from "react";
 
+/**
+ * React component for displaying a calendar view.
+ *
+ * @component
+ * @param {object} navigation - Navigation object used for navigating between screens.
+ * @returns {ReactElement} - The rendered component.
+ */
 export const CalendarView = ({ navigation }) => (
     <View>
         <Text>Calendar</Text>

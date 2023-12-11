@@ -1,8 +1,14 @@
 import {View} from "react-native";
-import {Button, Text} from "native-base";
+import {Text} from "native-base";
 import React from "react";
 
-export const SettingsView = ({ navigation }) => (
+/**
+ * Component for displaying settings view.
+ *
+ * @param {object} navigation - The navigation object from React Navigation.
+ * @returns {JSX.Element} The rendered settings view.
+ */
+export const SettingsView = ({navigation}) => (
     <View>
         <Text>Settings</Text>
         <Text>이 페이지는 아직 준비 중 입니다.</Text>

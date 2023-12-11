@@ -1,7 +1,14 @@
 import {View} from "react-native";
-import {Button, Text} from "native-base";
+import {Text} from "native-base";
 import React from "react";
 
+/**
+ * Represents a view for the Music page.
+ *
+ * @param {Object} navigation - The navigation object used for navigating between screens.
+ *
+ * @returns {JSX.Element} The rendered MusicView component.
+ */
 export const MusicView = ({ navigation }) => (
     <View>
         <Text>Music</Text>
