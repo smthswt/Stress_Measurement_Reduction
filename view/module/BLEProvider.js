@@ -6,21 +6,87 @@ const DEVICE_ID = 'ESP32_BLE';
 const SERVICE_UUID = 'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f';
 const CHARACTERISTIC_UUID = 'ed890871-07e9-4967-81b1-22ce3df7728e';
 
+/**
+ * Creates a BLE context for interacting with Bluetooth Low Energy devices.
+ *
+ * @returns {Object} The BLE context object.
+ */
 export const BLEContext = createContext();
 
+/**
+ * Returns the BLEContext from the current React context.
+ *
+ * @returns {BLEContext} The BLEContext from the current React context.
+ */
 export const useBLE = () => useContext(BLEContext);
 
+/**
+ * @classdesc Represents a variable manager for BLE (Bluetooth Low Energy) devices.
+ * @class
+ */
 const manager = new BleManager();
 
-export const BLEProvider = ({children}) => {
-    const [connectedDevice, setConnectedDevice] = useState(null);
-    const [receivedData, setReceivedData] = useState(""); // 수신된 데이터를 저장할 상태
-    const [devices, setDevices] = useState([]); // 발견된 장치들의 목록
 
+/**
+ * BLEProvider component provides functionality for handling Bluetooth Low Energy (BLE) devices.
+ *
+ * @component
+ * @param {ReactNode} children - The child components.
+ * @returns {ReactNode} - The child components wrapped in BLEContext.Provider.
+ */
+export const BLEProvider = ({children}) => {
+
+    /**
+     * Represents a collection of devices.
+     *
+     * @class
+     */
+    const [devices, setDevices] = useState([]);
+
+    /**
+     * Represents the connected device.
+     *
+     * @typedef {Object} ConnectedDevice
+     */
+    const [connectedDevice, setConnectedDevice] = useState(null);
+
+    /**
+     * Represents the received data from an external source.
+     *
+     * @typedef {Object} receivedData
+     */
+    const [receivedData, setReceivedData] = useState(""); // 수신된 데이터를 저장할 상태
+
+    /**
+     * Represents the scanning status.
+     *
+     * @type {boolean}
+     * @name isScanning
+     * @description Indicates whether the application is currently in scanning mode.
+     */
     const [isScanning, setIsScanning] = useState(false);
+
+    /**
+     * Represents the connection status of a device or network.
+     *
+     * @typedef {boolean} isConnected
+     */
     const [isConnected, setIsConnected] = useState(false);
 
+
+    /**
+     * A string variable to store accumulated data.
+     *
+     * @type {string}
+     */
     let accumulatedData = '';
+
+
+    /**
+     * Represents a subscription object.
+     *
+     * @typedef {Object} Subscription
+     */
     let subscription;
 
     useEffect(() => {
@@ -31,6 +97,13 @@ export const BLEProvider = ({children}) => {
         };
     }, [connectedDevice]);
 
+
+    /**
+     * Asynchronously connects to a BLE device with the specified deviceId.
+     *
+     * @param {string} deviceId - The ID of the BLE device to connect to.
+     * @returns {Promise<Object>} - A Promise that resolves to the connected device, or null if the connection fails.
+     */
     const connectToDevice = async (deviceId) => {
         try {
             // BLE 장치에 연결
@@ -64,16 +137,25 @@ export const BLEProvider = ({children}) => {
         }
     };
 
+
+    /**
+     * Disconnects from the connected device.
+     * If there is a connected device, it cancels the connection
+     * and removes any active subscription.
+     * Once disconnected, the connected device is set to null.
+     * This function is asynchronous and returns a promise.
+     *
+     * @returns {Promise} A promise that resolves once the disconnection is complete
+     *                    or rejects with an error if an error occurs during disconnection.
+     */
     const disconnectFromDevice = async () => {
         if (connectedDevice) {
-            if(subscription) {
+            if (subscription) {
                 console.log("subscription remove");
                 subscription.remove();
             }
             await connectedDevice.cancelConnection()
                 .then((device) => {
-                    // 데이터 송수신 코드
-                    // sendDataToArduino2(device, "Hellow");
                 })
                 .catch((error) => {
                     console.log(error);
@@ -82,6 +164,13 @@ export const BLEProvider = ({children}) => {
         }
     };
 
+
+    /**
+     * Handle characteristic for BLEProvider.
+     *
+     * @param {string} error - The error message.
+     * @param {object} characteristic - The characteristic object containing the value.
+     */
     const handleCharacteristic = (error, characteristic) => {
         if (error) {
             console.error("BLEProvider handleCharacteristic: " + error);
@@ -97,8 +186,8 @@ export const BLEProvider = ({children}) => {
         // console.log("Received: " + accumulatedData);
 
         // 데이터 조각의 시작과 끝을 확인
-        if (isValidJSONPart(accumulatedData)) {
-            accumulatedData = cleanData(accumulatedData);
+        if (isDollarNewlineFormat(accumulatedData)) {
+            accumulatedData = removeDollarAndNewline(accumulatedData);
             console.log("BLEProvider Received: " + accumulatedData);
 
             // 완전한 데이터를 상태에 업데이트
@@ -110,18 +199,42 @@ export const BLEProvider = ({children}) => {
         }
     };
 
-    // 패킷의 유효성을 검사하는 함수
-    const isValidJSONPart = (data) => {
-        // 시작 '{'와 끝 '}' 문자가 있는지 확인
+
+    /**
+     * Checks whether the given data is in dollar newline format.
+     *
+     * @param {string} data - The data to be checked.
+     * @returns {boolean} - Returns true if the data is in dollar newline format, false otherwise.
+     */
+    const isDollarNewlineFormat = (data) => {
+        // Check if the data starts with '$' and ends with '\n
         return data.startsWith('$') && data.endsWith('\n');
     };
 
-    // 문자열에서 head와 tail 문자 제거
-    const cleanData = (data) => {
+
+    /**
+     * Removes the dollar sign and newline character from the given data string.
+     *
+     * @param {string} data - The data string to be processed.
+     * @returns {string} The processed data string without the dollar sign and newline character.
+     */
+    const removeDollarAndNewline = (data) => {
         return data.replace(/^\$/, '').replace(/\n$/, '');
     };
 
-    const connectAndSubscribeToArduino = async (deviceId, serviceUUID, characteristicUUID) => {
+
+    /**
+     * Connects to a device with the given ID, subscribes to the specified service and characteristic,
+     * and handles any incoming characteristics using the provided handler function.
+     *
+     * @async
+     * @param {string} deviceId - The ID of the device to connect to.
+     * @param {string} serviceUUID - The UUID of the service to subscribe to.
+     * @param {string} characteristicUUID - The UUID of the characteristic to monitor.
+     * @returns {void}
+     * @throws {Error} If there was an error connecting to the device or subscribing to the characteristic.
+     */
+    const connectAndSubscribe = async (deviceId, serviceUUID, characteristicUUID) => {
         try {
             const device = await connectToDevice(deviceId);
             if (!device) return;
@@ -132,7 +245,15 @@ export const BLEProvider = ({children}) => {
         }
     };
 
-    const sendDataToArduino = async (serviceUUID, characteristicUUID, message) => {
+
+    /**
+     * Sends data through a BLE connection to a specified service and characteristic.
+     * @param {string} serviceUUID - The UUID of the service to send data to.
+     * @param {string} characteristicUUID - The UUID of the characteristic to send data to.
+     * @param {string} message - The data to send.
+     * @returns {void}
+     */
+    const sendData = async (serviceUUID, characteristicUUID, message) => {
         if (!connectedDevice) {
             console.log("BLEProvider 장치에 연결되어 있지 않습니다.");
             return;
@@ -144,7 +265,7 @@ export const BLEProvider = ({children}) => {
             if (!await connectedDevice.isConnected()) {
                 console.log("BLEProvider 장치가 연결되지 않았습니다. 재연결 시도 중...");
                 // 재연결 로직 수행
-                await connectAndSubscribeToArduino("08:D1:F9:D7:83:26", SERVICE_UUID, CHARACTERISTIC_UUID);
+                connectAndSubscribe("08:D1:F9:D7:83:26", SERVICE_UUID, CHARACTERISTIC_UUID);
             }
 
             console.log("BLEProvider SendData: " + message);
@@ -159,6 +280,12 @@ export const BLEProvider = ({children}) => {
         }
     };
 
+    /**
+     * Searches for a device with the given name using BLE scanning.
+     *
+     * @param {string} name - The name of the device to search for.
+     * @returns {Promise} A promise that resolves with the device if found, or rejects with an error if not found or an error occurred.
+     */
     const findDevice = (name) => {
         return new Promise((resolve, reject) => {
             console.log("BLEProvider BLE Scanning...");
@@ -187,6 +314,13 @@ export const BLEProvider = ({children}) => {
     };
 
 
+    /**
+     * Scans for Bluetooth devices and connects to them.
+     *
+     * This function starts scanning for Bluetooth devices using the `manager.startDeviceScan` method.
+     * It adds the newly discovered devices to an existing list of devices if they are not already present.
+     * The scan is stopped after a specified duration using the `setTimeout` function and the `manager.stopDeviceScan` method.
+     */
     const scanAndConnect = () => {
         manager.startDeviceScan(null, null, (error, device) => {
             if (error) {
@@ -206,6 +340,24 @@ export const BLEProvider = ({children}) => {
         }, 10000); // 10초 후에 스캔 중지
     };
 
+
+    /**
+     * Represents the current state and functionality of the manager.
+     *
+     * @typedef {Object} ManagerData
+     *
+     * @property {instance} manager - The manager instance
+     * @property {instance} connectedDevice - The name of the currently connected device.
+     * @property {string} receivedData - The data received from the connected device.
+     * @property {boolean} isConnected - Indicates whether the manager is currently connected to a device.
+     * @property {function} connectToDevice - A function to connect to a specific device.
+     * @property {function} disconnectFromDevice - A function to disconnect from the currently connected device.
+     * @property {function} connectAndSubscribe - A function to connect and subscribe to an BLE device.
+     * @property {function} sendData - A function to send data to the BLE device.
+     * @property {function} devices - A function to retrieve a list of available devices.
+     * @property {function} scanAndConnect - A function to scan for devices and connect to the first available one.
+     * @property {function} findDevice - A function to find a specific device by name.
+     */
     const value = {
         manager,
         connectedDevice,
@@ -213,8 +365,8 @@ export const BLEProvider = ({children}) => {
         isConnected,
         connectToDevice,
         disconnectFromDevice,
-        connectAndSubscribeToArduino,
-        sendDataToArduino,
+        connectAndSubscribe,
+        sendData,
         devices,
         scanAndConnect,
         findDevice,
