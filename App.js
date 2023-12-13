@@ -1,10 +1,12 @@
 import * as React from 'react';
 import {useEffect} from 'react';
-import {Animated, PermissionsAndroid, Platform, SafeAreaView} from 'react-native';
+import {Animated, PermissionsAndroid, Platform, SafeAreaView, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {NativeBaseProvider, VStack} from "native-base";
+import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
+import {Box, Center, HStack, Icon, NativeBaseProvider, Pressable, VStack, Text} from "native-base";
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 // BLE Import
 import {BLEProvider} from "./view/module/BLEProvider";
@@ -17,6 +19,9 @@ import {SettingsView} from "./view/SettingsView";
 import {ElectrocardiogramMeasurementView} from "./view/ElectrocardiogramMeasurementView";
 import {AnalysisResultView} from "./view/AnalysisResultView";
 import {MassageHealingView} from "./view/MassageHealingView";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import {Screen} from "react-native-screens";
 
 
 /**
@@ -45,18 +50,70 @@ const crossFadeTransition = {
     },
 };
 
-
 /**
  * @namespace Stack
  * @description Represents a stack navigator object in React Navigation.
  */
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator()
 
+const TabScreens = () => {
+    return (
+        <Tab.Navigator initialRouteName="Home"
+                       screenOptions={({route}) => ({
+                           tabBarIcon: ({focused, color, size}) => {
+                               let iconName
+                               let rn = route.name
 
+                               if (rn === "Home") {
+                                   iconName = 'home'
+                               } else if (rn === "Music") {
+                                   iconName = 'musical-notes'
+                               } else if (rn === "Calendar") {
+                                   iconName = 'calendar'
+                               } else if (rn === "Settings") {
+                                   iconName = 'settings'
+                               }
+                               return <Ionicons name={iconName} size={size} color={color}></Ionicons>
+                           }
+                       })}
+        >
+            <Tab.Screen name="Home" component={HomeView} options={crossFadeTransition}/>
+            <Tab.Screen name="Music" component={MusicView} options={crossFadeTransition}/>
+            <Tab.Screen name="Calendar" component={CalendarView}
+                        options={crossFadeTransition}/>
+            <Tab.Screen name="Settings" component={SettingsView}
+                        options={crossFadeTransition}/>
+            {/*Analysis Sub Screen
+                                <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
+                                              options={crossFadeTransition}/>
+                                <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
+                                              options={crossFadeTransition}/>
+                                <Stack.Screen name="Healing" component={MassageHealingView}
+                                              options={crossFadeTransition}/>
+                                 */}
+        </Tab.Navigator>
+    )
+}
 /**
  * Represents the main application component.
  * @constructor
  */
+
+const OtherScreens = () => {
+    return (
+        <NavigationContainer>
+        <Stack.Navigator>
+            <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
+                          options={crossFadeTransition}/>
+            <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
+                          options={crossFadeTransition}/>
+            <Stack.Screen name="Healing" component={MassageHealingView}
+                          options={crossFadeTransition}/>
+        </Stack.Navigator>
+</NavigationContainer>
+    )
+}
 const App = () => {
 
     /**
@@ -112,25 +169,19 @@ const App = () => {
                 <SafeAreaView style={{flex: 1}}>
                     <NavigationContainer>
                         <VStack flex={1} justifyContent={'space-between'}>
-                            <Stack.Navigator initialRouteName="Home" screenOptions={{
+                            <Stack.Navigator screenOptions={{
                                 headerShown: false,
                                 cardStyle: {backgroundColor: 'transparent'}
                             }}>
-                                {/*Main Menu Screen*/}
-                                <Stack.Screen name="Home" component={HomeView} options={crossFadeTransition}/>
-                                <Stack.Screen name="Music" component={MusicView} options={crossFadeTransition}/>
-                                <Stack.Screen name="Calendar" component={CalendarView}
-                                              options={crossFadeTransition}/>
-                                <Stack.Screen name="Settings" component={SettingsView}
-                                              options={crossFadeTransition}/>
-                                {/*Analysis Sub Screen*/}
+                                <Stack.Screen name="TabScreens" component={TabScreens} />
                                 <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
                                               options={crossFadeTransition}/>
                                 <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
                                               options={crossFadeTransition}/>
                                 <Stack.Screen name="Healing" component={MassageHealingView}
                                               options={crossFadeTransition}/>
-                            </Stack.Navigator>
+
+                             </Stack.Navigator>
                         </VStack>
                     </NavigationContainer>
                 </SafeAreaView>

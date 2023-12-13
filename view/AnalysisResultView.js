@@ -54,7 +54,7 @@ export const AnalysisResultView = () => {
 
 
     /**
-     * Sends a request to retrieve analysis data.
+     * Send a request to retrieve analytics data.
      *
      * @function sendGetAnalysisData
      * @returns {void}
@@ -115,7 +115,7 @@ export const AnalysisResultView = () => {
                 <ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>
             </VStack>
             <VStack space={1}>
-                <Button p={'5'} onPress={handlePress}>
+                <Button p={'5'} onPress={handlePress} bgColor={'#2785F4'}>
                     <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링하기</Text>
                 </Button>
             </VStack>
