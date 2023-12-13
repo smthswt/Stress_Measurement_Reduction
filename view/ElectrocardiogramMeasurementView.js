@@ -202,6 +202,7 @@ export const ElectrocardiogramMeasurementView = () => {
      * @returns {void}
      */
     const handleAnalysisStop = () => {
+
         // TODO: 분석 종료가 확인되면 호출되는 이벤트를 처리 해야 합니다.
         // setIsMessageOpen(false);
         // const timer = setTimeout(() => {
@@ -228,7 +229,7 @@ export const ElectrocardiogramMeasurementView = () => {
                         <Text>{seconds}초 남았습니다.</Text>
                     </Center>
                     <Progress value={progressValue}></Progress>
-                    <Button p={'5'} onPress={onOpenAnalysisStopMessageBox}>
+                    <Button p={'5'} onPress={onOpenAnalysisStopMessageBox} bgColor={'#2785F4'}>
                         <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>측정중지</Text>
                     </Button>
                 </VStack>
@@ -241,7 +242,7 @@ export const ElectrocardiogramMeasurementView = () => {
                         <Center>
                             <Text fontSize={'xl'} fontWeight={'bold'}>측정이 완료되었습니다.</Text>
                         </Center>
-                        <Button onPress={handleSummit} w={'100%'} p={5}>
+                        <Button onPress={handleSummit} w={'100%'} p={5} bgColor={'#2785F4'}>
                             <Text fontSize={'lg'} fontWeight={'bold'} color={'white'}>확인</Text>
                         </Button>
                     </VStack>

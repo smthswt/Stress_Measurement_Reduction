@@ -51,7 +51,7 @@ export const DeviceConnectState = () => {
                     <Text fontSize={'15px'} fontWeight={'bold'} color={'white'}>RENST DEVICE</Text>
                     <Text fontSize={'15px'} fontWeight={'bold'} color={'white'}>NOT CONNECTED</Text>
                 </VStack>
-                <Button onPress={handleConnect}>DEVICE CONNECT</Button>
+                <Button onPress={handleConnect} bg={"#2785F4"}>DEVICE CONNECT</Button>
             </HStack>
         </Box>
     );

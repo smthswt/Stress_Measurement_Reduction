@@ -101,7 +101,7 @@ export const MassageHealingView = () => {
         sendHealingStop();
         setIsMessageOpen(false);
         const timer = setTimeout(() => {
-            navigation.navigate("Home");
+            navigation.navigate("TabScreens", {screen:"Home"});
             clearTimeout(timer);
         }, 500);
     };
@@ -111,7 +111,7 @@ export const MassageHealingView = () => {
             <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'}>
                 <Heading>힐링을 시작 합니다...</Heading>
                 <VStack space={1}>
-                    <Button p={'5'} onPress={onOpenHealingStopMessageBox}>
+                    <Button p={'5'} onPress={onOpenHealingStopMessageBox} bgColor={"#2785F4"}>
                         <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링 중지</Text>
                     </Button>
                 </VStack>
