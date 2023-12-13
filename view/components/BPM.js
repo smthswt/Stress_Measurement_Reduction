@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, HStack, Text, VStack} from "native-base";
+import {Box, Divider, HStack, Text, VStack} from "native-base";
 import {LineChart} from "react-native-chart-kit";
 import {Dimensions, View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -30,6 +30,7 @@ export const BPM = () => {
                     <Text bold fontSize={"lg"}>112</Text>
                     <Text fontSize={'xs'}>최고 BPM</Text>
                 </VStack>
+                <Divider thickness="1" orientation="vertical" />
                 <VStack alignItems={"center"}>
                     <Text bold fontSize={"lg"}>48</Text>
                     <Text fontSize={'xs'}>최저 BPM</Text>

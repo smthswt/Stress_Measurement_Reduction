@@ -1,5 +1,17 @@
 import React, {useEffect} from "react";
-import {Box, Button, Center, HStack, Icon, NativeBaseProvider, Pressable, ScrollView, Text, VStack} from "native-base";
+import {
+    Box,
+    Button,
+    Center,
+    HStack,
+    Icon,
+    Image,
+    NativeBaseProvider,
+    Pressable,
+    ScrollView,
+    Text,
+    VStack
+} from "native-base";
 import {useBLE} from "./module/BLEProvider";
 import {DeviceConnectState} from "./components/DeviceConnectState";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -8,6 +20,8 @@ import {View} from "react-native";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import AllResultsImage from "./images/AllResults.png";
+import StressResultsImage from "./images/AllStress.png";
 
 
 /**
@@ -72,22 +86,36 @@ export const HomeView = ({navigation}) => {
     );
 
     const AllResultsImage = require('../view/images/AllResults.png')
+    const StressResultsImage = require('../view/images/AllStress.png')
     const AllResults = () => {
         return (
             <HStack space={2} justifyContent={"space-between"}>
                 <Pressable flex={1}>
-                    <VStack alignItems={"center"} justifyContent={"center"} bg={"#FFFFFF"} shadow={2}>
-                        <Text>Image</Text>
+                    <VStack alignItems={"center"} justifyContent={"center"} bg={"#FFFFFF"} shadow={2} pt={5} pb={5}>
+                        <Box h={100} alignContent={"center"}><Image source={AllResultsImage} alt={"view-all-results"}></Image></Box>
                         <Text bold fontSize={"lg"}>측정 결과 확인</Text>
                         <Text fontSize={'xs'} textAlign={"center"}>측정 결과를{"\n"}비교하여 확인해보세요.</Text>
                     </VStack>
                 </Pressable>
                 <Pressable flex={1}>
-                    <VStack alignItems={"center"} justifyContent={"center"} bg={"#FFFFFF"} shadow={2}>
-                        <Text>Image</Text>
-                        <Text bold fontSize={"lg"}>측정 결과 확인</Text>
-                        <Text fontSize={'xs'} textAlign={"center"}>측정 결과를{"\n"}비교하여 확인해보세요.</Text>
-                    </VStack>
+                    {({
+                          isHovered,
+                          isFocused,
+                          isPressed
+                    }) => {
+                        return <VStack alignItems={"center"} justifyContent={"center"} bg={isPressed ? "coolGray.200" : isHovered ? "coolGray.200" : "white"}
+                                       style={{
+                                           transform: [{
+                                               scale: isPressed ? 0.96 : 1
+                                           }]
+                                       }} shadow={2} pt={5}
+                                       pb={5} >
+                            <Box h={100} alignContent={"center"}><Image source={StressResultsImage}
+                                                                        alt={"view-all-stress"}></Image></Box>
+                            <Text bold fontSize={"lg"}>스트레스 정보</Text>
+                            <Text fontSize={'xs'} textAlign={"center"}>최근 검사한 스트레스{"\n"}수치를 한눈에 볼 수 있어요.</Text>
+                        </VStack>
+                    }}
                 </Pressable>
             </HStack>
         )
@@ -97,7 +125,7 @@ export const HomeView = ({navigation}) => {
         <ScrollView style={{flex: 1}}>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
                     <DeviceConnectState/>
-                    <VStack h={210} bgColor={'#2785F4'} justifyContent={'flex-end'} p={2}>
+                    <VStack h={210} bgColor={"#2785f4"} justifyContent={'flex-end'} p={2}>
                         <Ionicons name={"pulse"} color={"#FFFFFF"} size={80}></Ionicons>
                         <HStack p={2} justifyContent={'space-between'} alignItems={'flex-end'} >
                             <Box>

@@ -1,7 +1,8 @@
-import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image} from "native-base";
+import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image, Modal, HStack} from "native-base";
 import React, {useEffect, useRef, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";
+import emotion_happy from "./images/emotion_happy.png";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -148,8 +149,16 @@ export const ElectrocardiogramMeasurementView = () => {
     /**
      * Event called when seconds changes
      */
+
+    const [showModal, setShowModal] = useState(false)
+
     useEffect(() => {
         console.log("Time: " + seconds);
+
+        if (seconds === 55)
+        {
+            setShowModal(true)
+        }
 
         if(seconds <= 0)
         {
@@ -220,25 +229,102 @@ export const ElectrocardiogramMeasurementView = () => {
      */
     const progressValue = ((seconds) / totalTime) * 100;
 
+    const emotion_happy = require('../view/images/emotion_happy.png')
+    const emotion_normal = require('../view/images/emotion_normal.png')
+    const emotion_soso = require('../view/images/emotion_soso.png')
+    const emotion_tired = require('../view/images/emotion_tired.png')
+    const emotion_sad = require('../view/images/emotion_sad.png')
+    const emotion_angry = require('../view/images/emotion_angry.png')
+
     return (
         <>
-            <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'}>
-                <Heading>심전도 측정 중입니다...</Heading>
-                <VStack space={1}>
+            <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'} bg={"#2785f4"}>
+                <Heading color={"#FFFFFF"}>심전도 측정 중입니다...</Heading>
+                <VStack space={1} bg={"#FFFFFF"} p={5} shadow={2}>
                     <Center>
                         <Text>{seconds}초 남았습니다.</Text>
                     </Center>
-                    <Progress value={progressValue}></Progress>
-                    <Button p={'5'} onPress={onOpenAnalysisStopMessageBox} bgColor={'#2785F4'}>
+                    <Progress value={progressValue} colorScheme={"blue"}></Progress>
+                    <Button p={'5'} onPress={onOpenAnalysisStopMessageBox} bgColor={'#2785F4'} mt={2}>
                         <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>측정중지</Text>
                     </Button>
                 </VStack>
             </VStack>
 
+            {/*Popup select emotion when time reaches 20s*/}
+            <Modal isOpen={showModal} size={"full"}>
+                <Modal.Content borderTopLeftRadius={20}
+                               borderTopRightRadius={20}
+                               bg="white"
+                               p={4}
+                               style={{
+                                   position: 'absolute',
+                                   bottom: 0,
+                                   borderRadius:0,
+                               }}>
+                    <Modal.Body>
+                        <Center mb={5}>
+                            <Text textAlign={"center"} bold fontSize={'2xl'}>현재 기분이 어떠신가요?</Text>
+                        </Center>
+                        <Center>
+                            <HStack space={10} p={5}>
+                                <VStack space={5}>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_happy} alt={"emotion_happy"}></Image>
+                                            <Text>행복해요</Text>
+                                        </Center>
+                                    </VStack>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_tired} alt={"emotion_tired"}></Image>
+                                            <Text>피곤해요</Text>
+                                        </Center>
+                                    </VStack>
+                                </VStack>
+                                <VStack space={5}>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_normal} alt={"emotion_normal"}></Image>
+                                            <Text>보통이에요</Text>
+                                        </Center>
+                                    </VStack>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_sad} alt={"emotion_sad"}></Image>
+                                            <Text>슬퍼요</Text>
+                                        </Center>
+                                    </VStack>
+                                </VStack>
+                                <VStack space={5}>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_soso} alt={"emotion_soso"}></Image>
+                                            <Text>그저그래요</Text>
+                                        </Center>
+                                    </VStack>
+                                    <VStack space={2} flex={1}>
+                                        <Center>
+                                            <Image source={emotion_angry} alt={"emotion_angry"}></Image>
+                                            <Text>화나요</Text>
+                                        </Center>
+                                    </VStack>
+                                </VStack>
+                            </HStack>
+                        </Center>
+                        <Button bgColor={"#CFD0D2"} onPress={() => {
+                            setShowModal(false);
+                        }}>
+                            <Text color={"black"}>감정을 선택해주세요.</Text>
+                        </Button>
+                    </Modal.Body>
+                </Modal.Content>
+            </Modal>
+
             {/*측정 완료 다이얼로그*/}
             <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpen}>
                 <AlertDialog.Content p={'2%'}>
-                    <VStack space={3}>
+                    <VStack space={3} p={3}>
                         <Center>
                             <Text fontSize={'xl'} fontWeight={'bold'}>측정이 완료되었습니다.</Text>
                         </Center>
