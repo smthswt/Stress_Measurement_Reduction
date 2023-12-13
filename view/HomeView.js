@@ -1,5 +1,17 @@
 import React, {useEffect} from "react";
-import {Box, Button, Center, HStack, Icon, NativeBaseProvider, Pressable, ScrollView, Text, VStack} from "native-base";
+import {
+    Box,
+    Button,
+    Center,
+    Container,
+    HStack,
+    Icon,
+    NativeBaseProvider,
+    Pressable,
+    ScrollView,
+    Text,
+    VStack
+} from "native-base";
 import {useBLE} from "./module/BLEProvider";
 import {DeviceConnectState} from "./components/DeviceConnectState";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -109,16 +121,16 @@ export const HomeView = ({navigation}) => {
                             </>
                         </HStack>
                     </VStack>
-                    <VStack space={1} flex={1}>
-                        <Box flex={1} bg={'#E6E6E6'} borderRadius={'5'} p={2}>
-                            <VStack space={3} p={1}>
+                    {/*<VStack space={1} flex={1}>*/}
+                    {/*    <View flex={1} bg={'#E6E6E6'} borderRadius={'5'} p={2}>*/}
+                            <VStack space={3} bg={'#E6E6E6'} borderRadius={'5'} p={2} >
                                 <AnalysisDataNotFound/>
                                 <BPM/>
                                 <StressLevel/>
                                 <AllResults/>
                             </VStack>
-                        </Box>
-                    </VStack>
+                        {/*</View>*/}
+                    {/*</VStack>*/}
                 </VStack>
 
             <View>
