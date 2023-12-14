@@ -91,11 +91,25 @@ export const HomeView = ({navigation}) => {
         return (
             <HStack space={2} justifyContent={"space-between"}>
                 <Pressable flex={1}>
-                    <VStack alignItems={"center"} justifyContent={"center"} bg={"#FFFFFF"} shadow={2} pt={5} pb={5}>
-                        <Box h={100} alignContent={"center"}><Image source={AllResultsImage} alt={"view-all-results"}></Image></Box>
-                        <Text bold fontSize={"lg"}>측정 결과 확인</Text>
-                        <Text fontSize={'xs'} textAlign={"center"}>측정 결과를{"\n"}비교하여 확인해보세요.</Text>
-                    </VStack>
+                    {({
+                          isHovered,
+                          isFocused,
+                          isPressed
+                      }) => {
+                         return <VStack alignItems={"center"} justifyContent={"center"} bg={isPressed ? "coolGray.200" : isHovered ? "coolGray.200" : "white"}
+                                        style={{
+                                            transform: [{
+                                                scale: isPressed ? 0.96 : 1
+                                            }]
+                                        }} shadow={2} pt={5}
+                                        pb={5} >
+                             <Box h={100} alignContent={"center"}>
+                                 <Image source={AllResultsImage} alt={"view-all-results"}></Image>
+                             </Box>
+                             <Text bold fontSize={"lg"}>측정 결과 확인</Text>
+                             <Text fontSize={'xs'} textAlign={"center"}>측정 결과를{"\n"}비교하여 확인해보세요.</Text>
+                         </VStack>
+                    }}
                 </Pressable>
                 <Pressable flex={1}>
                     {({

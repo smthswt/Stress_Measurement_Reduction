@@ -2,7 +2,6 @@ import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image, Mod
 import React, {useEffect, useRef, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";
-import emotion_happy from "./images/emotion_happy.png";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -100,13 +99,6 @@ export const ElectrocardiogramMeasurementView = () => {
      * Function to handle summit action
      * @function handleSummit
      */
-    const handleSummit = () => {
-        setIsOpen(false);
-        const timer = setTimeout(() => {
-            navigation.navigate('AnalysisEnd');
-            clearTimeout(timer);
-        }, 500);
-    };
 
     /**
      * Starts the analysis process.
@@ -236,6 +228,72 @@ export const ElectrocardiogramMeasurementView = () => {
     const emotion_sad = require('../view/images/emotion_sad.png')
     const emotion_angry = require('../view/images/emotion_angry.png')
 
+    const emotions = [
+        { name: 'emotion_happy', source: emotion_happy },
+        { name: 'emotion_tired', source: emotion_tired },
+        { name: 'emotion_normal', source: emotion_normal },
+        { name: 'emotion_sad', source: emotion_sad },
+        { name: 'emotion_soso', source: emotion_soso },
+        { name: 'emotion_angry', source: emotion_angry },
+    ]
+    const [selectedEmotion, setSelectedEmotion] = useState(null);
+    const handleEmotionSelect = (emotionName) => {
+        if (selectedEmotion === emotionName) {
+            setSelectedEmotion(null);
+        } else {
+            setSelectedEmotion(emotionName);
+        }
+    };
+    const renderEmotions = () => {
+        const columns = emotions.reduce((acc, emotion, index) => {
+            const columnIndex = Math.floor(index / 2); // Split into columns with 2 rows each
+            acc[columnIndex] = acc[columnIndex] || [];
+            acc[columnIndex].push(
+                <VStack key={index} flex={1}>
+                    <Center>
+                        <Button
+                            onPress={() => handleEmotionSelect(emotion.name)}
+                            style={{
+                                backgroundColor: selectedEmotion === emotion.name ? '#F5F5F6' : 'transparent',
+                                borderRadius: 50,
+                            }}
+                        >
+                            <Image source={emotion.source} alt={emotion.name}></Image>
+                        </Button>
+                        <Text>{emotion.name}</Text>
+                    </Center>
+                </VStack>
+            );
+            return acc;
+        }, []);
+
+        return columns.map((column, index) => (
+            <VStack key={index} space={5} flex={1}>
+                {column}
+            </VStack>
+        ));
+    };
+
+    const handleSubmit = () => {
+        if (selectedEmotion) {
+            console.log('Selected emotion:', selectedEmotion);
+            // Perform additional actions with the selected emotion here
+            // For example, pass it to a parent component or perform an API call
+        }
+        // Optionally, close the modal after submission
+        setShowModal(false);
+    };
+
+    const handleSummit = () => {
+        setIsOpen(false);
+        const timer = setTimeout(() => {
+            if (selectedEmotion) {
+                navigation.navigate('AnalysisEnd', {selectedEmotion: selectedEmotion});
+                clearTimeout(timer);
+            }
+        }, 500);
+    };
+
     return (
         <>
             <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'} bg={"#2785f4"}>
@@ -252,70 +310,22 @@ export const ElectrocardiogramMeasurementView = () => {
             </VStack>
 
             {/*Popup select emotion when time reaches 20s*/}
-            <Modal isOpen={showModal} size={"full"}>
-                <Modal.Content borderTopLeftRadius={20}
-                               borderTopRightRadius={20}
-                               bg="white"
-                               p={4}
-                               style={{
-                                   position: 'absolute',
-                                   bottom: 0,
-                                   borderRadius:0,
-                               }}>
+            <Modal isOpen={showModal} size="full">
+                <Modal.Content borderTopLeftRadius={20} borderTopRightRadius={20} bg="white" p={4} style={{ position: 'absolute', bottom: 0, borderRadius: 0 }}>
                     <Modal.Body>
                         <Center mb={5}>
-                            <Text textAlign={"center"} bold fontSize={'2xl'}>현재 기분이 어떠신가요?</Text>
+                            <Text textAlign="center" bold fontSize="2xl">
+                                현재 기분이 어떠신가요?
+                            </Text>
                         </Center>
                         <Center>
-                            <HStack space={10} p={5}>
-                                <VStack space={5}>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_happy} alt={"emotion_happy"}></Image>
-                                            <Text>행복해요</Text>
-                                        </Center>
-                                    </VStack>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_tired} alt={"emotion_tired"}></Image>
-                                            <Text>피곤해요</Text>
-                                        </Center>
-                                    </VStack>
-                                </VStack>
-                                <VStack space={5}>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_normal} alt={"emotion_normal"}></Image>
-                                            <Text>보통이에요</Text>
-                                        </Center>
-                                    </VStack>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_sad} alt={"emotion_sad"}></Image>
-                                            <Text>슬퍼요</Text>
-                                        </Center>
-                                    </VStack>
-                                </VStack>
-                                <VStack space={5}>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_soso} alt={"emotion_soso"}></Image>
-                                            <Text>그저그래요</Text>
-                                        </Center>
-                                    </VStack>
-                                    <VStack space={2} flex={1}>
-                                        <Center>
-                                            <Image source={emotion_angry} alt={"emotion_angry"}></Image>
-                                            <Text>화나요</Text>
-                                        </Center>
-                                    </VStack>
-                                </VStack>
+                            <HStack pb={5}>
+                                {renderEmotions()}
                             </HStack>
                         </Center>
-                        <Button bgColor={"#CFD0D2"} onPress={() => {
-                            setShowModal(false);
-                        }}>
-                            <Text color={"black"}>감정을 선택해주세요.</Text>
+                        <Button bgColor={'#2785F4'} onPress={() => {handleSubmit()}} isDisabled={!selectedEmotion} _disabled={{ bgColor: '#a9a9a9' }}>
+                            {!selectedEmotion && <Text color="white">감정을 선택해주세요.</Text>}
+                            {selectedEmotion && <Text color="white">선택완료</Text>}
                         </Button>
                     </Modal.Body>
                 </Modal.Content>

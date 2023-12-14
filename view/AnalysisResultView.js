@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";
-import {Button, Heading, Text, VStack} from "native-base";
+import {Button, Center, Heading, HStack, Image, Link, Text, VStack} from "native-base";
 import {ItemComponent} from "./ItemComponent";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import {AnimatedCircularProgress} from "react-native-circular-progress";
+import SemiCircleProgress from "./components/SemiCirle";
 
 
 /**
@@ -10,8 +13,9 @@ import {ItemComponent} from "./ItemComponent";
  *
  * @class
  */
-export const AnalysisResultView = () => {
-
+export const AnalysisResultView = ({route}) => {
+    const selectedEmotion  = route.params;
+    //console.log(selectedEmotion)
     /**
      * UseNavigation function
      *
@@ -107,17 +111,65 @@ export const AnalysisResultView = () => {
         navigation.navigate('Healing');
     };
 
+    const emotions = {
+         emotion_happy:  require('../view/images/emotion_happy.png') ,
+         emotion_tired:  require('../view/images/emotion_tired.png') ,
+         emotion_normal: require('../view/images/emotion_normal.png') ,
+         emotion_sad: require('../view/images/emotion_sad.png') ,
+         emotion_soso: require('../view/images/emotion_soso.png'),
+         emotion_angry: require('../view/images/emotion_angry.png'),
+    };
+
+
 
     return (
-        <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'}>
-            <VStack space={3}>
-                <Heading>측정 결과 입니다.</Heading>
-                <ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>
+        <VStack space={1} h={'100%'} justifyContent={'space-between'} >
+            <VStack space={3} pt={10} bgColor={'white'} height={"40%"}>
+                <Center><Heading>측정 결과입니다.</Heading></Center>
+                <Center><Text textAlign={"center"}>마지막으로 검사한 결과와 비교했을 때 {'\n'} 수치가 증가하였습니다. </Text></Center>
+                {/*<ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>*/}
+                <Center pt={10}>
+                    <SemiCircleProgress
+                        percentage={40}
+                        progressColor={"#2785F4"}
+                        progressWidth={15}
+                    >
+                        <Text bold fontSize={'3xl'}>79</Text>
+                        <Text fontSize={'xs'} color={'#ADADAD'}>Stress Index</Text>
+                    </SemiCircleProgress>
+                </Center>
             </VStack>
-            <VStack space={1}>
-                <Button p={'5'} onPress={handlePress} bgColor={'#2785F4'}>
-                    <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링하기</Text>
-                </Button>
+            <VStack space={1} justifyContent={"space-between"} p={5} height={"60%"}>
+                <VStack space={5}>
+                    <VStack bg={"white"} p={4} style={{
+                        elevation: 2, // For Android
+                    }}>
+                        <HStack justifyContent={"space-between"}>
+                            <HStack alignItems={"center"} space={2}>
+                                <Ionicons name={'heart'} color={'#FF4370'} size={20}></Ionicons>
+                                <Text bold>BPM</Text>
+                            </HStack>
+                            <Text bold>999</Text>
+                        </HStack>
+                    </VStack>
+                    <VStack bg={"white"} p={4} style={{
+                        elevation: 2, // For Android
+                    }}>
+                        <HStack justifyContent={"space-between"}>
+                            <HStack alignItems={"center"} space={2}>
+                                <Ionicons name={'happy'} color={"#F2B95A"} size={20}></Ionicons>
+                                <Text bold>감정</Text>
+                            </HStack>
+                            <Image source={emotions[selectedEmotion.selectedEmotion]}  alt={"sad"}></Image>
+                        </HStack>
+                    </VStack>
+                </VStack>
+                <VStack>
+                    <Center><Link mb={10}>마지막 검사 결과와 비교하기</Link></Center>
+                    <Button p={'5'} onPress={handlePress} bgColor={'#2785F4'}>
+                        <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링하기</Text>
+                    </Button>
+                    </VStack>
             </VStack>
         </VStack>
     );
