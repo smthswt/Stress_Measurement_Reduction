@@ -7,9 +7,10 @@ import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {Box, Center, HStack, Icon, NativeBaseProvider, Pressable, VStack, Text} from "native-base";
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import Ionicons from "react-native-vector-icons/Ionicons";
+//CustomizedVectorImages
 
 // BLE Import
-import {BLEProvider} from "./view/module/BLEProvider";
+import {BLEProvider} from "./view/module/BLEProvider";``
 
 // View Import
 import {HomeView} from "./view/HomeView";
@@ -19,9 +20,11 @@ import {SettingsView} from "./view/SettingsView";
 import {ElectrocardiogramMeasurementView} from "./view/ElectrocardiogramMeasurementView";
 import {AnalysisResultView} from "./view/AnalysisResultView";
 import {MassageHealingView} from "./view/MassageHealingView";
+import {RecentResultComparison} from "./view/RecentResultComparison";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {Screen} from "react-native-screens";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
 
 
 /**
@@ -56,6 +59,7 @@ const crossFadeTransition = {
  */
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
+const StackNative = createNativeStackNavigator()
 
 const TabScreens = () => {
     return (
@@ -100,18 +104,14 @@ const TabScreens = () => {
  * @constructor
  */
 
-const OtherScreens = () => {
+const AnalysisViewScreens = () => {
     return (
-        <NavigationContainer>
-        <Stack.Navigator>
-            <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
+        <StackNative.Navigator initialRouteName={AnalysisResultView}>
+            <StackNative.Screen name="AnalysisEnd" component={AnalysisResultView}
                           options={crossFadeTransition}/>
-            <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
+            <StackNative.Screen name="RecentResultCompare" component={RecentResultComparison}
                           options={crossFadeTransition}/>
-            <Stack.Screen name="Healing" component={MassageHealingView}
-                          options={crossFadeTransition}/>
-        </Stack.Navigator>
-</NavigationContainer>
+        </StackNative.Navigator>
     )
 }
 const App = () => {
@@ -176,12 +176,11 @@ const App = () => {
                                 <Stack.Screen name="TabScreens" component={TabScreens} />
                                 <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
                                               options={crossFadeTransition}/>
-                                <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
+                                <Stack.Screen name="AnalysisViewScreens" component={AnalysisViewScreens}
                                               options={crossFadeTransition}/>
                                 <Stack.Screen name="Healing" component={MassageHealingView}
                                               options={crossFadeTransition}/>
-
-                             </Stack.Navigator>
+                            </Stack.Navigator>
                         </VStack>
                     </NavigationContainer>
                 </SafeAreaView>

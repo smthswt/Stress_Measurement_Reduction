@@ -7,7 +7,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import SemiCircleProgress from "./components/SemiCirle";
 
-
 /**
  * Represents the analysis result of a measurement.
  *
@@ -111,6 +110,10 @@ export const AnalysisResultView = ({route}) => {
         navigation.navigate('Healing');
     };
 
+    const handleLinkClick = () => {
+        navigation.navigate('RecentResultCompare', {selectedEmotion:selectedEmotion.selectedEmotion});
+    };
+
     const emotions = {
          emotion_happy:  require('../view/images/emotion_happy.png') ,
          emotion_tired:  require('../view/images/emotion_tired.png') ,
@@ -165,7 +168,7 @@ export const AnalysisResultView = ({route}) => {
                     </VStack>
                 </VStack>
                 <VStack>
-                    <Center><Link mb={10}>마지막 검사 결과와 비교하기</Link></Center>
+                    <Center><Link mb={10} onPress={handleLinkClick}>마지막 검사 결과와 비교하기</Link></Center>
                     <Button p={'5'} onPress={handlePress} bgColor={'#2785F4'}>
                         <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>힐링하기</Text>
                     </Button>

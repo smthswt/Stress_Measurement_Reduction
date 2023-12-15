@@ -288,7 +288,7 @@ export const ElectrocardiogramMeasurementView = () => {
         setIsOpen(false);
         const timer = setTimeout(() => {
             if (selectedEmotion) {
-                navigation.navigate('AnalysisEnd', {selectedEmotion: selectedEmotion});
+                navigation.navigate('AnalysisViewScreens', {screen: 'AnalysisEnd', params: {selectedEmotion: selectedEmotion}});
                 clearTimeout(timer);
             }
         }, 500);
@@ -309,7 +309,7 @@ export const ElectrocardiogramMeasurementView = () => {
                 </VStack>
             </VStack>
 
-            {/*Popup select emotion when time reaches 20s*/}
+            {/*Popup select emotion when time reaches 20s, consider using ActionSheet instead*/}
             <Modal isOpen={showModal} size="full">
                 <Modal.Content borderTopLeftRadius={20} borderTopRightRadius={20} bg="white" p={4} style={{ position: 'absolute', bottom: 0, borderRadius: 0 }}>
                     <Modal.Body>

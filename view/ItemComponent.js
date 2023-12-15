@@ -34,24 +34,30 @@ export const ItemComponent = ({stressIndex, sdnn, hr}) => {
 
 
     return (
-        <Box borderRadius="sm" borderWidth={0} bgColor="blueGray.300" p={3}>
-            <VStack>
+        <Box borderRadius="sm" borderWidth={0} pt={3} pb={3}>
+            <VStack space={2}>
                 <Text fontWeight={'bold'}>{dateString} {timeString}</Text>
-                <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
+                <VStack w="100%" space={1}>
                     <Text w={"30%"}>HR (BPM)</Text>
-                    <Progress flex={1} colorScheme="secondary" shadow={0} value={hr} min={0} max={200}/>
-                    <Text w={"10%"} textAlign={'right'}>{hr}</Text>
-                </HStack>
-                <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
+                    <HStack space={2} alignItems={'center'}>
+                        <Progress flex={1} colorScheme="#2785F4" shadow={0} value={hr} min={0} max={200}/>
+                        <Text w={"10%"} textAlign={'right'}>{hr}</Text>
+                    </HStack>
+                </VStack>
+                <VStack w="100%" space={1}>
                     <Text w={"30%"}>SDNN</Text>
-                    <Progress flex={1} colorScheme="secondary" shadow={0} value={sdnn} min={0} max={300}/>
-                    <Text w={"10%"} textAlign={'right'}>{parseFloat(sdnn).toFixed(2)}</Text>
-                </HStack>
-                <HStack w="100%" space={'3'} alignItems={'center'} justifyItems={'center'}>
+                    <HStack space={2} alignItems={'center'}>
+                        <Progress flex={1} colorScheme="secondary" shadow={0} value={sdnn} min={0} max={300}/>
+                        <Text w={"10%"} textAlign={'right'}>{parseFloat(sdnn).toFixed(2)}</Text>
+                    </HStack>
+                </VStack>
+                <VStack w="100%" space={1}>
                     <Text w={"30%"}>Stress Level</Text>
-                    <Progress flex={1} colorScheme={"emerald"} shadow={0} value={stressIndex} min={0} max={5}/>
-                    <Text w={"10%"} textAlign={'right'}>{stressIndex}</Text>
-                </HStack>
+                    <HStack space={2} alignItems={'center'}>
+                        <Progress flex={1} colorScheme={"emerald"} shadow={0} value={stressIndex} min={0} max={5}/>
+                        <Text w={"10%"} textAlign={'right'}>{stressIndex}</Text>
+                    </HStack>
+                </VStack>
             </VStack>
         </Box>
     );
