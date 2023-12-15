@@ -34,9 +34,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("screen");
  * @returns {JSX.Element} The rendered MusicView component.
  */
 export const MusicView = ({ navigation }) => {
-    const  EditButton = () => {
-        console.log("Edit button is pressed")
-    };
 
     return (
         <VStack>
