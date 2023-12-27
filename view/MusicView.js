@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import { Text, VStack, View,} from "native-base";
+import {Text, VStack, View, ScrollView,} from "native-base";
 import {Dimensions, } from "react-native";
 
 import {MusicList} from "./components/MusicList";

@@ -1,12 +1,10 @@
 import {View} from "react-native";
-import {Text, VStack, HStack, ScrollView, Image, Box, Pressable} from "native-base";
+import {Box, Center, HStack, Image, Pressable, ScrollView, Text, VStack} from "native-base";
 import React from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import AllResultsImage from "./images/AllResults.png";
-import StressResultsImage from "./images/AllStress.png";
 
 /**
  * React component for displaying a calendar view.
@@ -16,6 +14,24 @@ import StressResultsImage from "./images/AllStress.png";
  * @returns {ReactElement} - The rendered component.
  */
 export const CalendarView = ({ navigation }) => {
+
+    const date = new Date()
+    let month = date.getMonth() + 1;
+    let dateOfMonth = date.getDate();
+    // let dayOfWeek = date.getDay();
+
+    const getDate = (offset) => {
+        const newDate = dateOfMonth + offset;
+        return `${month}/${newDate}`
+    };
+
+    const getDayOfWeek = (offset) => {
+        const week = ["일", '월', '화', '수', '목', '금', '토'];
+        return week[new Date().getDay() + offset]
+    };
+
+    console.log("오늘 날짜 :", `${month}/${dateOfMonth}`)
+    console.log("오늘 요일 :", getDayOfWeek(0))
 
     const emotions = {
         emotion_happy:  require('../view/images/emotion_happy.png') ,
@@ -74,21 +90,58 @@ export const CalendarView = ({ navigation }) => {
                 </Pressable>
             </HStack>
         )
-    }
+    };
 
 
 return (
     <VStack style={{flex: 1}}>
     <VStack space={2} bgColor={"white"} padding={5}>
         <HStack alignitems={"flex-start"} justifyContent={'space-between'}>
-            <Text bold fontSize={18}>달력</Text>
+            <Text fontWeight={900} fontSize={18}>달력</Text>
             <AntDesign name={"calendar"} size={22} color={"black"}/>
         </HStack>
-        <HStack>
-            <Text>
-                //달력 날짜들 + ScrollView
-            </Text>
+
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+        <HStack space={3} justifyContent={"flex-start"} mt={2.5}>
+            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(0)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(0)}</Text>
+            </Center>
+            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(1)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(1)}</Text>
+            </Center>
+
+            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(2)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(2)}</Text>
+            </Center>
+            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(3)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(3)}</Text>
+            </Center>
+
+            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(4)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(4)}</Text>
+            </Center>
+            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(5)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(5)}</Text>
+            </Center>
+
+            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(6)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(6)}</Text>
+            </Center>
+            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(7)}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(7)}</Text>
+            </Center>
+
+
         </HStack>
+        </ScrollView>
     </VStack>
 
         <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>

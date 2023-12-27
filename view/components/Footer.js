@@ -58,7 +58,7 @@ export const Footer = () => {
     );
 
     return (
-        <Box bg="white" safeAreaBottom width="100%">
+        <Box bg="white" safeAreaBottom width="100%" paddingY={2}>
             <HStack bg="indigo.600" alignItems="center" safeAreaBottom shadow={6}>
                 <Pressable cursor="pointer" opacity={selected === 0 ? 1 : 0.5} py="3" flex={1}
                            onPress={() => {
