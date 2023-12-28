@@ -1,4 +1,4 @@
-import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image} from "native-base";
+import {AlertDialog, Button, Center, Heading, Text, VStack} from "native-base";
 import React, {useEffect, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";

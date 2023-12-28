@@ -6,6 +6,7 @@ import {ItemComponent} from "./ItemComponent";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import SemiCircleProgress from "./components/SemiCirle";
+import Emotion_happy from "../view/images/emotion_happy.svg"
 
 
 /**
@@ -108,6 +109,10 @@ export const RecentResultComparison = ({route}) => {
      * @returns {void}
      */
 
+    const handleSeeAllResults = () => {
+        navigation.navigate('AnalysisViewScreens', {screen:"AllRecordsList"})
+    }
+
     const emotions = {
         emotion_happy:  require('../view/images/emotion_happy.png') ,
         emotion_tired:  require('../view/images/emotion_tired.png') ,
@@ -129,10 +134,13 @@ export const RecentResultComparison = ({route}) => {
             <VStack space={1} justifyContent={"space-between"} p={5} bgColor={"white"} shadow={2}>
                 <HStack justifyContent={'space-between'} alignItems={'center'}>
                     <Text bold fontSize={'lg'}>마지막 검사 기록</Text>
-                    <Image source={emotions.emotion_sad} alt={'test'}/>
+                    <Image source={emotions.emotion_happy} alt={'test'}/>
                 </HStack>
                 <ItemComponent hr={HR} sdnn={SDNN} stressIndex={stressIndex}></ItemComponent>
             </VStack>
+            <Center>
+                <Link onPress={handleSeeAllResults}>See all records</Link>
+            </Center>
         </VStack>
     );
 }

@@ -21,10 +21,19 @@ import {ElectrocardiogramMeasurementView} from "./view/ElectrocardiogramMeasurem
 import {AnalysisResultView} from "./view/AnalysisResultView";
 import {MassageHealingView} from "./view/MassageHealingView";
 import {RecentResultComparison} from "./view/RecentResultComparison";
+import {AllRecordsListView} from "./view/AllRecordsListView"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {Screen} from "react-native-screens";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {HomeView_AllResults} from "./view/HomeView_AllResults";
+import {HomeView_AllStress} from "./view/HomeView_AllStress";
+import {LoginView} from "./view/LoginView";
+import {RegisterView} from "./view/RegisterView";
+import {RegisterSuccessView} from "./view/RegisterSuccessView";
+import {SettingsView_Device} from "./view/SettingsView_Device";
+import {SettingsView_Regular} from "./view/SettingsView_Regular";
+import {SettingsView_Manual} from "./view/SettingsView_Manual";
 
 
 /**
@@ -60,6 +69,19 @@ const crossFadeTransition = {
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
 const StackNative = createNativeStackNavigator()
+
+const LoginScreens =() => {
+    return (
+        <StackNative.Navigator initialRouteName={LoginView}>
+            <StackNative.Screen name="Login" component={LoginView}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Register" component={RegisterView}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="RegisterSuccess" component={RegisterSuccessView}
+                                options={crossFadeTransition}/>
+        </StackNative.Navigator>
+    )
+}
 
 const TabScreens = () => {
     return (
@@ -111,6 +133,22 @@ const AnalysisViewScreens = () => {
                           options={crossFadeTransition}/>
             <StackNative.Screen name="RecentResultCompare" component={RecentResultComparison}
                           options={crossFadeTransition}/>
+            <StackNative.Screen name="AllRecordsList" component={AllRecordsListView}
+                                options={crossFadeTransition}/>
+        </StackNative.Navigator>
+    )
+}
+const SettingScreens =() => {
+    return (
+        <StackNative.Navigator initialRouteName={SettingsView}>
+            <StackNative.Screen name="Settings" component={SettingsView}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Device" component={SettingsView_Device}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Regular" component={SettingsView_Regular}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Manual" component={SettingsView_Manual}
+                                options={crossFadeTransition}/>
         </StackNative.Navigator>
     )
 }
@@ -169,17 +207,24 @@ const App = () => {
                 <SafeAreaView style={{flex: 1}}>
                     <NavigationContainer>
                         <VStack flex={1} justifyContent={'space-between'}>
-                            <Stack.Navigator screenOptions={{
+                            <Stack.Navigator initialRouteName={LoginView} screenOptions={{
                                 headerShown: false,
                                 cardStyle: {backgroundColor: 'transparent'}
                             }}>
+                                <Stack.Screen name={"LoginScreens"} component={LoginScreens}/>
                                 <Stack.Screen name="TabScreens" component={TabScreens} />
                                 <Stack.Screen name="AnalysisStart" component={ElectrocardiogramMeasurementView}
                                               options={crossFadeTransition}/>
                                 <Stack.Screen name="AnalysisViewScreens" component={AnalysisViewScreens}
                                               options={crossFadeTransition}/>
+                                <Stack.Screen name={"HomeView_AllResults"} component={HomeView_AllResults}
+                                              options={crossFadeTransition}/>
+                                <Stack.Screen name={"HomeView_AllStress"} component={HomeView_AllStress}
+                                              options={crossFadeTransition}/>
                                 <Stack.Screen name="Healing" component={MassageHealingView}
                                               options={crossFadeTransition}/>
+                                <StackNative.Screen name="SettingScreens" component={SettingScreens}
+                                                    options={crossFadeTransition}/>
                             </Stack.Navigator>
                         </VStack>
                     </NavigationContainer>

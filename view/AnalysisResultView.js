@@ -31,7 +31,6 @@ export const AnalysisResultView = ({route}) => {
      */
     const {sendData, receivedData} = useBLE();
 
-
     /**
      * Represents the stress index of a given object.
      *

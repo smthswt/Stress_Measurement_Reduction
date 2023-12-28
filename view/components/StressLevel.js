@@ -1,7 +1,7 @@
 import React from 'react';
-import {Box, HStack, Text, VStack} from "native-base";
+import {HStack, Text, VStack} from "native-base";
 import {LineChart} from "react-native-chart-kit";
-import {Dimensions, View} from "react-native";
+import {View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const data={

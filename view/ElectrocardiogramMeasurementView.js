@@ -2,6 +2,7 @@ import {AlertDialog, Button, Center, Heading, Progress, Text, VStack, Image, Mod
 import React, {useEffect, useRef, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -33,7 +34,7 @@ export const ElectrocardiogramMeasurementView = () => {
      *
      * @type {number}
      */
-    const totalTime = 60;
+    const totalTime = 20;
 
     /**
      * Reference to a message element used in a React component.
@@ -147,7 +148,7 @@ export const ElectrocardiogramMeasurementView = () => {
     useEffect(() => {
         console.log("Time: " + seconds);
 
-        if (seconds === 55)
+        if (seconds === 18)
         {
             setShowModal(true)
         }
@@ -219,7 +220,7 @@ export const ElectrocardiogramMeasurementView = () => {
      * @param {number} seconds - The seconds elapsed.
      * @returns {number} - The progress value as a percentage (0-100).
      */
-    const progressValue = ((seconds) / totalTime) * 100;
+    const progressValue = ((totalTime - seconds) / totalTime) * 100;
 
     const emotion_happy = require('../view/images/emotion_happy.png')
     const emotion_normal = require('../view/images/emotion_normal.png')
@@ -335,6 +336,9 @@ export const ElectrocardiogramMeasurementView = () => {
             <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpen}>
                 <AlertDialog.Content p={'2%'}>
                     <VStack space={3} p={3}>
+                        <Center>
+                            <Ionicons name={"checkmark-circle-outline"} size={100} color={"#59BCFF"}/>
+                        </Center>
                         <Center>
                             <Text fontSize={'xl'} fontWeight={'bold'}>측정이 완료되었습니다.</Text>
                         </Center>

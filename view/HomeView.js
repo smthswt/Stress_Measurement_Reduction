@@ -4,7 +4,6 @@ import {
     Button,
     Center,
     HStack,
-    Icon,
     Image,
     NativeBaseProvider,
     Pressable,
@@ -20,8 +19,9 @@ import {View} from "react-native";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import AllResultsImage from "./images/AllResults.png";
-import StressResultsImage from "./images/AllStress.png";
+import HeartIcon from "./images/HeartIcon.svg"
+import HeartIconSvg from "./components/HeartIconSvg";
+import {SvgXml} from "react-native-svg";
 
 
 /**
@@ -37,6 +37,24 @@ const AnalysisDataNotFound = () => (
     </Box>
 );
 
+const xml =`
+<svg width="66" height="64" viewBox="0 0 66 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_986_6145)">
+<path d="M41 29.3153C41 30.4044 40.584 31.509 39.712 32.3569L33.008 39L26.288 32.3569C25.432 31.5167 25 30.4044 25 29.3153C25 28.2263 25.432 27.1061 26.288 26.266C27.976 24.578 30.744 24.578 32.448 26.266L33.008 26.8183L33.552 26.266C35.256 24.578 38.04 24.578 39.712 26.266C40.584 27.1139 41 28.2185 41 29.3231V29.3153Z" fill="#2785F4"/>
+</g>
+<defs>
+<filter id="filter0_d_986_6145" x="0" y="0" width="66" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="12.5"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_986_6145"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_986_6145" result="shape"/>
+</filter>
+</defs>
+</svg>`
 /**
  * HomeScreen component representing the home screen of the application.
  *
@@ -85,12 +103,20 @@ export const HomeView = ({navigation}) => {
         </Button>
     );
 
+    const handleMovetoViewAllResults = () => {
+        navigation.navigate("HomeView_AllResults")
+    }
+
+    const handleMovetoViewAllStress = () => {
+        navigation.navigate("HomeView_AllStress")
+    }
+
     const AllResultsImage = require('../view/images/AllResults.png')
     const StressResultsImage = require('../view/images/AllStress.png')
     const AllResults = () => {
         return (
             <HStack space={2} justifyContent={"space-between"}>
-                <Pressable flex={1}>
+                <Pressable flex={1} onPress={handleMovetoViewAllResults}>
                     {({
                           isHovered,
                           isFocused,
@@ -111,7 +137,7 @@ export const HomeView = ({navigation}) => {
                          </VStack>
                     }}
                 </Pressable>
-                <Pressable flex={1}>
+                <Pressable flex={1} onPress={handleMovetoViewAllStress}>
                     {({
                           isHovered,
                           isFocused,
@@ -139,8 +165,9 @@ export const HomeView = ({navigation}) => {
         <ScrollView style={{flex: 1}}>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
                     <DeviceConnectState/>
-                    <VStack h={210} bgColor={"#2785f4"} justifyContent={'flex-end'} p={2}>
+                    <VStack h={210} bgColor={"black"} justifyContent={'flex-end'} p={2}>
                         <Ionicons name={"pulse"} color={"#FFFFFF"} size={80}></Ionicons>
+                        <SvgXml xml={xml} width="100%" height="100%"/>
                         <HStack p={2} justifyContent={'space-between'} alignItems={'flex-end'} >
                             <Box>
                                 <Text color={'white'} fontSize={'lg'} bold>길동님</Text>
