@@ -22,13 +22,15 @@ import {useNavigation} from "@react-navigation/native";
 
 export const MusicList = () => {
     const { isOpen, onOpen, onClose } = useDisclose();
-    const  IsButton = () => {
-        console.log("button is pressed23")
+    const  mp3Button = () => {
+        console.log("MP3button is pressed")
+    };
+
+    const  initButton = () => {
+        console.log("initbutton is pressed")
     };
 
     const navigation = useNavigation();
-
-
 
     const Music_ActionSheet = () => {
         return(
@@ -43,7 +45,7 @@ export const MusicList = () => {
                         </Text>
                     </Box>
 
-                    <Actionsheet.Item onPress={IsButton}
+                    <Actionsheet.Item onPress={mp3Button}
                         // onPress={navigation.navigate('MovetoNextActionSheetPage')}
                     >
                         <HStack p={1}>
@@ -57,7 +59,7 @@ export const MusicList = () => {
                         </HStack>
                     </Actionsheet.Item>
 
-                    <Actionsheet.Item onPress={IsButton}>
+                    <Actionsheet.Item onPress={initButton}>
                         <HStack p={1}>
                             <HStack space={3} >
                                 <Ionicons name={"settings-sharp"} size={22} color={"#ADAEB3"} />
