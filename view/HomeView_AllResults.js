@@ -52,8 +52,6 @@ export const HomeView_AllResults = ({navigation}) => {
             {date: '12.17', bpm: 92},
             {date: '12.18', bpm: 84},
             {date: '12.19', bpm: 86},
-            {date: '12.20', bpm: 88},
-            {date: '12.21', bpm: 85},
         ],
         min: [
             {date: '12.15', bpm: 98},
@@ -61,9 +59,6 @@ export const HomeView_AllResults = ({navigation}) => {
             {date: '12.17', bpm: 81},
             {date: '12.18', bpm: 82},
             {date: '12.19', bpm: 83},
-            {date: '12.20', bpm: 81},
-            {date: '12.21', bpm: 75},
-
         ]
     }
 
@@ -160,31 +155,6 @@ export const HomeView_AllResults = ({navigation}) => {
     return (
         <ScrollView>
         <VStack p={3} space={3}>
-            <Pressable>
-                <Button onPress={() => setShowCalendar(true)} width={'60%'} bg={"#2785F4"}>
-                    <HStack alignItems={'center'} space={2}>
-                        <Ionicons name={"calendar-sharp"} color={"white"} size={15}/>
-                        <Text color={"white"} bold>{finalStartDate ? finalStartDate.toString().split('T')[0].replace(/-/g, '/') : ""} - {finalEndDate ? finalEndDate.toString().split('T')[0].replace(/-/g, '/') : ""}</Text>
-                        <Ionicons name={"chevron-down"} color={"white"} size={15}/>
-                    </HStack>
-                </Button>
-            </Pressable>
-            <Actionsheet isOpen={showCalendar} onClose={actionClose}>
-                <Actionsheet.Content>
-                    <CalendarPicker
-                    startFromMonday={true}
-                    allowRangeSelection={true}
-                    minDate={new Date(2023, 11, 1)}
-                    maxDate={new Date(2050, 6, 3)}
-                    selectedDayColor="#2785F4"
-                    onDateChange={onDateChange}
-                    />
-                    <VStack>
-                        <Text> {selectedStartDate ? selectedStartDate.toISOString().split('T')[0].replace(/-/g, '/') : ""} - {selectedEndDate ? selectedEndDate.toISOString().split('T')[0].replace(/-/g, '/') : ""}
-                        </Text>
-                    </VStack>
-                </Actionsheet.Content>
-            </Actionsheet>
             <VStack space={5}>
             {bpmData &&
             <VStack bg={"white"} shadow={2} p={3}>

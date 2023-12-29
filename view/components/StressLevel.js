@@ -3,16 +3,18 @@ import {HStack, Text, VStack} from "native-base";
 import {LineChart} from "react-native-chart-kit";
 import {View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import {VictoryBar, VictoryChart, VictoryGroup} from "victory-native";
+import {VictoryTheme} from "victory";
 
-const data={
-    labels: ["11/27", "11/28", "11/29", "11/30", "12/1"],
-        datasets: [
-        {
-            data: [
-                2,4,4,5,4
-            ]
-        }
-    ]
+const mockData = {
+    before: [
+        {date: "2023.11.09", stressLevel: 3},
+        {date: "2023.11.11", stressLevel: 4},
+    ],
+    after: [
+        {date: "2023.11.09", stressLevel: 5},
+        {date: "2023.11.11", stressLevel: 3},
+    ],
 }
 export const StressLevel = () => {
     return (
@@ -23,36 +25,92 @@ export const StressLevel = () => {
                     <Ionicons name={"flash"} color={"#FF6B18"} size={20}></Ionicons>
                     <Text bold fontSize={'lg'}>스트레스 레벨</Text>
                 </HStack>
-                <Text fontSize={'xs'}>스트레스 관리가 필요한 레벨이에요.</Text>
+                <Text fontSize={'xs'}>오늘 힘든 하루를 보내셨나요?</Text>
             </VStack>
-                <VStack alignItems={"center"}>
-                    <Text bold fontSize={"lg"}>04</Text>
-                    <Text fontSize={'xs'}>현재 스트레스</Text>
+                <VStack space={2}>
+                    <HStack alignItems={"center"} space={2}>
+                        <Ionicons name={"ellipse"} color={"#2785F4"}/>
+                        <Text fontSize={'xs'}>힐링 전</Text>
+                    </HStack>
+                    <HStack alignItems={"center"} space={2}>
+                        <Ionicons name={"ellipse"} color={"#FF4370"}/>
+                        <Text fontSize={'xs'}>힐링 후</Text>
+                    </HStack>
                 </VStack>
         </HStack>
-            <View>
-                <LineChart data={data} width={340} height={180} fromZero={true}
-                           chartConfig={{
-                               //backgroundColor: "white",
-                               backgroundGradientFrom: '#FFFFFF',
-                               backgroundGradientFromOpacity: 0,
-                               backgroundGradientTo: '#FFFFFF',
-                               backgroundGradientToOpacity: 0,
-                               fillShadowGradient:'#FFFFFF',
-                               fillShadowGradientOpacity: 0,
-                               color: (opacity = 1) => `#FF6B18`,
-                               labelColor: (opacity = 1) => `#ADADAD`,
-                               strokeWidth: 1,
-                               useShadowColorFromDataset: true,
-                               decimalPlaces: 0,
-                               propsForBackgroundLines : {
-                                   stroke:"#E6E6E7",
-                               },
-                              }}
-                           withVerticalLines={false}
-                           style={{margin:2, marginTop:18}}>
-                </LineChart>
-            </View>
+            <HStack justifyContent={"center"} alignItems={"center"}>
+                {/*
+                    <VStack flex={1} justifyContent={"center"} alignItems={"center"}>
+                        <Text bold>2023.11.09</Text>
+                        <BarChart data={firstdata} width={150} height={200}
+                                  chartConfig={{
+                                      backgroundColor: "#FFFFFF",
+                                      backgroundGradientTo:"#FFFFFF",
+                                      backgroundGradientFromOpacity:0,
+                                      backgroundGradientFrom:"#FFFFFF",
+                                      backgroundGradientToOpacity:0,
+                                      color: (opacity = 1) => `#000000`,
+                                      barPercentage: 0.7,
+                                      barRadius:5
+                                  }}
+                                  withHorizontalLabels={false}
+                                  withVerticalLabels={true}
+                                  withInnerLines={true}
+                                  fromZero={true}
+                                  withCustomBarColorFromData={true}
+                                  showBarTops={false}
+                                  flatColor={true}
+                                  style={{marginLeft:-50}}/>
+                    </VStack>
+                    <VStack flex={1} justifyContent={"center"} alignItems={"center"}>
+                        <Text bold>2023.11.11</Text>
+                        <BarChart data={seconddata} width={150} height={200}
+                                  chartConfig={{
+                                      backgroundColor: "#FFFFFF",
+                                      backgroundGradientTo:"#FFFFFF",
+                                      backgroundGradientFrom:"#FFFFFF",
+                                      backgroundGradientFromOpacity:0,
+                                      backgroundGradientToOpacity:0,
+                                      color: (opacity = 1) => `#000000`,
+                                      barPercentage: 0.7,
+                                      barRadius:5
+                                  }}
+                                  withHorizontalLabels={true}
+                                  withVerticalLabels={true}
+                                  withInnerLines={true}
+                                  fromZero={true}
+                                  withCustomBarColorFromData={true}
+                                  showBarTops={false}
+                                  flatColor={true}
+                                  showValuesOnTopOfBars={false}
+                                  style={{marginLeft:0}}/>
+                    </VStack>
+                    */}
+                <VictoryChart width={350} height={250} maxDomain={{y:5}} theme={VictoryTheme.material}>
+                    <VictoryGroup offset={35} width={250} height={200}>
+                        <VictoryBar
+                            barWidth={25}
+                            labels={({ datum }) => datum.stressLevel}
+                            style={{ data: { fill: "#2785F4" },labels: { fill: "black", fontWeight:"bold"} }}
+                            data={mockData.before}
+                            x={"date"}
+                            y={"stressLevel"}
+                            cornerRadius={5}
+
+                        />
+                        <VictoryBar
+                            barWidth={25}
+                            labels={({ datum }) => datum.stressLevel}
+                            style={{ data: { fill: "#FF4370" },labels: { fill: "black", fontWeight:"bold"} }}
+                            data={mockData.after}
+                            x={"date"}
+                            y={"stressLevel"}
+                            cornerRadius={5}
+                        />
+                    </VictoryGroup>
+                </VictoryChart>
+            </HStack>
+
         </VStack>
     )
 }

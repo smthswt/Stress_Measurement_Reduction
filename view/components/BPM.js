@@ -1,66 +1,144 @@
 import React from 'react';
-import {Divider, HStack, Text, VStack} from "native-base";
-import {LineChart} from "react-native-chart-kit";
+import {Box, Divider, HStack, Text, VStack} from "native-base";
+import {BarChart, LineChart} from "react-native-chart-kit";
 import {View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import {VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLabel, VictoryLegend} from "victory-native";
+import {VictoryTheme} from "victory";
 
-const data={
-    labels: ["09:00", "12:00", "15:00", "18:00", "21:00"],
-        datasets: [
+const mockData = {
+    before: [
+        {date: "2023.11.09", bpm: 64},
+        {date: "2023.11.11", bpm: 89},
+    ],
+    after: [
+        {date: "2023.11.09", bpm: 119},
+        {date: "2023.11.11", bpm: 64},
+    ],
+}
+
+const firstdata = {
+    labels : ["64", "119"],
+    datasets: [
         {
-            data: [
-                48,90,80,112,68
+            data: [64,119],
+            colors: [
+                (opacity = 1) => `#2785F4`,
+                (opacity=1) => `#FF4370`
             ]
         }
     ]
 }
+
+const seconddata = {
+    labels : ["89", "64"],
+    datasets: [
+        {
+            data: [89,64],
+            colors: [
+                (opacity = 1) => `#2785F4`,
+                (opacity=1) => `#FF4370`
+            ]
+        }
+    ]
+}
+
 export const BPM = () => {
     return (
-        <VStack bgColor={'white'} p={3} shadow={2}>
-            <HStack justifyContent={'space-between'}>
+        <VStack bgColor={'white'} shadow={2}>
+            <HStack justifyContent={'space-between'} p={3}>
             <VStack justifyContent={'space-between'}>
                 <HStack alignItems={"center"} space={1}>
                     <Ionicons name={"heart"} color={"#FF4370"} size={20}></Ionicons>
                     <Text bold fontSize={'lg'}>BPM</Text>
                 </HStack>
-                <Text fontSize={'xs'}>오늘 하루 BPM이에요!</Text>
+                <Text fontSize={'xs'}>BPM 측정 전 후 비교 그래프에요.</Text>
             </VStack>
-            <HStack space={2}>
-                <VStack alignItems={"center"}>
-                    <Text bold fontSize={"lg"}>112</Text>
-                    <Text fontSize={'xs'}>최고 BPM</Text>
-                </VStack>
-                <Divider thickness="1" orientation="vertical" />
-                <VStack alignItems={"center"}>
-                    <Text bold fontSize={"lg"}>48</Text>
-                    <Text fontSize={'xs'}>최저 BPM</Text>
-                </VStack>
+            <VStack space={2}>
+                <HStack alignItems={"center"} space={2}>
+                    <Ionicons name={"ellipse"} color={"#2785F4"}/>
+                    <Text fontSize={'xs'}>힐링 전</Text>
+                </HStack>
+                <HStack alignItems={"center"} space={2}>
+                    <Ionicons name={"ellipse"} color={"#FF4370"}/>
+                    <Text fontSize={'xs'}>힐링 후</Text>
+                </HStack>
+            </VStack>
+
+            </HStack>
+            <HStack justifyContent={"center"} alignItems={"center"}>
+                {/*
+                    <VStack flex={1} justifyContent={"center"} alignItems={"center"}>
+                        <Text bold>2023.11.09</Text>
+                        <BarChart data={firstdata} width={150} height={200}
+                                  chartConfig={{
+                                      backgroundColor: "#FFFFFF",
+                                      backgroundGradientTo:"#FFFFFF",
+                                      backgroundGradientFromOpacity:0,
+                                      backgroundGradientFrom:"#FFFFFF",
+                                      backgroundGradientToOpacity:0,
+                                      color: (opacity = 1) => `#000000`,
+                                      barPercentage: 0.7,
+                                      barRadius:5
+                                  }}
+                                  withHorizontalLabels={false}
+                                  withVerticalLabels={true}
+                                  withInnerLines={true}
+                                  fromZero={true}
+                                  withCustomBarColorFromData={true}
+                                  showBarTops={false}
+                                  flatColor={true}
+                                  style={{marginLeft:-50}}/>
+                    </VStack>
+                    <VStack flex={1} justifyContent={"center"} alignItems={"center"}>
+                        <Text bold>2023.11.11</Text>
+                        <BarChart data={seconddata} width={150} height={200}
+                                  chartConfig={{
+                                      backgroundColor: "#FFFFFF",
+                                      backgroundGradientTo:"#FFFFFF",
+                                      backgroundGradientFrom:"#FFFFFF",
+                                      backgroundGradientFromOpacity:0,
+                                      backgroundGradientToOpacity:0,
+                                      color: (opacity = 1) => `#000000`,
+                                      barPercentage: 0.7,
+                                      barRadius:5
+                                  }}
+                                  withHorizontalLabels={true}
+                                  withVerticalLabels={true}
+                                  withInnerLines={true}
+                                  fromZero={true}
+                                  withCustomBarColorFromData={true}
+                                  showBarTops={false}
+                                  flatColor={true}
+                                  showValuesOnTopOfBars={false}
+                                  style={{marginLeft:0}}/>
+                    </VStack>
+                    */}
+                <VictoryChart width={350} height={250} maxDomain={{y:120}} theme={VictoryTheme.material}>
+                    <VictoryGroup offset={35} width={250} height={200}>
+                        <VictoryBar
+                            barWidth={25}
+                            labels={({ datum }) => datum.bpm}
+                            style={{ data: { fill: "#2785F4" },labels: { fill: "black", fontWeight:"bold"} }}
+                            data={mockData.before}
+                            x={"date"}
+                            y={"bpm"}
+                            cornerRadius={5}
+
+                        />
+                        <VictoryBar
+                            barWidth={25}
+                            labels={({ datum }) => datum.bpm}
+                            style={{ data: { fill: "#FF4370" },labels: { fill: "black", fontWeight:"bold"} }}
+                            data={mockData.after}
+                            x={"date"}
+                            y={"bpm"}
+                            cornerRadius={5}
+                        />
+                    </VictoryGroup>
+            </VictoryChart>
             </HStack>
 
-        </HStack>
-            <View>
-                <LineChart data={data} width={340} height={180} fromZero={true}
-                           chartConfig={{
-                               //backgroundColor: "white",
-                               backgroundGradientFrom: '#FFFFFF',
-                               backgroundGradientFromOpacity: 0,
-                               backgroundGradientTo: '#FFFFFF',
-                               backgroundGradientToOpacity: 0,
-                               fillShadowGradient:'#FFFFFF',
-                               fillShadowGradientOpacity: 0,
-                               color: (opacity = 1) => `#FF4370`,
-                               labelColor: (opacity = 1) => `#ADADAD`,
-                               strokeWidth: 1,
-                               useShadowColorFromDataset: true,
-                               decimalPlaces: 0,
-                               propsForBackgroundLines : {
-                                   stroke:"#E6E6E7",
-                               },
-                              }}
-                           withVerticalLines={false}
-                           style={{margin:2, marginTop:18}}>
-                </LineChart>
-            </View>
         </VStack>
     )
 }

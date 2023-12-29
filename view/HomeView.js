@@ -13,16 +13,14 @@ import {
 } from "native-base";
 import {useBLE} from "./module/BLEProvider";
 import {DeviceConnectState} from "./components/DeviceConnectState";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {View} from "react-native";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import HeartIcon from "./images/HeartIcon.svg"
-import HeartIconSvg from "./components/HeartIconSvg";
-import {SvgXml} from "react-native-svg";
-
+import HomeBarWave from "./icons/HomeBarWave";
+import AllResultsIcon from "./icons/AllResultsIcon";
+import AllStressIcon from "./icons/AllStressIcon";
+import {CircleProgressAnimation} from "./components/CircleProgressAnimation";
 
 /**
  * Represents a component that displays a message when analysis data is not found.
@@ -37,24 +35,6 @@ const AnalysisDataNotFound = () => (
     </Box>
 );
 
-const xml =`
-<svg width="66" height="64" viewBox="0 0 66 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_d_986_6145)">
-<path d="M41 29.3153C41 30.4044 40.584 31.509 39.712 32.3569L33.008 39L26.288 32.3569C25.432 31.5167 25 30.4044 25 29.3153C25 28.2263 25.432 27.1061 26.288 26.266C27.976 24.578 30.744 24.578 32.448 26.266L33.008 26.8183L33.552 26.266C35.256 24.578 38.04 24.578 39.712 26.266C40.584 27.1139 41 28.2185 41 29.3231V29.3153Z" fill="#2785F4"/>
-</g>
-<defs>
-<filter id="filter0_d_986_6145" x="0" y="0" width="66" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset/>
-<feGaussianBlur stdDeviation="12.5"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_986_6145"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_986_6145" result="shape"/>
-</filter>
-</defs>
-</svg>`
 /**
  * HomeScreen component representing the home screen of the application.
  *
@@ -130,7 +110,7 @@ export const HomeView = ({navigation}) => {
                                         }} shadow={2} pt={5}
                                         pb={5} >
                              <Box h={100} alignContent={"center"}>
-                                 <Image source={AllResultsImage} alt={"view-all-results"}></Image>
+                                 <AllResultsIcon width={118} height={"100%"}/>
                              </Box>
                              <Text bold fontSize={"lg"}>측정 결과 확인</Text>
                              <Text fontSize={'xs'} textAlign={"center"}>측정 결과를{"\n"}비교하여 확인해보세요.</Text>
@@ -141,7 +121,7 @@ export const HomeView = ({navigation}) => {
                     {({
                           isHovered,
                           isFocused,
-                          isPressed
+                          isPressed,
                     }) => {
                         return <VStack alignItems={"center"} justifyContent={"center"} bg={isPressed ? "coolGray.200" : isHovered ? "coolGray.200" : "white"}
                                        style={{
@@ -150,8 +130,9 @@ export const HomeView = ({navigation}) => {
                                            }]
                                        }} shadow={2} pt={5}
                                        pb={5} >
-                            <Box h={100} alignContent={"center"}><Image source={StressResultsImage}
-                                                                        alt={"view-all-stress"}></Image></Box>
+                            <Box h={100} alignContent={"center"}>
+                                <AllStressIcon width={118} height={"100%"}/>
+                            </Box>
                             <Text bold fontSize={"lg"}>스트레스 정보</Text>
                             <Text fontSize={'xs'} textAlign={"center"}>최근 검사한 스트레스{"\n"}수치를 한눈에 볼 수 있어요.</Text>
                         </VStack>
@@ -165,9 +146,7 @@ export const HomeView = ({navigation}) => {
         <ScrollView style={{flex: 1}}>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
                     <DeviceConnectState/>
-                    <VStack h={210} bgColor={"black"} justifyContent={'flex-end'} p={2}>
-                        <Ionicons name={"pulse"} color={"#FFFFFF"} size={80}></Ionicons>
-                        <SvgXml xml={xml} width="100%" height="100%"/>
+                    <VStack h={210} bgColor={"#2785F4"} justifyContent={'flex-start'} p={2}>
                         <HStack p={2} justifyContent={'space-between'} alignItems={'flex-end'} >
                             <Box>
                                 <Text color={'white'} fontSize={'lg'} bold>길동님</Text>
@@ -177,23 +156,26 @@ export const HomeView = ({navigation}) => {
                                 {isConnected ? DeviceConnected() : DeviceConnected()}
                             </>
                         </HStack>
+                        {/*<Box mt={-90} width={"100%"} height={"100%"}>
+                            <HomeBarWave/>
+                        </Box>*/}
                     </VStack>
-                    <VStack space={1} flex={1}>
-                        <Box flex={1} bg={'#E6E6E6'} borderRadius={'5'} p={2}>
-                            <VStack space={3} p={1}>
-                                <AnalysisDataNotFound/>
+                    <VStack p={5}>
+                            <VStack space={5} p={1}>
+                                <VStack bg={"white"} height={120} mt={-100} shadow={2} pt={2} pb={2}>
+                                    <Box flex={2}>
+                                        <Text textAlign={"center"} bold>심박수 측정이 필요합니다!</Text>
+                                    </Box>
+                                    <Box justifyContent={"center"} alignItems={"center"} flex={5}>
+                                        <Ionicons name={"heart"} size={25} color={"#2785F4"}/>
+                                    </Box>
+                                </VStack>
                                 <BPM/>
                                 <StressLevel/>
                                 <AllResults/>
                             </VStack>
-                        </Box>
                     </VStack>
                 </VStack>
-
-            <View>
-                <View>
-                </View>
-            </View>
         </ScrollView>
     );
 }

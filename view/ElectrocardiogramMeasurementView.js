@@ -3,6 +3,8 @@ import React, {useEffect, useRef, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import {useBLE} from "./module/BLEProvider";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import {CircleProgressAnimation} from "./components/CircleProgressAnimation";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -34,7 +36,7 @@ export const ElectrocardiogramMeasurementView = () => {
      *
      * @type {number}
      */
-    const totalTime = 20;
+    const totalTime = 100;
 
     /**
      * Reference to a message element used in a React component.
@@ -148,7 +150,7 @@ export const ElectrocardiogramMeasurementView = () => {
     useEffect(() => {
         console.log("Time: " + seconds);
 
-        if (seconds === 18)
+        if (seconds === totalTime-10)
         {
             setShowModal(true)
         }
@@ -299,6 +301,7 @@ export const ElectrocardiogramMeasurementView = () => {
         <>
             <VStack space={1} p={'5'} h={'100%'} justifyContent={'space-between'} bg={"#2785f4"}>
                 <Heading color={"#FFFFFF"}>심전도 측정 중입니다...</Heading>
+                <CircleProgressAnimation/>
                 <VStack space={1} bg={"#FFFFFF"} p={5} shadow={2}>
                     <Center>
                         <Text>{seconds}초 남았습니다.</Text>
