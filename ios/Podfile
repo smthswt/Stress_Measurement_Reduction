@@ -30,7 +30,7 @@ target 'RENST' do
 
   # Add the Permission-BluetoothPeripheral pod
   permission_path = '../node_modules/react-native-permissions/ios/BluetoothPeripheral'
-  pod 'Permission-BluetoothPeripheral', :path=> "#{permissions_path}/Permission-BluetoothPeripheral.podspec"
+  pod 'Permission-BluetoothPeripheral', :path=> "#{permission_path}/Permission-BluetoothPeripheral.podspec"
 
   # Flags change depending on the env values.
   flags = get_default_flags()

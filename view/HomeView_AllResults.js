@@ -16,6 +16,8 @@ import React, {useEffect, useState} from "react";
 import CalendarPicker from "react-native-calendar-picker";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLabel, VictoryLegend} from 'victory-native';
+import { VictoryTheme } from "victory";
+import Svg, { Circle } from "react-native-svg";
 
 /**
  * Component for displaying settings view.
@@ -24,9 +26,6 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLabel, Victo
  * @returns {JSX.Element} The rendered settings view.
  */
 export const HomeView_AllResults = ({navigation}) => {
-
-    const [selectedStartDate, setSelectedStartDate] = useState('')
-    const [selectedEndDate, setSelectedEndDate] = useState('')
     const [finalStartDate, setFinalStartDate] = useState('')
     const [finalEndDate, setFinalEndDate] = useState('')
     const [bpmData, setBpmData] = useState(null)
@@ -69,39 +68,68 @@ export const HomeView_AllResults = ({navigation}) => {
     const emotion_sad = require('../view/images/emotion_sad.png')
     const emotion_angry = require('../view/images/emotion_angry.png')
 
-    const emotionData = [
-        { date:'12.15', name: 'emotion_happy', source: emotion_happy },
-        { date:'12.16', name: 'emotion_tired', source: emotion_tired },
-        { date:'12.17', name: 'emotion_normal', source: emotion_normal },
-        { date:'12.18', name: 'emotion_sad', source: emotion_sad },
-        { date:'12.19', name: 'emotion_soso', source: emotion_soso },
-    ]
+    const emotionData = {
+        '12.15': {
+            before: { name: emotion_tired, source: emotion_tired },
+            after: { name: emotion_soso, source: emotion_soso }
+        },
+        '12.16': {
+            before: { name: emotion_tired, source: emotion_tired },
+            after: { name: emotion_happy, source: emotion_happy }
+        },
+        '12.17': {
+            before: { name: emotion_normal, source: emotion_normal },
+            after: { name: emotion_happy, source: emotion_happy }
+        },
+        '12.18': {
+            before: { name: emotion_sad, source: emotion_sad },
+            after: { name: emotion_normal, source: emotion_normal }
+        },
+        '12.19': {
+            before: { name: emotion_angry, source: emotion_angry },
+            after: { name: emotion_soso, source: emotion_soso }
+        },
+    };
 
-    const EmotionComponent = ({date, emotion_name, emotion_source}) => {
+    const EmotionComponent = ({date, before, after}) => {
         return (
-            <VStack alignItems={"center"} space={2}>
-                <Image alt={emotion_name} source={emotion_source}></Image>
-                <Text color={"#ADADAD"}>{date}</Text>
-            </VStack>
+          <HStack justifyContent={"space-between"} alignItems={"center"}>
+              <Text color={"#ADADAD"}>{date}</Text>
+              <HStack space={10} alignItems={"center"}>
+                  <VStack space={1} alignItems={"center"}>
+                      <Image source={before.source} alt={before.name}/>
+                      <Text color={"#2785F4"}>재측정 전</Text>
+                  </VStack>
+                  <Text color={"#ADADAD"}>-----></Text>
+                  <VStack space={1} alignItems={"center"}>
+                      <Image source={after.source} alt={after.name}/>
+                      <Text color={"#FF4370"}>재측정 후</Text>
+                  </VStack>
+              </HStack>
+          </HStack>
         )
     }
 
     const stressData = [
-        {date: '2023-12-15', stressIndex: 45},
-        {date: '2023-12-16', stressIndex: 50},
-        {date: '2023-12-17', stressIndex: 80},
-        {date: '2023-12-18', stressIndex: 75},
-        {date: '2023-12-19', stressIndex: 95},
+        {date: '2023.12.15', stressIndex: 45},
+        {date: '2023.12.16', stressIndex: 50},
+        {date: '2023.12.17', stressIndex: 80},
+        {date: '2023.12.18', stressIndex: 75},
+        {date: '2023.12.19', stressIndex: 95},
     ]
 
     const StressComponent = ({date, stressIndex}) => {
         return (
-            <VStack space={1} height={9}>
-                <HStack justifyContent={"space-between"}>
-                    <Text>{date}</Text>
+            <VStack space={2}>
+                <Text>{date}</Text>
+                <HStack justifyContent={"space-between"} space={5} alignItems={"center"}>
+                    <Progress flex={1} colorScheme="blue" shadow={0} value={stressIndex} min={0} max={200}/>
                     <Text >{stressIndex}</Text>
                 </HStack>
-                <Progress flex={1} colorScheme="blue" shadow={0} value={stressIndex} min={0} max={200}/>
+                <HStack justifyContent={"space-between"} space={5} alignItems={"center"}>
+                    <Progress flex={1} colorScheme="pink" shadow={0} value={stressIndex} min={0} max={200}/>
+                    <Text >{stressIndex}</Text>
+                </HStack>
             </VStack>
         )
     }
@@ -128,46 +156,22 @@ export const HomeView_AllResults = ({navigation}) => {
 
     }, []);
 
-    console.log(bpmData && bpmData.map((data) => data.bpm))
-
-    const [showCalendar, setShowCalendar] = useState(false)
-
-    const onDateChange = (date, type) => {
-        //function to handle the date change
-        if (type === "END_DATE") {
-            setSelectedEndDate(date);
-        } else {
-            setSelectedEndDate(null);
-            setSelectedStartDate(date);
-        }
-    };
-
-    const actionClose = () => {
-        if(selectedEndDate && selectedStartDate) {
-            setFinalEndDate(selectedEndDate.toISOString().split('T')[0].replace(/-/g, '/'))
-            setFinalStartDate(selectedStartDate.toISOString().split('T')[0].replace(/-/g, '/'))
-            fetchDataFromMock(selectedStartDate, selectedEndDate)
-        }
-
-        setShowCalendar(false)
-    }
-
     return (
         <ScrollView>
         <VStack p={3} space={3}>
             <VStack space={5}>
             {bpmData &&
-            <VStack bg={"white"} shadow={2} p={3}>
-                <Text bold>BPM</Text>
-                <VictoryChart domainPadding={10}>
+            <VStack bg={"white"} shadow={2}>
+                <Text bold pl={3} pt={3}>BPM</Text>
+                <VictoryChart maxDomain={{y:120}} height={300} domainPadding={10} theme={VictoryTheme.material}>
                     <VictoryLegend x={250}
                                    centerTitle
-                                   orientation="horizontal"
+                                   orientation="vertical"
                                    gutter={20}
                                    style={{ title: {fontSize: 15 },}}
                                    colorScale={[ "#2785F4", "#FF4370"]}
                                    data={[
-                                       { name: "최고" }, { name: "최저" }
+                                       { name: "재측정 전" }, { name: "재측정 후" }
                                    ]}
                     />
                     <VictoryGroup offset={12}>
@@ -194,17 +198,28 @@ export const HomeView_AllResults = ({navigation}) => {
             </VStack>}
             <VStack bg={"white"} shadow={2} p={3}>
                 <Text bold>감정</Text>
-                <HStack justifyContent={"space-between"} mt={3}>
-                    {emotionData.map((item) => (
-                        <EmotionComponent date={item.date} emotion_name={item.name} emotion_source={item.source}></EmotionComponent>
+                <VStack space={3}>
+                    {Object.entries(emotionData).map(([date, emotions]) => (
+                      <EmotionComponent
+                        key={date}
+                        date={date}
+                        before={emotions.before}
+                        after={emotions.after}
+                      />
                     ))}
-                </HStack>
+                </VStack>
             </VStack>
             <VStack bg={"white"} shadow={2} p={3}>
-                <Text bold>스트레스</Text>
+                <HStack justifyContent={"space-between"}>
+                    <Text bold>스트레스</Text>
+                    <VStack space={2}>
+                        <Text color={"#616161"}>재측정 전</Text>
+                        <Text color={"#616161"}>재측정 후</Text>
+                    </VStack>
+                </HStack>
                 <VStack space={3} mt={3}>
                     {stressData.map((item) => (
-                        <StressComponent date={item.date} stressIndex={item.stressIndex}></StressComponent>
+                      <StressComponent date={item.date} stressIndex={item.stressIndex}></StressComponent>
                     ))}
                 </VStack>
             </VStack>
