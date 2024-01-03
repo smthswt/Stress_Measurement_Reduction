@@ -1,6 +1,10 @@
-import {View} from "react-native";
-import {Button, Divider, Radio, Text, VStack} from "native-base";
-import React from "react";
+import {BackHandler, TouchableOpacity, View} from "react-native";
+import {Button, Divider, HStack, Radio, Text, useDisclose, VStack} from "native-base";
+import React, {useEffect} from "react";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import MusicActionSheet from "./components/MusicActionSheet";
+import Music_ActionSheet from "./components/MusicActionSheet";
+import ManualActionSheet from "./components/ManualActionSheet";
 
 /**
  * React component for displaying a calendar view.
@@ -10,12 +14,22 @@ import React from "react";
  * @returns {ReactElement} - The rendered component.
  */
 export const SettingsView_Manual = ({ navigation }) => {
+    const { isOpen, onOpen, onClose } = useDisclose();
     const [music, setMusic] = React.useState("music_two");
     const [move, setMove] = React.useState("move_two");
     const [time, setTime] = React.useState("time_one");
 
+
     return (
-        <VStack height={"100%"} p={5} space={5}>
+        <VStack flex={1}>
+            <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.goBack()}}>
+                    <Ionicons name={"arrow-back"} color={'#222222'} size={25} />
+                </TouchableOpacity>
+                <Text bold fontSize={18} marginLeft={3}>메뉴얼 설정</Text>
+            </HStack>
+
+        <VStack flex={1} p={6} space={6}>
             <VStack bg={"white"} p={5} space={2} shadow={2}>
                 <Text bold>음원 선택</Text>
                 <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={music} onChange={nextValue => {
@@ -35,7 +49,10 @@ export const SettingsView_Manual = ({ navigation }) => {
                     </Radio>
                 </Radio.Group>
                 <Divider/>
-                <Button variant={"text"} >음원 추가하기 +</Button>
+                <Button variant={"text"} onPress={onOpen}>
+                    <Text>음원 추가하기 +</Text>
+                    <ManualActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} />
+                </Button>
             </VStack>
             <VStack bg={"white"} p={5} space={2} shadow={2}>
                 <Text bold>진동 선택</Text>
@@ -60,6 +77,8 @@ export const SettingsView_Manual = ({ navigation }) => {
                     <Radio value="time_three" my={1} size={"sm"}>30 분</Radio>
                 </Radio.Group>
             </VStack>
+        </VStack>
+
         </VStack>
     )
 }

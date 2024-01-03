@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^4.5.1",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
@@ -29,6 +30,7 @@
     "react-native-paper": "^5.11.3",
     "react-native-permissions": "^3.10.1",
     "react-native-progress-circle": "^2.1.0",
+    "react-native-reanimated": "^3.6.1",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.27.0",
     "react-native-svg": "^12.5.1",

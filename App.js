@@ -4,7 +4,7 @@ import {Animated, PermissionsAndroid, Platform, SafeAreaView, View} from 'react-
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {Box, Center, HStack, Icon, NativeBaseProvider, Pressable, VStack, Text} from "native-base";
+import {Box, Center, HStack, Icon, NativeBaseProvider, Pressable, VStack, Text, Actionsheet} from "native-base";
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import Ionicons from "react-native-vector-icons/Ionicons";
 //CustomizedVectorImages
@@ -22,9 +22,6 @@ import {AnalysisResultView} from "./view/AnalysisResultView";
 import {MassageHealingView} from "./view/MassageHealingView";
 import {RecentResultComparison} from "./view/RecentResultComparison";
 import {AllRecordsListView} from "./view/AllRecordsListView"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import {Screen} from "react-native-screens";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {HomeView_AllResults} from "./view/HomeView_AllResults";
 import {HomeView_AllStress} from "./view/HomeView_AllStress";
@@ -34,6 +31,9 @@ import {RegisterSuccessView} from "./view/RegisterSuccessView";
 import {SettingsView_Device} from "./view/SettingsView_Device";
 import {SettingsView_Regular} from "./view/SettingsView_Regular";
 import {SettingsView_Manual} from "./view/SettingsView_Manual";
+import {PrivacyPolicy} from "./view/PrivacyPolicy";
+
+
 
 
 /**
@@ -138,6 +138,8 @@ const AnalysisViewScreens = () => {
         </StackNative.Navigator>
     )
 }
+
+
 const SettingScreens =() => {
     return (
         <StackNative.Navigator initialRouteName={SettingsView}>
@@ -149,9 +151,13 @@ const SettingScreens =() => {
                                 options={crossFadeTransition}/>
             <StackNative.Screen name="Manual" component={SettingsView_Manual}
                                 options={crossFadeTransition}/>
+            <StackNative.Screen name="Privacy" component={PrivacyPolicy}
+                                options={crossFadeTransition}/>
         </StackNative.Navigator>
     )
-}
+};
+
+
 const App = () => {
 
     /**
