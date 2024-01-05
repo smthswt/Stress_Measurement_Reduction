@@ -6,15 +6,12 @@ import {
     useDisclose,
     View,
     VStack,
-    Actionsheet,
-    Box,
-    Icon,
     FlatList
 } from "native-base";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import React, {useRef, useState} from "react";
+import React from "react";
 import Music_ActionSheet from "./MusicActionSheet";
 
 
@@ -54,9 +51,9 @@ export const MusicList = () => {
 
     return (
         // <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
-        <VStack p={5} flex={1} style={{shadowColor: "black", shadowOpacity: 9}}>
+        <VStack p={5} flex={1}>
 
-            <View shadow={2}>
+            <View width={"100%"} shadow={2}>
                 <FlatList showsVerticalScrollIndicator={false}
                           data={data}
                           keyExtractor={(item) => item.id}

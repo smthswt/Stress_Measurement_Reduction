@@ -2,6 +2,7 @@ import {HStack, Text, VStack} from "native-base";
 import React, { useEffect } from "react";
 import { BackHandler, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import Calendar_List from "./components/CalendarListActionsheet";
 
 
 /**
@@ -16,6 +17,7 @@ export const SettingsView_Device = ({ navigation }) => {
 
     return (
         <VStack flex={1}>
+
             <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
                 <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.goBack()}}>
                     <Ionicons name={"arrow-back"} color={'#222222'} size={25} />
