@@ -2,6 +2,12 @@ import {View} from "react-native";
 import {Button, Center, HStack, Progress, ScrollView, Text, VStack} from "native-base";
 import React from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import emotion_tired from "./images/emotion_tired.png";
+import emotion_soso from "./images/emotion_soso.png";
+import emotion_happy from "./images/emotion_happy.png";
+import emotion_normal from "./images/emotion_normal.png";
+import emotion_sad from "./images/emotion_sad.png";
+import emotion_angry from "./images/emotion_angry.png";
 
 /**
  * Component for displaying settings view.
@@ -23,15 +29,45 @@ const stressData = [
     {date: '2023-12-19', stressIndex: 95},
 ]
 */}
-const stressData = null
-const StressComponent = ({date, stressIndex}) => {
+
+const stressData = {
+  '2023.12.29': { before: 3, after: 1, },
+  '2023.12.28': { before: 4, after: 1, },
+  '2023.12.27': { before: 5, after: 2, },
+  '2023.12.26': { before: 2, after: 2, },
+  '2023.12.25': { before: 4, after: 3, },
+  '2023.12.24': { before: 4, after: 3, },
+  '2023.12.23': { before: 4, after: 3, },
+  '2023.12.22': { before: 3, after: 3, },
+  '2023.12.21': { before: 2, after: 1, },
+  '2023.12.20': { before: 1, after: 1, },
+};
+
+//const stressData = null
+const StressComponent = ({date, before, after}) => {
     return (
         <VStack bg={"white"} shadow={2} space={3} p={5}>
             <HStack justifyContent={"space-between"}>
                 <Text>{date}</Text>
-                <Text >{stressIndex}</Text>
+                <HStack space={5}>
+                  <HStack alignItems={"center"} space={2}>
+                    <Ionicons name={"ellipse"} color={"#2785F4"}/>
+                    <Text fontSize={'xs'}>힐링 전</Text>
+                  </HStack>
+                  <HStack alignItems={"center"} space={2}>
+                    <Ionicons name={"ellipse"} color={"#FF4370"}/>
+                    <Text fontSize={'xs'}>힐링 후</Text>
+                  </HStack>
+                </HStack>
             </HStack>
-            <Progress flex={1} colorScheme="blue" shadow={0} value={stressIndex} min={0} max={200}/>
+            <HStack alignItems={"center"} space={3}>
+              <Progress flex={1} colorScheme="blue" shadow={0} value={before} min={0} max={5} height={3}/>
+              <Text>{before}</Text>
+            </HStack>
+          <HStack alignItems={"center"} space={3}>
+            <Progress flex={1} colorScheme="pink" shadow={0} value={after} min={0} max={5} height={3}/>
+            <Text>{after}</Text>
+          </HStack>
         </VStack>
     )
 }
@@ -46,9 +82,14 @@ export const HomeView_AllStress = ({navigation}) => {
             {stressData ? (
                 <ScrollView>
                     <VStack p={3} space={3}>
-                        {stressData.map((item, index) => (
-                            <StressComponent key={index} date={item.date} stressIndex={item.stressIndex} />
-                        ))}
+                      {Object.entries(stressData).map(([date, stressIndex]) => (
+                        <StressComponent
+                          key={date}
+                          date={date}
+                          before={stressIndex.before}
+                          after={stressIndex.after}
+                        />
+                      ))}
                     </VStack>
                 </ScrollView>
             ) : (

@@ -17,15 +17,16 @@ import {ItemComponent} from './ItemComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import SemiCircleProgress from './components/SemiCirle';
+import {BeforeAfterResultComparison} from './BeforeAfterResultComparison';
 
 /**
  * Represents the analysis result of a measurement.
  *
  * @class
  */
-export const AnalysisResultView = ({route}) => {
-  const beforeEmotion = route.params;
-  //console.log(selectedEmotion)
+export const RemeasureResultView = ({route}) => {
+  const afterEmotion = route.params;
+  //console.log(afterEmotion)
   /**
    * UseNavigation function
    *
@@ -124,17 +125,10 @@ export const AnalysisResultView = ({route}) => {
    * @function handlePress
    * @returns {void}
    */
-  const handleHealingPress = () => {
-    navigation.navigate('Healing');
-  };
-
-  const handleManualPress = () => {
-    navigation.navigate('Manual');
-  };
-
-  const handleLinkClick = () => {
-    navigation.navigate('RecentResultCompare', {
-      selectedEmotion: beforeEmotion.beforeEmotion,
+  const handleBeforeAfterClick = () => {
+    navigation.navigate('RemeasureResultsViewScreens', {
+      screen: 'RecentResultCompare',
+      selectedEmotion: afterEmotion.afterEmotion,
     });
   };
 
@@ -149,13 +143,11 @@ export const AnalysisResultView = ({route}) => {
 
   return (
     <VStack space={1} h={'100%'} justifyContent={'space-between'}>
-      <VStack space={3} pt={10} bgColor={'white'} height={'40%'}>
+      <VStack space={3} pt={10} bg={'#67ADFF'} height={'40%'}>
         <Center>
-          <Heading>측정 결과입니다.</Heading>
-        </Center>
-        <Center>
-          <Text textAlign={'center'}>
-            마지막으로 검사한 결과와 비교했을 때 {'\n'} 수치가 증가하였습니다.{' '}
+          <Heading color={'white'}>힐링 후 측정 결과입니다.</Heading>
+          <Text textAlign={'center'} color={'white'} pt={1}>
+            일반 모드로 측정한 결과와 비교했을 때 {'\n'} 수치가 하락하였습니다.{' '}
           </Text>
         </Center>
         {/*<ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>*/}
@@ -214,35 +206,18 @@ export const AnalysisResultView = ({route}) => {
               </Box>
               <Box flex={1} alignItems={'flex-end'}>
                 <Image
-                  source={emotions[beforeEmotion.beforeEmotion]}
+                  source={emotions[afterEmotion.afterEmotion]}
                   alt={'sad'}
                 />
               </Box>
             </HStack>
           </VStack>
         </VStack>
-        <HStack justifyContent={'space-between'} space={4}>
-          {/*<Center><Link mb={10} onPress={handleLinkClick}>마지막 검사 결과와 비교하기</Link></Center>*/}
-          <Button
-            p={'5'}
-            onPress={handleHealingPress}
-            bgColor={'#2785F4'}
-            flex={1}>
-            <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
-              힐링 모드
-            </Text>
-          </Button>
-          <Button
-            p={'5'}
-            onPress={handleManualPress}
-            borderColor={'#2785F4'}
-            variant={'outline'}
-            flex={1}>
-            <Text fontSize={'15'} fontWeight={'bold'} color={'#2785F4'}>
-              Manual 모드
-            </Text>
-          </Button>
-        </HStack>
+        <Button p={3} onPress={handleBeforeAfterClick} bgColor={'#2785F4'}>
+          <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
+            전 후 결과 확인하기
+          </Text>
+        </Button>
       </VStack>
     </VStack>
   );

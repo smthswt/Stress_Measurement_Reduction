@@ -1,5 +1,6 @@
 import React from "react";
 import {Box, HStack, Progress, Text, VStack} from "native-base";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 /**
  * Represents an item component that displays stress index, sdnn, and heart rate.
@@ -36,28 +37,28 @@ export const ItemComponent = ({stressIndex, sdnn, hr}) => {
     return (
         <Box borderRadius="sm" borderWidth={0} pt={3} pb={3}>
             <VStack space={2}>
-                <Text fontWeight={'bold'}>{dateString} {timeString}</Text>
-                <VStack w="100%" space={1}>
-                    <Text w={"30%"}>HR (BPM)</Text>
-                    <HStack space={2} alignItems={'center'}>
-                        <Progress flex={1} colorScheme="#2785F4" shadow={0} value={hr} min={0} max={200}/>
-                        <Text w={"10%"} textAlign={'right'}>{hr}</Text>
+                <Text fontSize={"xs"} fontStyle={"italic"}>{dateString} {timeString}</Text>
+                <HStack w="100%" justifyContent={"space-between"}>
+                    <HStack alignItems={"center"} space={1}>
+                        <Ionicons name={"heart"} color={'#FF4370'} size={15}/>
+                        <Text>HR (BPM)</Text>
                     </HStack>
-                </VStack>
-                <VStack w="100%" space={1}>
-                    <Text w={"30%"}>SDNN</Text>
-                    <HStack space={2} alignItems={'center'}>
-                        <Progress flex={1} colorScheme="secondary" shadow={0} value={sdnn} min={0} max={300}/>
-                        <Text w={"10%"} textAlign={'right'}>{parseFloat(sdnn).toFixed(2)}</Text>
+                    <Text>{hr}</Text>
+                </HStack>
+                <HStack w="100%" justifyContent={"space-between"}>
+                    <HStack alignItems={"center"} space={1}>
+                        <Ionicons name={'reader'} color={'#2785F4'} size={15} />
+                        <Text>SDNN</Text>
                     </HStack>
-                </VStack>
-                <VStack w="100%" space={1}>
-                    <Text w={"30%"}>Stress Level</Text>
-                    <HStack space={2} alignItems={'center'}>
-                        <Progress flex={1} colorScheme={"emerald"} shadow={0} value={stressIndex} min={0} max={5}/>
-                        <Text w={"10%"} textAlign={'right'}>{stressIndex}</Text>
+                    <Text>{parseFloat(sdnn).toFixed(2)}</Text>
+                </HStack>
+                <HStack w="100%" justifyContent={"space-between"}>
+                    <HStack alignItems={"center"} space={1}>
+                        <Ionicons name={'flash'} color={'#FF6B18'} size={15}/>
+                        <Text>Stress Level</Text>
                     </HStack>
-                </VStack>
+                    <Text>{`0`}{stressIndex}</Text>
+                </HStack>
             </VStack>
         </Box>
     );

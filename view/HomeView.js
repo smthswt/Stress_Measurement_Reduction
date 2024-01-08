@@ -20,8 +20,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeBarWave from "./icons/HomeBarWave";
 import AllResultsIcon from "./icons/AllResultsIcon";
 import AllStressIcon from "./icons/AllStressIcon";
-import {CircleProgressAnimation} from "./components/CircleProgressAnimation";
-
 /**
  * Represents a component that displays a message when analysis data is not found.
  *
