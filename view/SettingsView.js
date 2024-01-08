@@ -1,5 +1,5 @@
 import {View} from "react-native";
-import {Divider, HStack, Pressable, Text, VStack} from "native-base";
+import {Box, Button, Divider, HStack, Pressable, Text, VStack} from "native-base";
 import React from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -22,9 +22,27 @@ export const SettingsView = ({navigation}) => {
         navigation.navigate("SettingScreens", {screen:"Manual"})
     }
 
+    const handlePrivacyPolicy = () => {
+        navigation.navigate("SettingScreens", {screen:'Privacy'})
+    }
+
+    const handleLogout = () => {
+        console.log("로그아웃 버튼이 클릭 되었습니다.")
+    }
+
+    const handleQuitAccount = () => {
+        console.log("서비스 탈퇴가 클릭 되었습니다.")
+    }
+
 
     return (
-        <VStack p={5} space={5}>
+        <VStack style={{flex: 1}}>
+            <VStack alignitems={"flex-start"} bgColor={"white"} padding={5}>
+                <Text bold fontSize={18}>설정</Text>
+            </VStack>
+
+        <View flex={1} style={{alignItems: 'center', justifyContent: 'space-between'}}>
+        <VStack p={5} space={5} width={"100%"}>
             <Pressable onPress={handleDeviceSettings}>
                 <HStack bgColor={"white"} p={3} justifyContent={"space-between"} alignItems={"center"} shadow={2}>
                     <VStack space={3}>
@@ -55,20 +73,27 @@ export const SettingsView = ({navigation}) => {
                 </HStack>
             </Pressable>
             <VStack bgColor={"white"} p={3} shadow={2}>
-                <Pressable>
+                <Pressable onPress={handlePrivacyPolicy}>
                     <HStack justifyContent={"space-between"} alignItems={"center"}>
                         <Text>개인정보 처리방침</Text>
                         <Ionicons name={"chevron-forward"} size={25} color={"black"}/>
                     </HStack>
                 </Pressable>
                 <Divider mt={3} mb={3}/>
-                <Pressable>
+                <Pressable onPress={handleLogout}>
                     <HStack justifyContent={"space-between"} alignItems={"center"}>
                         <Text>로그아웃</Text>
                         <Ionicons name={"chevron-forward"} size={25} color={"black"}/>
                     </HStack>
                 </Pressable>
             </VStack>
+        </VStack>
+
+            <Button variant={'unstyled'} marginBottom={10} onPress={handleQuitAccount}>
+            <Text underline color={"red.500"} fontWeight={500}>서비스 탈퇴</Text>
+            </Button>
+
+        </View>
         </VStack>
     );
 }

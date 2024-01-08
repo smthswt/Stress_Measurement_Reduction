@@ -1,10 +1,12 @@
-import {View} from "react-native";
-import {Box, Center, HStack, Image, Pressable, ScrollView, Text, VStack} from "native-base";
+import {TouchableOpacity, TouchableOpacityComponent, View} from "react-native";
+import {Box, Center, HStack, Image, Pressable, ScrollView, Text, useDisclose, VStack, Actionsheet} from "native-base";
 import React from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import CalendarList from "./components/CalendarListActionsheet";
+import CalendarList_ActionSheet from "./components/CalendarListActionsheet";
 
 /**
  * React component for displaying a calendar view.
@@ -14,6 +16,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
  * @returns {ReactElement} - The rendered component.
  */
 export const CalendarView = ({ navigation }) => {
+    const {isOpen, onOpen, onClose } = useDisclose();
 
     const date = new Date()
     let month = date.getMonth() + 1;
@@ -93,12 +96,16 @@ export const CalendarView = ({ navigation }) => {
     };
 
 
+
 return (
     <VStack style={{flex: 1}}>
     <VStack space={2} bgColor={"white"} padding={5}>
         <HStack alignitems={"flex-start"} justifyContent={'space-between'}>
             <Text fontWeight={900} fontSize={18}>달력</Text>
+            <TouchableOpacity activeOpacity={0.7} onPress={onOpen}>
             <AntDesign name={"calendar"} size={22} color={"black"}/>
+                <CalendarList_ActionSheet isOpen={isOpen} onClose={onClose}/>
+            </TouchableOpacity>
         </HStack>
 
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>

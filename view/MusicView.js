@@ -19,6 +19,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("screen");
  */
 export const MusicView = ({ navigation }) => {
 
+
     return (
         <VStack style={{flex: 1}}>
             <VStack alignitems={"flex-start"} bgColor={"white"} padding={5}>
@@ -26,7 +27,7 @@ export const MusicView = ({ navigation }) => {
                 <Text fontSize={14} color={"#616151"} mt={2}>나에게 맞는 음악을 설정해보세요.</Text>
             </VStack>
 
-            <MusicList></MusicList>
+            <MusicList />
 
         </VStack>
     );
