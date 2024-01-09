@@ -8,16 +8,18 @@ import {
   Divider,
   Heading,
   HStack,
-  Image,
-  Link,
   Text,
   VStack,
 } from 'native-base';
 import {ItemComponent} from './ItemComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import SemiCircleProgress from './components/SemiCirle';
-import {BeforeAfterResultComparison} from './BeforeAfterResultComparison';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * Represents the analysis result of a measurement.
@@ -25,8 +27,8 @@ import {BeforeAfterResultComparison} from './BeforeAfterResultComparison';
  * @class
  */
 export const RemeasureResultView = ({route}) => {
-  const afterEmotion = route.params;
-  //console.log(afterEmotion)
+  const Emotions = route.params;
+  console.log(Emotions)
   /**
    * UseNavigation function
    *
@@ -128,17 +130,17 @@ export const RemeasureResultView = ({route}) => {
   const handleBeforeAfterClick = () => {
     navigation.navigate('RemeasureResultsViewScreens', {
       screen: 'RecentResultCompare',
-      selectedEmotion: afterEmotion.afterEmotion,
+      params: {beforeEmotion:Emotions.beforeEmotion, afterEmotion: Emotions.afterEmotion},
     });
   };
 
-  const emotions = {
-    emotion_happy: require('../view/images/emotion_happy.png'),
-    emotion_tired: require('../view/images/emotion_tired.png'),
-    emotion_normal: require('../view/images/emotion_normal.png'),
-    emotion_sad: require('../view/images/emotion_sad.png'),
-    emotion_soso: require('../view/images/emotion_soso.png'),
-    emotion_angry: require('../view/images/emotion_angry.png'),
+  const EmotionIcon = {
+    emotion_happy: <EmotionHappy width={40} height={40} />,
+    emotion_normal: <EmotionNormal width={40} height={40} />,
+    emotion_soso: <EmotionSoso width={40} height={40} />,
+    emotion_tired: <EmotionTired width={40} height={40} />,
+    emotion_sad: <EmotionSad width={40} height={40} />,
+    emotion_angry: <EmotionAngry width={40} height={40} />,
   };
 
   return (
@@ -150,7 +152,6 @@ export const RemeasureResultView = ({route}) => {
             일반 모드로 측정한 결과와 비교했을 때 {'\n'} 수치가 하락하였습니다.{' '}
           </Text>
         </Center>
-        {/*<ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>*/}
         <Center pt={5}>
           <SemiCircleProgress
             percentage={80}
@@ -205,10 +206,7 @@ export const RemeasureResultView = ({route}) => {
                 <Divider />
               </Box>
               <Box flex={1} alignItems={'flex-end'}>
-                <Image
-                  source={emotions[afterEmotion.afterEmotion]}
-                  alt={'sad'}
-                />
+                {EmotionIcon[Emotions.afterEmotion]}
               </Box>
             </HStack>
           </VStack>

@@ -42,7 +42,7 @@ export const CircleProgressAnimation = ({navigation}) => {
 
   return (
     <VStack flex={1} alignItems={'center'} justifyItems={'center'}>
-      <Box top={140}>
+      <Box top={height/4.5}>
         <Ionicons name={'heart'} size={50} color={'#FFFFFF'} />
       </Box>
       <Svg style={{position: 'absolute'}}>

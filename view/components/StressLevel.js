@@ -96,7 +96,7 @@ export const StressLevel = () => {
           <VictoryGroup offset={35} width={250} height={200}>
             <VictoryBar
               barWidth={25}
-              labels={({datum}) => datum.stressLevel}
+              labels={({datum}) => `0`+datum.stressLevel}
               style={{
                 data: {fill: '#2785F4'},
                 labels: {fill: 'black', fontWeight: 'bold'},
@@ -108,7 +108,7 @@ export const StressLevel = () => {
             />
             <VictoryBar
               barWidth={25}
-              labels={({datum}) => datum.stressLevel}
+              labels={({datum}) => `0`+datum.stressLevel}
               style={{
                 data: {fill: '#FF4370'},
                 labels: {fill: 'black', fontWeight: 'bold'},

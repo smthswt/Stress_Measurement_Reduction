@@ -38,13 +38,14 @@ import deviceImage from './images/Renst_ISO.png';
  *
  * @returns {JSX.Element} The HealingView component.
  */
-export const ManualView = () => {
+export const ManualView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
+  const beforeEmotion = route.params;
 
   /**
    * Sends data.
@@ -122,6 +123,7 @@ export const ManualView = () => {
   const handleHealingStop = () => {
     sendHealingStop();
     setIsMessageOpen(false);
+    setIsCounting(false)
     const timer = setTimeout(() => {
       //navigation.navigate('TabScreens', {screen: 'Home'});
       clearTimeout(timer);
@@ -155,6 +157,7 @@ export const ManualView = () => {
     }
 
     if (secondsLeft <= 0) {
+      setIsCounting(false)
       setIsRemeasureOpen(true);
     }
 
@@ -166,15 +169,23 @@ export const ManualView = () => {
 
   const deviceImage = require('./images/Renst_ISO.png');
 
+  const MovetoRemeasure = () => {
+    setIsRemeasureOpen(false)
+    const timer = setTimeout(() => {
+      navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
+      clearTimeout(timer);
+    }, );
+  };
+
   return (
     <>
       <VStack p={5} h={'100%'} justifyContent={'space-between'} bg={'#67ADFF'}>
-        <Center>
+        <Center height={'10%'}>
           <Heading color={'white'}>Manual 모드</Heading>
           <Text color={'white'}>힘든 하루를 보낸 길동님을 위한 모드에요.</Text>
         </Center>
-        <VStack space={3}>
-          <VStack bg={'white'} shadow={2} height={420}>
+        <VStack space={3} height={'90%'} justifyContent={'flex-end'}>
+          <VStack bg={'white'} shadow={2} height={"80%"}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
             />
@@ -253,14 +264,14 @@ export const ManualView = () => {
           setIsRemeasureOpen(false);
         }}>
         <Actionsheet.Content>
-          <Box w="100%" px={4} justifyContent="center">
+          <Box w="100%" p={4} justifyContent="center">
             <Center>
               <Heading>다시 측정하기</Heading>
               <Text>측정 후 Manual 모드를 이용한 재측정이 필요해요!</Text>
               <Image source={deviceImage} alt={'deviceImage'} />
-              <Button width={'100%'} p={'5'} bgColor={'#2785F4'}>
+              <Button width={'100%'} p={'5'} bgColor={'#2785F4'} onPress={MovetoRemeasure}>
                 <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
-                  Manual 모드로 측정하기
+                  힐링 후 측정하기
                 </Text>
               </Button>
             </Center>

@@ -17,6 +17,12 @@ import {ItemComponent} from './ItemComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import SemiCircleProgress from './components/SemiCirle';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * Represents the analysis result of a measurement.
@@ -25,7 +31,7 @@ import SemiCircleProgress from './components/SemiCirle';
  */
 export const AnalysisResultView = ({route}) => {
   const beforeEmotion = route.params;
-  //console.log(selectedEmotion)
+  console.log(beforeEmotion)
   /**
    * UseNavigation function
    *
@@ -125,26 +131,20 @@ export const AnalysisResultView = ({route}) => {
    * @returns {void}
    */
   const handleHealingPress = () => {
-    navigation.navigate('Healing');
+    navigation.navigate('Healing', {beforeEmotion:beforeEmotion.beforeEmotion});
   };
 
   const handleManualPress = () => {
-    navigation.navigate('Manual');
+    navigation.navigate('Manual',{beforeEmotion:beforeEmotion.beforeEmotion});
   };
 
-  const handleLinkClick = () => {
-    navigation.navigate('RecentResultCompare', {
-      selectedEmotion: beforeEmotion.beforeEmotion,
-    });
-  };
-
-  const emotions = {
-    emotion_happy: require('../view/images/emotion_happy.png'),
-    emotion_tired: require('../view/images/emotion_tired.png'),
-    emotion_normal: require('../view/images/emotion_normal.png'),
-    emotion_sad: require('../view/images/emotion_sad.png'),
-    emotion_soso: require('../view/images/emotion_soso.png'),
-    emotion_angry: require('../view/images/emotion_angry.png'),
+  const EmotionIcon = {
+    emotion_happy: <EmotionHappy width={40} height={40} />,
+    emotion_normal: <EmotionNormal width={40} height={40} />,
+    emotion_soso: <EmotionSoso width={40} height={40} />,
+    emotion_tired: <EmotionTired width={40} height={40} />,
+    emotion_sad: <EmotionSad width={40} height={40} />,
+    emotion_angry: <EmotionAngry width={40} height={40} />,
   };
 
   return (
@@ -213,23 +213,19 @@ export const AnalysisResultView = ({route}) => {
                 <Divider />
               </Box>
               <Box flex={1} alignItems={'flex-end'}>
-                <Image
-                  source={emotions[beforeEmotion.beforeEmotion]}
-                  alt={'sad'}
-                />
+                {EmotionIcon[beforeEmotion.beforeEmotion]}
               </Box>
             </HStack>
           </VStack>
         </VStack>
         <HStack justifyContent={'space-between'} space={4}>
-          {/*<Center><Link mb={10} onPress={handleLinkClick}>마지막 검사 결과와 비교하기</Link></Center>*/}
           <Button
             p={'5'}
             onPress={handleHealingPress}
             bgColor={'#2785F4'}
             flex={1}>
             <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
-              힐링 모드
+              AI 모드
             </Text>
           </Button>
           <Button

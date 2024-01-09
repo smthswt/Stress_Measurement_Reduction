@@ -9,7 +9,6 @@ import {
   Image,
   Progress,
   Text,
-  useDisclose,
   VStack,
 } from 'native-base';
 import React, {useEffect, useRef, useState} from 'react';
@@ -38,13 +37,15 @@ import deviceImage from './images/Renst_ISO.png';
  *
  * @returns {JSX.Element} The HealingView component.
  */
-export const HealingView = () => {
+export const HealingView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
+  const beforeEmotion = route.params;
+  //console.log(route.params);
 
   /**
    * Sends data.
@@ -80,9 +81,6 @@ export const HealingView = () => {
    * @type {React.MutableRefObject<HTMLElement|null>}
    */
   const messageRef = React.useRef(null);
-
-  const [seconds, setSeconds] = useState(totalTime);
-  const [isOpen, setIsOpen] = React.useState(false);
   const [isMessageOpen, setIsMessageOpen] = React.useState(false);
 
   useEffect(() => {
@@ -122,6 +120,7 @@ export const HealingView = () => {
   const handleHealingStop = () => {
     sendHealingStop();
     setIsMessageOpen(false);
+    setIsCounting(false)
     const timer = setTimeout(() => {
       //navigation.navigate('TabScreens', {screen: 'Home'});
       clearTimeout(timer);
@@ -133,6 +132,11 @@ export const HealingView = () => {
 
   const [healingStart, setHealingStart] = useState(false);
 
+
+  const animationDuration = 100; // Duration in seconds (same as MusicCircleProgressAnimation)
+  const [isCounting, setIsCounting] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(animationDuration);
+
   const startAnimation = () => {
     if (startAnimationRef.current) {
       startAnimationRef.current();
@@ -140,10 +144,6 @@ export const HealingView = () => {
     setHealingStart(true);
     setIsCounting(true);
   };
-
-  const animationDuration = 100; // Duration in seconds (same as MusicCircleProgressAnimation)
-  const [isCounting, setIsCounting] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(animationDuration);
 
   useEffect(() => {
     let intervalId;
@@ -155,6 +155,7 @@ export const HealingView = () => {
     }
 
     if (secondsLeft <= 0) {
+      setIsCounting(false)
       setIsRemeasureOpen(true);
     }
 
@@ -169,20 +170,20 @@ export const HealingView = () => {
   const MovetoRemeasure = () => {
     setIsRemeasureOpen(false)
     const timer = setTimeout(() => {
-      navigation.navigate('RemeasureStart');
+      navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
       clearTimeout(timer);
-    }, 500);
+    }, );
   };
 
   return (
     <>
-      <VStack p={5} h={'100%'} justifyContent={'space-between'} bg={'#67ADFF'}>
-        <Center>
-          <Heading color={'white'}>힐링 모드</Heading>
+      <VStack p={5} height={'100%'} justifyContent={'space-between'} bg={'#67ADFF'}>
+        <Center height={'5%'}>
+          <Heading color={'white'}>AI 모드</Heading>
           <Text color={'white'}>힘든 하루를 보낸 길동님을 위한 모드에요.</Text>
         </Center>
-        <VStack space={3}>
-          <VStack bg={'white'} shadow={2} height={420}>
+        <VStack space={3} justifyContent={"flex-end"} height={'90%'}>
+          <VStack bg={'white'} shadow={2} height={'80%'}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
             />
@@ -262,7 +263,7 @@ export const HealingView = () => {
           setIsRemeasureOpen(false);
         }}>
         <Actionsheet.Content>
-          <Box w="100%" px={4} justifyContent="center">
+          <Box w="100%" p={4} justifyContent="center">
             <Center>
               <Heading>다시 측정하기</Heading>
               <Text>측정 후 힐링 모드를 이용한 재측정이 필요해요!</Text>

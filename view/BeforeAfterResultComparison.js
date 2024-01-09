@@ -22,6 +22,12 @@ import Emotion_happy from '../view/images/emotion_happy.svg';
 import {Screen} from 'react-native-screens';
 import {VictoryTheme} from 'victory';
 import {VictoryBar, VictoryChart, VictoryGroup} from 'victory-native';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * Represents the analysis result of a measurement.
@@ -29,8 +35,8 @@ import {VictoryBar, VictoryChart, VictoryGroup} from 'victory-native';
  * @class
  */
 export const BeforeAfterResultComparison = ({route}) => {
-  const selectedEmotion = route.params;
-  console.log(selectedEmotion);
+  const Emotions = route.params;
+  console.log(Emotions);
   /**
    * UseNavigation function
    *
@@ -134,14 +140,24 @@ export const BeforeAfterResultComparison = ({route}) => {
     navigation.navigate('AnalysisViewScreens', {screen: 'AllRecordsList'});
   };
 
-  const emotions = {
-    emotion_happy: require('../view/images/emotion_happy.png'),
-    emotion_tired: require('../view/images/emotion_tired.png'),
-    emotion_normal: require('../view/images/emotion_normal.png'),
-    emotion_sad: require('../view/images/emotion_sad.png'),
-    emotion_soso: require('../view/images/emotion_soso.png'),
-    emotion_angry: require('../view/images/emotion_angry.png'),
+  const EmotionIcon = {
+    emotion_happy: <EmotionHappy width={40} height={40} />,
+    emotion_normal: <EmotionNormal width={40} height={40} />,
+    emotion_soso: <EmotionSoso width={40} height={40} />,
+    emotion_tired: <EmotionTired width={40} height={40} />,
+    emotion_sad: <EmotionSad width={40} height={40} />,
+    emotion_angry: <EmotionAngry width={40} height={40} />,
   };
+
+  const EmotionName = {
+    emotion_happy: '행복해요',
+    emotion_normal: '보통이에요',
+    emotion_soso: '그저그래요',
+    emotion_tired: '피곤해요',
+    emotion_sad: '슬퍼요',
+    emotion_angry: '화나요',
+  }
+
 
   const mockData = {
     before: [
@@ -175,14 +191,14 @@ export const BeforeAfterResultComparison = ({route}) => {
           </Text>
           <HStack alignItems={'center'} space={10}>
             <VStack alignItems={'center'}>
-              <Image source={emotions.emotion_sad} alt={'test'} />
-              <Text>슬퍼요</Text>
+              {EmotionIcon[Emotions.beforeEmotion]}
+              <Text>{EmotionName[Emotions.beforeEmotion]}</Text>
               <Text color={'#616161'}>힐링 전</Text>
             </VStack>
             <Ionicons name={'arrow-forward'} color={'#ADAEB3'} size={20} />
             <VStack alignItems={'center'}>
-              <Image source={emotions.emotion_happy} alt={'test'} />
-              <Text>행복해요</Text>
+              {EmotionIcon[Emotions.afterEmotion]}
+              <Text>{EmotionName[Emotions.afterEmotion]}</Text>
               <Text color={'#616161'}>힐링 후</Text>
             </VStack>
           </HStack>

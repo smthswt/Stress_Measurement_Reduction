@@ -16,19 +16,27 @@ import {useBLE} from './module/BLEProvider';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {CircleProgressAnimation} from './components/CircleProgressAnimation';
 import WalkingPeopleIcon from './icons/WalkingPeopleIcon';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
  *
  * @returns {JSX.Element} The Electrocardiogram Measurement view component.
  */
-export const ECGRemeasurementView = () => {
+export const ECGRemeasurementView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
+  const beforeEmotion = route.params;
+  //console.log(beforeEmotion);
 
   /**
    * Sends data to an Arduino device.
@@ -159,16 +167,19 @@ export const ECGRemeasurementView = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    console.log('Time: ' + seconds);
+    //console.log('Time: ' + seconds);
 
     if (seconds === totalTime - 10) {
       setShowModal(true);
     }
 
-    if (seconds <= 0) {
+    if (isEmotionSelected && seconds <= 0) {
       clearInterval(interval.current);
       setIsOpen(true);
       endAnalysis();
+    }
+    if (!isEmotionSelected && seconds <= 0) {
+      endAnalysis()
     }
   }, [seconds]);
 
@@ -217,7 +228,10 @@ export const ECGRemeasurementView = () => {
   const handleAnalysisStop = () => {
     setIsMessageOpen(false);
     const timer = setTimeout(() => {
-      navigation.navigate('Home');
+      navigation.navigate('RemeasureResultsViewScreens', {
+        screen: 'RemeasureEnd',
+        params: {beforeEmotion:beforeEmotion.beforeEmotion, afterEmotion: selectedEmotion},
+      })
       clearTimeout(timer);
     }, 500);
   };
@@ -235,20 +249,22 @@ export const ECGRemeasurementView = () => {
    */
   const progressValue = ((totalTime - seconds) / totalTime) * 100;
 
-  const emotion_happy = require('../view/images/emotion_happy.png');
-  const emotion_normal = require('../view/images/emotion_normal.png');
-  const emotion_soso = require('../view/images/emotion_soso.png');
-  const emotion_tired = require('../view/images/emotion_tired.png');
-  const emotion_sad = require('../view/images/emotion_sad.png');
-  const emotion_angry = require('../view/images/emotion_angry.png');
+  const EmotionIcon = {
+    emotion_happy: <EmotionHappy width={40} height={40} />,
+    emotion_normal: <EmotionNormal width={40} height={40} />,
+    emotion_soso: <EmotionSoso width={40} height={40} />,
+    emotion_tired: <EmotionTired width={40} height={40} />,
+    emotion_sad: <EmotionSad width={40} height={40} />,
+    emotion_angry: <EmotionAngry width={40} height={40} />,
+  };
 
   const emotions = [
-    {name: 'emotion_happy', source: emotion_happy},
-    {name: 'emotion_tired', source: emotion_tired},
-    {name: 'emotion_normal', source: emotion_normal},
-    {name: 'emotion_sad', source: emotion_sad},
-    {name: 'emotion_soso', source: emotion_soso},
-    {name: 'emotion_angry', source: emotion_angry},
+    {name: 'emotion_happy'},
+    {name: 'emotion_tired'},
+    {name: 'emotion_normal'},
+    {name: 'emotion_sad'},
+    {name: 'emotion_soso'},
+    {name: 'emotion_angry'},
   ];
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const handleEmotionSelect = emotionName => {
@@ -272,7 +288,7 @@ export const ECGRemeasurementView = () => {
                   selectedEmotion === emotion.name ? '#F5F5F6' : 'transparent',
                 borderRadius: 50,
               }}>
-              <Image source={emotion.source} alt={emotion.name} />
+              {EmotionIcon[emotion.name]}
             </Button>
             <Text fontSize={'xs'}>{emotion.name}</Text>
           </Center>
@@ -288,12 +304,16 @@ export const ECGRemeasurementView = () => {
     ));
   };
 
+  const [isEmotionSelected, setEmotionSelected] = useState(false)
+
   const handleSubmit = () => {
     if (selectedEmotion) {
       console.log('Selected emotion:', selectedEmotion);
       setShowModal(false);
+      setEmotionSelected(true)
     }
   };
+
 
   const handleSummit = () => {
     setIsOpen(false);
@@ -301,7 +321,7 @@ export const ECGRemeasurementView = () => {
       if (selectedEmotion) {
         navigation.navigate('RemeasureResultsViewScreens', {
           screen: 'RemeasureEnd',
-          params: {afterEmotion: selectedEmotion},
+          params: {beforeEmotion:beforeEmotion.beforeEmotion,afterEmotion: selectedEmotion},
         });
         clearTimeout(timer);
       }
@@ -336,9 +356,16 @@ export const ECGRemeasurementView = () => {
           </HStack>
         </HStack>
         <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2}>
-          <Center>
-            <Text>{seconds}초 남았습니다.</Text>
-          </Center>
+          {seconds >= 0 &&
+              <Center>
+                <Text>{seconds}초 남았습니다.</Text>
+              </Center>
+          }
+          {seconds < 0 &&
+              <Center>
+                <Text>0초 남았습니다.</Text>
+              </Center>
+          }
           <Progress value={progressValue} colorScheme={'blue'} />
           <Button
             onPress={onOpenAnalysisStopMessageBox}

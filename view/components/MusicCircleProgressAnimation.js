@@ -51,7 +51,7 @@ export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
 
   return (
     <VStack flex={1} alignItems={'center'} justifyItems={'center'}>
-      <Box top={140}>
+      <Box top={height/4.5}>
         <Ionicons name={'heart'} size={50} color={'#2785F4'} />
       </Box>
       <Svg style={{position: 'absolute'}}>

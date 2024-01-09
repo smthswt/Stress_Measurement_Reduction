@@ -25,6 +25,12 @@ import {
 } from 'victory-native';
 import {VictoryTheme} from 'victory';
 import Svg, {Circle} from 'react-native-svg';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * Component for displaying settings view.
@@ -68,48 +74,60 @@ export const HomeView_AllResults = ({navigation}) => {
     ],
   };
 
-  const emotion_happy = require('../view/images/emotion_happy.png');
-  const emotion_normal = require('../view/images/emotion_normal.png');
-  const emotion_soso = require('../view/images/emotion_soso.png');
-  const emotion_tired = require('../view/images/emotion_tired.png');
-  const emotion_sad = require('../view/images/emotion_sad.png');
-  const emotion_angry = require('../view/images/emotion_angry.png');
-
   const emotionData = {
     12.15: {
-      before: {name: emotion_tired, source: emotion_tired},
-      after: {name: emotion_soso, source: emotion_soso},
+      before: 'emotion_tired',
+      after: 'emotion_soso',
     },
     12.16: {
-      before: {name: emotion_tired, source: emotion_tired},
-      after: {name: emotion_happy, source: emotion_happy},
+      before: 'emotion_tired',
+      after: 'emotion_happy',
     },
     12.17: {
-      before: {name: emotion_normal, source: emotion_normal},
-      after: {name: emotion_happy, source: emotion_happy},
+      before: 'emotion_normal',
+      after: 'emotion_happy',
     },
     12.18: {
-      before: {name: emotion_sad, source: emotion_sad},
-      after: {name: emotion_normal, source: emotion_normal},
+      before: 'emotion_sad',
+      after: 'emotion_normal',
     },
     12.19: {
-      before: {name: emotion_angry, source: emotion_angry},
-      after: {name: emotion_soso, source: emotion_soso},
+      before: 'emotion_angry',
+      after: 'emotion_soso',
     },
   };
 
   const EmotionComponent = ({date, before, after}) => {
+    const getEmotionComponent = (emotion) => {
+      switch (emotion) {
+        case 'emotion_happy':
+          return <EmotionHappy width={46} height={40} />;
+        case 'emotion_normal':
+          return <EmotionNormal width={40} height={40} />;
+        case 'emotion_soso':
+          return <EmotionSoso width={40} height={40} />;
+        case 'emotion_tired':
+          return <EmotionTired width={40} height={40} />;
+        case 'emotion_sad':
+          return <EmotionSad width={40} height={40} />;
+        case 'emotion_angry':
+          return <EmotionAngry width={40} height={40} />;
+        default:
+          return null;
+      }
+    };
+
     return (
       <HStack justifyContent={'space-between'} alignItems={'center'}>
         <Text color={'#ADADAD'}>{date}</Text>
         <HStack space={10} alignItems={'center'}>
           <VStack space={1} alignItems={'center'}>
-            <Image source={before.source} alt={before.name} />
+            {getEmotionComponent(before)}
             <Text color={'#2785F4'}>힐링 전</Text>
           </VStack>
-          <Text color={'#ADADAD'}>-----></Text>
+          <Text color={'#ADADAD'}>-----{`>`}</Text>
           <VStack space={1} alignItems={'center'}>
-            <Image source={after.source} alt={after.name} />
+            {getEmotionComponent(after)}
             <Text color={'#FF4370'}>힐링 후</Text>
           </VStack>
         </HStack>
@@ -230,6 +248,7 @@ export const HomeView_AllResults = ({navigation}) => {
           )}
           <VStack bg={'white'} shadow={2} p={3}>
             <Text bold>감정</Text>
+
             <VStack space={3}>
               {Object.entries(emotionData).map(([date, emotions]) => (
                 <EmotionComponent
@@ -240,6 +259,7 @@ export const HomeView_AllResults = ({navigation}) => {
                 />
               ))}
             </VStack>
+
           </VStack>
           <VStack bg={'white'} shadow={2} p={3}>
             <HStack justifyContent={'space-between'}>
@@ -262,6 +282,7 @@ export const HomeView_AllResults = ({navigation}) => {
             <VStack space={3} mt={3}>
               {stressData.map(item => (
                 <StressComponent
+                    key={item.date}
                   date={item.date}
                   stressIndex={item.stressIndex}
                 />

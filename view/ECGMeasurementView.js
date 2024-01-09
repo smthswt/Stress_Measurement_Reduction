@@ -16,6 +16,12 @@ import {useBLE} from './module/BLEProvider';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {CircleProgressAnimation} from './components/CircleProgressAnimation';
 import WalkingPeopleIcon from './icons/WalkingPeopleIcon';
+import EmotionHappy from "./icons/EmotionHappy";
+import EmotionNormal from "./icons/EmotionNormal";
+import EmotionSoso from "./icons/EmotionSoso";
+import EmotionTired from "./icons/EmotionTired";
+import EmotionSad from "./icons/EmotionSad";
+import EmotionAngry from "./icons/EmotionAngry";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -165,11 +171,15 @@ export const ECGMeasurementView = () => {
       setShowModal(true);
     }
 
-    if (seconds <= 0) {
+    if (isEmotionSelected && seconds <= 0) {
       clearInterval(interval.current);
       setIsOpen(true);
       endAnalysis();
     }
+    if (!isEmotionSelected && seconds <= 0) {
+      endAnalysis()
+    }
+
   }, [seconds]);
 
   /**
@@ -235,20 +245,22 @@ export const ECGMeasurementView = () => {
    */
   const progressValue = ((totalTime - seconds) / totalTime) * 100;
 
-  const emotion_happy = require('../view/images/emotion_happy.png');
-  const emotion_normal = require('../view/images/emotion_normal.png');
-  const emotion_soso = require('../view/images/emotion_soso.png');
-  const emotion_tired = require('../view/images/emotion_tired.png');
-  const emotion_sad = require('../view/images/emotion_sad.png');
-  const emotion_angry = require('../view/images/emotion_angry.png');
+  const EmotionIcon = {
+    emotion_happy: <EmotionHappy width={40} height={40} />,
+    emotion_normal: <EmotionNormal width={40} height={40} />,
+    emotion_soso: <EmotionSoso width={40} height={40} />,
+    emotion_tired: <EmotionTired width={40} height={40} />,
+    emotion_sad: <EmotionSad width={40} height={40} />,
+    emotion_angry: <EmotionAngry width={40} height={40} />,
+  };
 
   const emotions = [
-    {name: 'emotion_happy', source: emotion_happy},
-    {name: 'emotion_tired', source: emotion_tired},
-    {name: 'emotion_normal', source: emotion_normal},
-    {name: 'emotion_sad', source: emotion_sad},
-    {name: 'emotion_soso', source: emotion_soso},
-    {name: 'emotion_angry', source: emotion_angry},
+    {name: 'emotion_happy'},
+    {name: 'emotion_tired'},
+    {name: 'emotion_normal'},
+    {name: 'emotion_sad'},
+    {name: 'emotion_soso'},
+    {name: 'emotion_angry'},
   ];
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const handleEmotionSelect = emotionName => {
@@ -272,7 +284,7 @@ export const ECGMeasurementView = () => {
                   selectedEmotion === emotion.name ? '#F5F5F6' : 'transparent',
                 borderRadius: 50,
               }}>
-              <Image source={emotion.source} alt={emotion.name} />
+              {EmotionIcon[emotion.name]}
             </Button>
             <Text fontSize={'xs'}>{emotion.name}</Text>
           </Center>
@@ -287,11 +299,12 @@ export const ECGMeasurementView = () => {
       </VStack>
     ));
   };
-
+  const [isEmotionSelected, setEmotionSelected] = useState(false)
   const handleSubmit = () => {
     if (selectedEmotion) {
       console.log('Selected emotion:', selectedEmotion);
       setShowModal(false);
+      setEmotionSelected(true)
     }
   };
 
@@ -316,7 +329,7 @@ export const ECGMeasurementView = () => {
         h={'100%'}
         justifyContent={'space-between'}
         bg={'#2785f4'}>
-        <Heading color={'#FFFFFF'}>심전도 측정 중입니다...</Heading>
+        <Center><Heading color={'#FFFFFF'}>심전도 측정 중입니다...</Heading></Center>
         <CircleProgressAnimation />
         <HStack
           space={1}
@@ -334,9 +347,16 @@ export const ECGMeasurementView = () => {
           </HStack>
         </HStack>
         <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2}>
+          {seconds >= 0 &&
           <Center>
             <Text>{seconds}초 남았습니다.</Text>
           </Center>
+          }
+          {seconds < 0 &&
+              <Center>
+                <Text>0초 남았습니다.</Text>
+              </Center>
+          }
           <Progress value={progressValue} colorScheme={'blue'} />
           <Button
             onPress={onOpenAnalysisStopMessageBox}
