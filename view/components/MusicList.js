@@ -53,7 +53,7 @@ export const MusicList = () => {
         // <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
         <VStack p={5} flex={1}>
 
-            <View width={"100%"} shadow={2}>
+            <View width={"100%"} shadow={2} backgroundColor={'white'}>
                 <FlatList showsVerticalScrollIndicator={false}
                           data={data}
                           keyExtractor={(item) => item.id}

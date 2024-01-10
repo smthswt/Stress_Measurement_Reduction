@@ -2,7 +2,7 @@ import {HStack, Text, VStack} from "native-base";
 import React, { useEffect } from "react";
 import { BackHandler, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Calendar_List from "./components/CalendarListActionsheet";
+import Calendar_List from "./components/CalendarList";
 
 
 /**
