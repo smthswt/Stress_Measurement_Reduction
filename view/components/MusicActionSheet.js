@@ -5,7 +5,7 @@ import React, {useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
 
-const Music_ActionSheet = ({onOpen, onClose, isOpen}) => {
+const Music_ActionSheet = ({onOpen, onClose, isOpen, data}) => {
     const [showMp3UploadView, setShowMp3UploadView] = useState(false);
     const [showInitializeView, setShowInitializeView] = useState(true);
 
@@ -44,11 +44,11 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen}) => {
         return(
             <VStack style={{width: "100%"}} justifyContent="center" alignItems={"center"}>
 
-                <Box w="100%" h={60} px={4} marginBottom={4} justifyContent="center" alignItems={"center"}>
-                    <Text fontSize="17" color="black" fontWeight={"bold"} lineHeight={32}>
+                <Box w="100%" h={60} marginTop={0.5} marginBottom={4} justifyContent="center" alignItems={"center"}>
+                    <Text fontSize={18} color="black" fontWeight={"bold"} lineHeight={32}>
                         핸드폰 내 MP3
                     </Text>
-                    <Text fontSize="17" color="black" fontWeight={"bold"}>
+                    <Text fontSize={18} color="black" fontWeight={"bold"}>
                         파일을 선택해주세요.
                     </Text>
                 </Box>
@@ -93,14 +93,16 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen}) => {
 
     const InitializeActionSheet = () => {
 
+        const stressLevel = data.stressLevel;
+
         return(
             <VStack style={{width: "100%"}} justifyContent="center" alignItems={"center"}>
 
-                <Box w="100%" h={60} px={4} marginBottom={4} justifyContent="center" alignItems={"center"}>
-                    <Text fontSize="17" color="black" fontWeight={"bold"} lineHeight={32}>
-                        스트레스 레벨 1
+                <Box w="100%" h={60} marginTop={0.5} marginBottom={4} justifyContent="center" alignItems={"center"}>
+                    <Text fontSize={18} color="black" fontWeight={"bold"} lineHeight={32}>
+                        스트레스 레벨 {stressLevel}
                     </Text>
-                    <Text fontSize="17" color="black" fontWeight={"bold"}>
+                    <Text fontSize={18} color="black" fontWeight={"bold"}>
                         음원 설정 초기화 하겠습니까?
                     </Text>
                 </Box>
@@ -134,11 +136,11 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen}) => {
                     ) : showInitializeView ? (
 
                         <>
-                            <Box w="100%" h={60} px={4} marginBottom={5} justifyContent="center" alignItems={"center"}>
-                                <Text fontSize="17" color="black" fontWeight={"bold"} lineHeight={32}>
+                            <Box w="100%" h={60} marginTop={0.5} marginBottom={5} justifyContent="center" alignItems={"center"}>
+                                <Text fontSize={18} color="black" fontWeight={"bold"} lineHeight={32}>
                                     음원 변경 방식을
                                 </Text>
-                                <Text fontSize="17" color="black" fontWeight={"bold"}>
+                                <Text fontSize={18} color="black" fontWeight={"bold"}>
                                     선택해주세요.
                                 </Text>
                             </Box>

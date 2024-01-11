@@ -27,11 +27,11 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen}) => {
         <Actionsheet isOpen={isOpen} onClose={handleOnClose} hideDragIndicator>
 
             <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"} alignItems={"center"} >
-                    <Box w="100%" h={60} px={4} marginBottom={4} justifyContent="center" alignItems={"center"}>
-                        <Text fontSize="17" color="black" fontWeight={"bold"} lineHeight={32}>
+                    <Box w="100%" h={60} marginTop={1} marginBottom={5} justifyContent="center" alignItems={"center"}>
+                        <Text fontSize={18} color="black" fontWeight={"bold"} lineHeight={32}>
                             핸드폰 내 MP3
                         </Text>
-                        <Text fontSize="17" color="black" fontWeight={"bold"}>
+                        <Text fontSize={18} color="black" fontWeight={"bold"}>
                             파일을 선택해주세요.
                         </Text>
                     </Box>

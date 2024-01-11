@@ -39,6 +39,9 @@ import {PP_Drop} from "./view/components/PrivacyPolicy/PP_drop";
 import {PP_delegation} from "./view/components/PrivacyPolicy/PP_delegation";
 import {PP_Personal} from "./view/components/PrivacyPolicy/PP_Personal";
 import {PP_Safety} from "./view/components/PrivacyPolicy/PP_Safety";
+import EnrollingDeviceView from "./view/EnrollingDeviceView";
+import DeviceListView from "./view/DeviceListView";
+import CompleteSearchingDevice from "./view/CompleteSearchingDevice";
 
 
 /**
@@ -175,6 +178,25 @@ const PrivacyPolicyScreens = () => {
     )
 };
 
+const DeviceSettingScreens = () => {
+    return(
+        <StackNative.Navigator initialRouteName={SettingsView_Device}>
+            <StackNative.Screen name={"Enroll"} component={EnrollingDeviceView} options={crossFadeTransition} />
+            <StackNative.Screen name={"Devicelist"} component={DeviceListView} options={crossFadeTransition} />
+            <StackNative.Screen name={"CompleteEnroll"} component={CompleteSearchingDevice} options={crossFadeTransition} />
+
+        </StackNative.Navigator>
+    )
+};
+
+// const EnrollingDeviceScreens = () => {
+//     return(
+//         <StackNative.Navigator initialRouteName={EnrollingDeviceView}>
+//             <StackNative.Screen name={}
+//         </StackNative.Navigator>
+//     )
+// }
+
 const App = () => {
 
     /**
@@ -249,6 +271,8 @@ const App = () => {
                                 <StackNative.Screen name="SettingScreens" component={SettingScreens}
                                                     options={crossFadeTransition}/>
                                 <StackNative.Screen name="PrivacyPolicyScreens" component={PrivacyPolicyScreens}
+                                                    options={crossFadeTransition}/>
+                                <StackNative.Screen name="DeviceSettingScreens" component={DeviceSettingScreens}
                                                     options={crossFadeTransition}/>
                             </Stack.Navigator>
                         </VStack>

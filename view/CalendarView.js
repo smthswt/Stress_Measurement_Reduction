@@ -165,7 +165,6 @@ return (
         <HStack space={3} justifyContent={"flex-start"} mt={2.5}>
             {dateRangeMapping()}
 
-
         </HStack>
         </ScrollView>
     </VStack>

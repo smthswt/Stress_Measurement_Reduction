@@ -74,7 +74,7 @@ export const MusicList = () => {
                                           <View width={"100%"} borderWidth={1} borderRadius={30} borderColor={"#59BCFF"} padding={1.5}>
                                               <MaterialIcons name={"edit"} size={20} color={"#2785F4"}/>
                                           </View>
-                                          <Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen}/>
+                                          <Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} data={item}/>
                                       </Button>
 
                                   </HStack>
