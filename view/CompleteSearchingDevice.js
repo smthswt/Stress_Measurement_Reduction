@@ -43,7 +43,7 @@ const CompleteSearchingDevice = ({navigation}) => {
     };
 
     const  handleSearchAgain = () => {
-        console.log("다시 검색하기")
+        console.log("다시 검색하기 = 새로고침?")
     };
 
     const handleSubmit = () => {
@@ -63,7 +63,7 @@ const CompleteSearchingDevice = ({navigation}) => {
     return(
         <View flex={1}>
             <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.goBack()}}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.navigate("Device")}}>
                     <Ionicons name={"arrow-back"} color={'#222222'} size={25} />
                 </TouchableOpacity>
                 <Text bold fontSize={18} marginLeft={3}>디바이스 등록하기</Text>
@@ -89,7 +89,7 @@ const CompleteSearchingDevice = ({navigation}) => {
             </VStack>
 
                 <Center flex={0.33} bg={"white"}>
-                    <VStack flex={1} width={"92%"} justifyContent={"center"} alignItems={"center"} pb={4}>
+                    <VStack flex={1} width={"92%"} justifyContent={"center"} alignItems={"center"} pb={3}>
                         <View flex={1} justifyContent={"center"} mb={1}>
                             <Text>{data.length}개의 디바이스가 확인되었습니다.</Text>
                         </View>
