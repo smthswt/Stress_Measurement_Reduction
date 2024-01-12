@@ -1,8 +1,6 @@
 import {Button, Center, Checkbox, FormControl, Heading, HStack, Input, List, Text, TextArea, VStack} from "native-base";
 import React, {useContext, useEffect, useState} from "react";
-import { BackHandler, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Calendar_List from "./components/CalendarListActionsheet";
 import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
 
