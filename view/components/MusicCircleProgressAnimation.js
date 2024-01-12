@@ -3,8 +3,9 @@ import {Box, Text, VStack} from 'native-base';
 import React, { useEffect, useRef } from "react";
 import Svg, {Circle} from 'react-native-svg';
 import Animated, {
+  Easing,
   useAnimatedProps,
-  useSharedValue,
+  useSharedValue, withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -26,14 +27,17 @@ const backgroundStrokeColor = '#E8E9ED';
 const strokeColor = '#2785F4';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedEllipse = Animated.createAnimatedComponent(Circle);
 
 export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
   const progress = useSharedValue(0);
   const animationStarted = useRef(false);
+  const scaleValue =  useSharedValue(0.8)
 
   const startAnimation = () => {
     if (!animationStarted.current) {
       progress.value = withTiming(1, { duration: 100000 });
+      scaleValue.value = withRepeat(withTiming(2, {duration:1000, easing:Easing.linear}), -1)
       animationStarted.current = true;
     }
   };
@@ -49,29 +53,38 @@ export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
     };
   });
 
+  const animated2Props = useAnimatedProps(() => {
+    return {
+      r: 40 * scaleValue.value,
+    };
+  });
+
+  const animated3Props = useAnimatedProps(() => {
+    return {
+      r: 20 * scaleValue.value,
+    }
+  });
+
   return (
     <VStack flex={1} alignItems={'center'} justifyItems={'center'}>
-      <Box top={height/4.5}>
-        <Ionicons name={'heart'} size={50} color={'#2785F4'} />
-      </Box>
       <Svg style={{position: 'absolute'}}>
         <Circle
-          cx={width / 2.25}
+          cx={width/2-20}
           cy={height / 4}
           r={R * 1.3}
-          stroke={"#59BCFF"}
-          strokeWidth={3}
+          stroke={'rgba(89,188,255,0.5)'}
+          strokeWidth={4}
           strokeDasharray={2}
         />
         <Circle
-          cx={width / 2.25}
+          cx={width / 2-20}
           cy={height / 4}
           r={R}
           stroke={backgroundStrokeColor}
           strokeWidth={30}
         />
         <AnimatedCircle
-          cx={width / 2.25}
+          cx={width / 2 -20}
           cy={height / 4}
           r={R}
           stroke={strokeColor}
@@ -79,7 +92,20 @@ export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
           strokeDasharray={circleLength}
           animatedProps={animatedProps}
         />
+        <AnimatedEllipse cx={width/2-20}
+                         cy={height/4}
+                         fill={'rgba(39, 133, 244, 0.1)'}
+                         animatedProps={animated2Props}
+        />
+        <AnimatedEllipse cx={width/2-20}
+                         cy={height/4}
+                         fill={'rgba(39, 133, 244, 0.2)'}
+                         animatedProps={animated3Props}
+        />
       </Svg>
+      <Box top={height/4 -20} style={{position: 'absolute'}} width={"100%"} alignItems={"center"}>
+        <Ionicons name={'heart'} size={40} color={'#2785F4'} />
+      </Box>
     </VStack>
   );
 };

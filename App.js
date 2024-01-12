@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {
     Animated,
     PermissionsAndroid,
@@ -40,6 +40,13 @@ import {SettingsView_Manual} from './view/SettingsView_Manual';
 import {ManualView} from './view/ManualView';
 import {RemeasureResultView} from './view/ReMeasureResultView';
 import {ECGRemeasurementView} from './view/ECGRemeasurementView';
+import {SettingsView_DeleteAccount} from "./view/SettingsView_DeleteAccount";
+import {UserProvider} from "./view/module/UserProvider";
+import SplashScreen from "react-native-splash-screen";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {OnboardingOneScreen1} from "./view/onboarding/OnboardingOneScreen1";
+import {OnboardingOneScreen3} from "./view/onboarding/OnboardingOneScreen3";
+import {OnboardingOneScreen2} from "./view/onboarding/OnboardingOneScreen2";
 
 /**
  * Object representing cross-fade transition configuration.
@@ -67,6 +74,23 @@ const crossFadeTransition = {
     },
 };
 
+const crossFadeTransitionWithHeader = {
+    gestureDirection: 'horizontal',
+    headerShown: true,
+    cardStyleInterpolator: ({current, next, layouts}) => {
+        return {
+            cardStyle: {
+                opacity: Animated.add(
+                    current.progress,
+                    next ? next.progress : 0,
+                ).interpolate({
+                    inputRange: [0, 1, 2],
+                    outputRange: [0, 1, 0],
+                }),
+            },
+        };
+    },
+};
 /**
  * @namespace Stack
  * @description Represents a stack navigator object in React Navigation.
@@ -75,27 +99,6 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const StackNative = createNativeStackNavigator();
 
-const LoginScreens = () => {
-    return (
-        <StackNative.Navigator initialRouteName={LoginView}>
-            <StackNative.Screen
-                name="Login"
-                component={LoginView}
-                options={crossFadeTransition}
-            />
-            <StackNative.Screen
-                name="Register"
-                component={RegisterView}
-                options={crossFadeTransition}
-            />
-            <StackNative.Screen
-                name="RegisterSuccess"
-                component={RegisterSuccessView}
-                options={crossFadeTransition}
-            />
-        </StackNative.Navigator>
-    );
-};
 
 const TabScreens = () => {
     return (
@@ -180,9 +183,9 @@ const RemeasureResultsViewScreens = () => {
                 options={crossFadeTransition}
             />
             <StackNative.Screen
-                name="RecentResultCompare"
+                name="힐링 모드 전 후 비교하기"
                 component={BeforeAfterResultComparison}
-                options={crossFadeTransition}
+                options={crossFadeTransitionWithHeader}
             />
         </StackNative.Navigator>
     );
@@ -190,12 +193,7 @@ const RemeasureResultsViewScreens = () => {
 
 const SettingScreens = () => {
     return (
-        <StackNative.Navigator initialRouteName={SettingsView}>
-            <StackNative.Screen
-                name="Settings"
-                component={SettingsView}
-                options={crossFadeTransition}
-            />
+        <StackNative.Navigator>
             <StackNative.Screen
                 name="Device"
                 component={SettingsView_Device}
@@ -220,6 +218,62 @@ const App = () => {
      *
      * @returns {Promise<boolean>} - A Promise that resolves to a boolean indicating whether the location permission is granted or not.
      */
+
+    const [onboarded, setOnboarded] = useState();
+
+    const getStorage = async () => {
+        const onboarded = await AsyncStorage.getItem('ONBOARDED');
+        setOnboarded(JSON.parse(onboarded));
+    };
+
+    // -------------------- EFFECTS -------------------- //
+    useEffect(() => {
+        getStorage();
+    }, []);
+
+    // -------------------- ACTIONS -------------------- //
+
+    useEffect(() => {
+        SplashScreen.hide()
+    }, []);
+
+    const LoginScreens = () => {
+        return (
+            <StackNative.Navigator initialRouteName={onboarded ? 'Login' : 'Onboarding1'}>
+                <StackNative.Screen
+                    name="Onboarding1"
+                    component={OnboardingOneScreen1}
+                    options={crossFadeTransition}
+                />
+                <StackNative.Screen
+                    name="Onboarding2"
+                    component={OnboardingOneScreen2}
+                    options={crossFadeTransition}
+                />
+                <StackNative.Screen
+                    name="Onboarding3"
+                    component={OnboardingOneScreen3}
+                    options={crossFadeTransition}
+                />
+                <StackNative.Screen
+                    name="Login"
+                    component={LoginView}
+                    options={crossFadeTransition}
+                />
+                <StackNative.Screen
+                    name="회원가입"
+                    component={RegisterView}
+                    options={crossFadeTransitionWithHeader}
+                />
+                <StackNative.Screen
+                    name="RegisterSuccess"
+                    component={RegisterSuccessView}
+                    options={crossFadeTransition}
+                />
+            </StackNative.Navigator>
+        );
+    };
+
     const requestLocationPermission = async () => {
         if (Platform.OS === 'ios') {
             let locationPermission = await check(
@@ -268,6 +322,7 @@ const App = () => {
 
     return (
         // <Provider store={store}>
+        <UserProvider>
         <BLEProvider>
             <NativeBaseProvider>
                 <SafeAreaView style={{flex: 1}}>
@@ -292,14 +347,14 @@ const App = () => {
                                     options={crossFadeTransition}
                                 />
                                 <Stack.Screen
-                                    name={'HomeView_AllResults'}
+                                    name={'측정 결과 확인'}
                                     component={HomeView_AllResults}
-                                    options={crossFadeTransition}
+                                    options={crossFadeTransitionWithHeader}
                                 />
                                 <Stack.Screen
-                                    name={'HomeView_AllStress'}
+                                    name={'스트레스 정보'}
                                     component={HomeView_AllStress}
-                                    options={crossFadeTransition}
+                                    options={crossFadeTransitionWithHeader}
                                 />
                                 <Stack.Screen
                                     name="Healing"
@@ -326,13 +381,18 @@ const App = () => {
                                     component={SettingScreens}
                                     options={crossFadeTransition}
                                 />
+                                <StackNative.Screen
+                                    name="서비스 탈퇴"
+                                    component={SettingsView_DeleteAccount}
+                                    options={crossFadeTransitionWithHeader}
+                                />
                             </Stack.Navigator>
                         </VStack>
                     </NavigationContainer>
                 </SafeAreaView>
             </NativeBaseProvider>
         </BLEProvider>
-        // </Provider>
+        </UserProvider>
     );
 };
 

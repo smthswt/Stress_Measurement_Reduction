@@ -19,6 +19,7 @@ import {MusicCircleProgressAnimation} from './components/MusicCircleProgressAnim
 import {useSharedValue, withTiming} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import deviceImage from './images/Renst_ISO.png';
+import {ImageBackground} from "react-native";
 
 /**
  * The HealingView component represents the view for a massage healing process.
@@ -175,14 +176,17 @@ export const HealingView = ({route}) => {
     }, );
   };
 
+  const healingbackground = require("./images/healingbackground.png")
+
   return (
     <>
-      <VStack p={5} height={'100%'} justifyContent={'space-between'} bg={'#67ADFF'}>
+      <ImageBackground source={healingbackground} style={{height:'100%', width:'100%'}}>
+      <VStack p={'20px'} height={'100%'} justifyContent={'space-between'}>
         <Center height={'5%'}>
           <Heading color={'white'}>AI 모드</Heading>
           <Text color={'white'}>힘든 하루를 보낸 길동님을 위한 모드에요.</Text>
         </Center>
-        <VStack space={3} justifyContent={"flex-end"} height={'90%'}>
+        <VStack space={3} justifyContent={"flex-end"} height={'75%'}>
           <VStack bg={'white'} shadow={2} height={'80%'}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
@@ -213,24 +217,25 @@ export const HealingView = ({route}) => {
             </VStack>
           </VStack>
           {!healingStart && (
-            <Button p={'5'} onPress={startAnimation} bgColor={'#2785F4'}>
-              <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
+            <Button onPress={startAnimation} bgColor={'#2785F4'}>
+              <Text fontSize={20} fontWeight={'bold'} color={'white'}>
                 힐링 모드 시작
               </Text>
             </Button>
           )}
           {healingStart && (
             <Button
-              p={'5'}
               onPress={onOpenHealingStopMessageBox}
-              bgColor={'#2785F4'}>
-              <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
+              variant={'outline'}
+              borderColor={'#2785F4'}>
+              <Text fontSize={20} fontWeight={'bold'} color={'#2785F4'}>
                 힐링 중지
               </Text>
             </Button>
           )}
         </VStack>
       </VStack>
+      </ImageBackground>
       <AlertDialog
         leastDestructiveRef={messageRef}
         isOpen={isMessageOpen}
