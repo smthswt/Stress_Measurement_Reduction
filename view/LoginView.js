@@ -11,11 +11,27 @@ import {
     Icon,
     HStack, Link, Divider, Checkbox
 } from "native-base";
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const login_background = require('./images/Login_background.png')
+const login_background = require('./images/Loginbg.png')
+import SQLite from 'react-native-sqlite-storage';
+import {UserContext} from "./module/UserProvider";
+
+const db = SQLite.openDatabase(
+    {
+        name: 'RENST.db',
+        location: 'default',
+    },
+    () => {
+        console.log('Database opened successfully');
+        // Perform further operations or setup here
+    },
+    error => {
+        console.error('Error opening database: ', error);
+    }
+);
 
 /**
  * React component for displaying a calendar view.
@@ -27,6 +43,7 @@ const login_background = require('./images/Login_background.png')
 export const LoginView = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const {setUserId} = useContext(UserContext)
     const [errors, setErrors] = useState({})
 
     const [show, setShow] = React.useState(false);
@@ -52,22 +69,40 @@ export const LoginView = ({ navigation }) => {
     const handleLogin = () => {
         const isValid = validate()
         if (isValid) {
-            navigation.navigate("TabScreens", {screen:"Home"})
-            // For demonstration purposes, let's log the username and password
-            console.log('Username:', username);
-            console.log('Password:', password);
+            db.transaction(tx => {
+                tx.executeSql(
+                    'SELECT * FROM users WHERE username = ? AND password = ?',
+                    [username, password],
+                    (_, { rows }) => {
+                        if (rows.length > 0) {
+                            // Authentication successful, navigate to Home screen or other screens
+                            const user = rows.item(0);
+                            const userId = rows.item(0).id
+                            setUserId(userId)
+                            //console.log(user)
+                            navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
+                        } else {
+                            Alert.alert('Login Failed', 'Invalid username or password');
+                        }
+                    },
+                    error => {
+                        console.error('Error during login: ', error);
+                        Alert.alert('Login Failed', 'An error occurred during login');
+                    }
+                );
+            });
         } else {
             Alert.alert('Invalid Form', 'Please fill in the required fields');
         }
     };
 
     const handleRegister = () => {
-        navigation.navigate("LoginScreens", {screen:"Register"})
+        navigation.navigate("LoginScreens", {screen:"회원가입"})
     }
 
     return (
-        <ImageBackground source={login_background} resizeMode="cover" >
-        <VStack height={"100%"} bg={"rgba(3, 60, 130, 0.85)"} >
+        <ImageBackground source={login_background} style={{width: '100%', height: '100%'}}>
+        <VStack height={"100%"}>
             <Center height={"30%"}>
                 <Heading color={"white"} fontSize={'6xl'}>RENST</Heading>
             </Center>
@@ -81,7 +116,8 @@ export const LoginView = ({ navigation }) => {
                             bg={"white"}
                             height={50}
                             _focus={{
-                                bgColor:"coolGray"
+                                bgColor:"coolGray",
+                                borderColor:"#2785F4",
                             }}
                         />
                     </FormControl>
@@ -94,7 +130,8 @@ export const LoginView = ({ navigation }) => {
                             type={show ? "text" : "password"}
                             height={50}
                             _focus={{
-                                bgColor:"coolGray"
+                                bgColor:"coolGray",
+                                borderColor:"#2785F4",
                             }}
                             InputRightElement={
                             <Pressable onPress={() => setShow(!show)}>
@@ -104,7 +141,7 @@ export const LoginView = ({ navigation }) => {
                         />
                     </FormControl>
                     <FormControl>
-                        <Checkbox value="test" accessibilityLabel="This is a dummy checkbox" colorScheme={"info"} defaultIsChecked>
+                        <Checkbox value="test" accessibilityLabel="AutoLogin" colorScheme={"info"}>
                             <Text color={"white"} fontSize={"xs"}>자동 로그인</Text>
                         </Checkbox>
                     </FormControl>

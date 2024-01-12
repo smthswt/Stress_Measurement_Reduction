@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useBLE} from './module/BLEProvider';
 import {
@@ -28,12 +28,21 @@ import EmotionSoso from "./icons/EmotionSoso";
 import EmotionTired from "./icons/EmotionTired";
 import EmotionSad from "./icons/EmotionSad";
 import EmotionAngry from "./icons/EmotionAngry";
+import {UserContext} from "./module/UserProvider";
+import {Alert} from "react-native";
+import SQLite from "react-native-sqlite-storage";
 
 /**
  * Represents the analysis result of a measurement.
  *
  * @class
  */
+const db = SQLite.openDatabase(
+    {
+      name: 'RENST.db',
+      location: 'default',
+    },
+);
 export const BeforeAfterResultComparison = ({route}) => {
   const Emotions = route.params;
   console.log(Emotions);
@@ -45,6 +54,7 @@ export const BeforeAfterResultComparison = ({route}) => {
    * @returns {object} - The navigation object.
    */
   const navigation = useNavigation();
+  const {userId} = useContext(UserContext)
 
   /**
    * Sends data to Arduino.
@@ -173,7 +183,21 @@ export const BeforeAfterResultComparison = ({route}) => {
   };
 
   const handleConfirm = () => {
-    navigation.navigate('TabScreens', {screen: 'Home'});
+    db.transaction(tx => {
+      tx.executeSql(
+          'SELECT * FROM users WHERE id = ?',
+          [userId],
+          (_, { rows }) => {
+            if (rows.length > 0) {
+              const name = rows.item(0).name
+              console.log(name)
+              navigation.navigate('TabScreens', { screen: 'Home', params:{name:name} });
+            } else {
+              console.log('No name');
+            }
+          },
+      );
+    });
   };
 
   return (

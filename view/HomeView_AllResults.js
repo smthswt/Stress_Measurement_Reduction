@@ -153,11 +153,11 @@ export const HomeView_AllResults = ({navigation}) => {
           alignItems={'center'}>
           <Progress
             flex={1}
-            colorScheme="blue"
             shadow={0}
             value={stressIndex}
             min={0}
             max={200}
+            _filledTrack={{bg: "#2785F4"}}
           />
           <Text>{stressIndex}</Text>
         </HStack>
@@ -167,11 +167,11 @@ export const HomeView_AllResults = ({navigation}) => {
           alignItems={'center'}>
           <Progress
             flex={1}
-            colorScheme="pink"
             shadow={0}
             value={stressIndex}
             min={0}
             max={200}
+            _filledTrack={{bg: "#FF4370"}}
           />
           <Text>{stressIndex}</Text>
         </HStack>

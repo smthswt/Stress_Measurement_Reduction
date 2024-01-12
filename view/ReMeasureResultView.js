@@ -129,7 +129,7 @@ export const RemeasureResultView = ({route}) => {
    */
   const handleBeforeAfterClick = () => {
     navigation.navigate('RemeasureResultsViewScreens', {
-      screen: 'RecentResultCompare',
+      screen: '힐링 모드 전 후 비교하기',
       params: {beforeEmotion:Emotions.beforeEmotion, afterEmotion: Emotions.afterEmotion},
     });
   };

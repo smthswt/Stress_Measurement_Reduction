@@ -61,12 +61,12 @@ const StressComponent = ({date, before, after}) => {
                 </HStack>
             </HStack>
             <HStack alignItems={"center"} space={3}>
-              <Progress flex={1} colorScheme="blue" shadow={0} value={before} min={0} max={5} height={3}/>
-              <Text>{before}</Text>
+              <Progress flex={1} shadow={0} value={before} min={0} max={5} height={3} _filledTrack={{bg: "#2785F4"}}/>
+              <Text>{`0`+before}</Text>
             </HStack>
           <HStack alignItems={"center"} space={3}>
-            <Progress flex={1} colorScheme="pink" shadow={0} value={after} min={0} max={5} height={3}/>
-            <Text>{after}</Text>
+            <Progress flex={1} shadow={0} value={after} min={0} max={5} height={3} _filledTrack={{bg: "#FF4370"}}/>
+            <Text>{`0`+after}</Text>
           </HStack>
         </VStack>
     )

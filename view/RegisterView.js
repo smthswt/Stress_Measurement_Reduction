@@ -2,18 +2,20 @@ import {View} from 'react-native';
 import {
   Button,
   FormControl,
-  Heading,
+  Heading, HStack,
   Icon,
   Input,
   Pressable,
   Radio,
-  ScrollView,
+  ScrollView, Stack,
   Text,
   VStack,
 } from 'native-base';
-import React, {useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Alert} from 'react-native';
+import SQLite from 'react-native-sqlite-storage';
+import {UserContext} from "./module/UserProvider";
 
 /**
  * React component for displaying a calendar view.
@@ -22,6 +24,16 @@ import {Alert} from 'react-native';
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
+const db = SQLite.openDatabase(
+    {
+      name: 'RENST.db',
+      location: 'default',
+    },
+    () => {},
+    error => {
+      console.error('Error opening database: ', error);
+    }
+)
 
 export const RegisterView = ({navigation}) => {
   const [formData, setData] = useState({});
@@ -29,6 +41,26 @@ export const RegisterView = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [showAgain, setShowAgain] = useState(false);
   const [gender, setGender] = useState('male');
+
+
+  const createTables = async () => {
+    db.transaction(txn => {
+      txn.executeSql(
+          `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE, password VARCHAR, name VARCHAR, age INTEGER, gender VARCHAR)`,
+          [],
+          (sqlTxn, res) => {
+            console.log('table created successfully')
+          },
+          error => {
+            console.log("error on creating table" + error.message)
+          }
+      )
+    })
+  }
+
+  useEffect(() => {
+    createTables()
+  }, []);
 
   const validate = () => {
     let valid = true;
@@ -67,17 +99,60 @@ export const RegisterView = ({navigation}) => {
       valid = false;
     }
 
+    db.transaction(tx => {
+      tx.executeSql(
+          'SELECT * FROM users WHERE username = ?',
+          [formData.username],
+          (_, { rows }) => {
+            if (rows.length > 0) {
+              errors.username = 'Username already exists';
+              valid = false;
+              setErrors(errors);
+            }
+          },
+          error => {
+            console.error('Error checking username: ', error);
+          }
+      );
+    });
+
     setErrors(errors);
 
     return valid;
   };
 
-  const handleSummit = () => {
+  const {setUserId} = useContext(UserContext)
+
+  const handleSummit =  async () => {
     const isValid = validate();
 
     if (isValid) {
       const fullFormData = {...formData, gender: gender};
-      navigation.navigate('LoginScreens', {screen: 'RegisterSuccess'});
+      db.transaction(tx => {
+        tx.executeSql(
+            'INSERT INTO users (username, password, name, age, gender) VALUES (?, ?, ?, ?, ?)',
+            [
+              fullFormData.username,
+              fullFormData.password,
+              fullFormData.name,
+              fullFormData.age,
+              fullFormData.gender,
+            ],
+            (_,result) => {
+              console.log('User registered successfully');
+              const userId = result.insertId
+              setUserId(userId)
+              navigation.navigate('LoginScreens', {
+                screen: 'RegisterSuccess',
+                params: { name: formData.name, username: formData.username, password:formData.password },
+              });
+            },
+            error => {
+              console.error('Error registering user in database: ', error);
+            }
+        );
+      });
+
       console.log(fullFormData);
     } else {
       Alert.alert(
@@ -95,14 +170,14 @@ export const RegisterView = ({navigation}) => {
   };
 
   return (
-    <ScrollView>
+      <View flex={1} >
       <VStack
         height={'100%'}
         bgColor={'white'}
         p={5}
         justifyContent={'space-between'}>
         <VStack space={5} justifyContent={'center'}>
-          <Heading height={'5%'}>정보를 입력해주세요.</Heading>
+          <Heading>정보를 입력해주세요.</Heading>
           <FormControl isRequired isInvalid={errors.username}>
             <FormControl.Label _text={{bold: true}}>아이디</FormControl.Label>
             <Input
@@ -112,6 +187,7 @@ export const RegisterView = ({navigation}) => {
               height={50}
               _focus={{
                 bgColor: 'gray.50',
+                borderColor:"#2785F4",
               }}
             />
             <FormControl.ErrorMessage>
@@ -128,6 +204,7 @@ export const RegisterView = ({navigation}) => {
               height={50}
               _focus={{
                 bgColor: 'gray.50',
+                borderColor:"#2785F4",
               }}
               InputRightElement={
                 <Pressable onPress={() => setShow(!show)}>
@@ -158,6 +235,7 @@ export const RegisterView = ({navigation}) => {
               height={50}
               _focus={{
                 bgColor: 'gray.50',
+                borderColor:"#2785F4",
               }}
               InputRightElement={
                 <Pressable onPress={() => setShowAgain(!showAgain)}>
@@ -183,6 +261,7 @@ export const RegisterView = ({navigation}) => {
               height={50}
               _focus={{
                 bgColor: 'gray.50',
+                borderColor:"#2785F4",
               }}
             />
             <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>
@@ -196,28 +275,29 @@ export const RegisterView = ({navigation}) => {
               height={50}
               _focus={{
                 bgColor: 'gray.50',
+                borderColor:"#2785F4",
               }}
             />
             <FormControl.ErrorMessage>{errors.age}</FormControl.ErrorMessage>
           </FormControl>
           <FormControl isRequired>
             <FormControl.Label _text={{bold: true}}>성별</FormControl.Label>
-            <VStack space={2}>
               <Radio.Group
-                name="myRadioGroup"
-                accessibilityLabel="favorite number"
+                name="myGenderGroup"
+                accessibilityLabel="gender"
                 value={gender}
                 onChange={nextValue => {
                   setGender(nextValue);
                 }}>
+                <Stack direction={"row"} alignItems={"flex-start"} space={4}>
                 <Radio colorScheme={'blue'} value="male" my={1} size={'sm'}>
                   남성
                 </Radio>
                 <Radio colorScheme={'blue'} value="female" my={1} size={'sm'}>
                   여성
                 </Radio>
+                </Stack>
               </Radio.Group>
-            </VStack>
           </FormControl>
         </VStack>
         <Button
@@ -230,6 +310,6 @@ export const RegisterView = ({navigation}) => {
           </Text>
         </Button>
       </VStack>
-    </ScrollView>
+      </View>
   );
 };

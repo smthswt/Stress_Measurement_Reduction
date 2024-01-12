@@ -22,6 +22,7 @@ import EmotionSoso from "./icons/EmotionSoso";
 import EmotionTired from "./icons/EmotionTired";
 import EmotionSad from "./icons/EmotionSad";
 import EmotionAngry from "./icons/EmotionAngry";
+import {ImageBackground} from "react-native";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -227,9 +228,11 @@ export const ECGRemeasurementView = ({route}) => {
    */
   const handleAnalysisStop = () => {
     setIsMessageOpen(false);
+    setShowModal(false)
+    clearInterval(interval.current)
     const timer = setTimeout(() => {
       navigation.navigate('RemeasureResultsViewScreens', {
-        screen: 'RemeasureEnd',
+        screen: '힐링 모드 전 후 비교하기',
         params: {beforeEmotion:beforeEmotion.beforeEmotion, afterEmotion: selectedEmotion},
       })
       clearTimeout(timer);
@@ -327,16 +330,16 @@ export const ECGRemeasurementView = ({route}) => {
       }
     }, 500);
   };
+  const background = require('./images/measurebackground.png')
 
   return (
     <>
+      <ImageBackground source={background} style={{height:"100%", width:"100%"}}>
       <VStack
         space={3}
-        p={'5'}
         h={'100%'}
-        justifyContent={'space-between'}
-        bg={'#2785f4'}>
-        <Center>
+        justifyContent={'space-between'}>
+        <Center p={5}>
           <Heading color={'#FFFFFF'}>힐링 후 심전도 측정 중입니다...</Heading>
         </Center>
         <CircleProgressAnimation />
@@ -344,6 +347,7 @@ export const ECGRemeasurementView = ({route}) => {
           space={1}
           bg={'#FFFFFF'}
           p={5}
+          m={5}
           shadow={2}
           justifyContent={'space-between'}>
           <Text>
@@ -355,7 +359,7 @@ export const ECGRemeasurementView = ({route}) => {
             <Ionicons name={'close-circle'} color={'#EB5147'} />
           </HStack>
         </HStack>
-        <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2}>
+        <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2} m={5} mt={0}>
           {seconds >= 0 &&
               <Center>
                 <Text>{seconds}초 남았습니다.</Text>
@@ -377,7 +381,7 @@ export const ECGRemeasurementView = ({route}) => {
           </Button>
         </VStack>
       </VStack>
-
+      </ImageBackground>
       {/*Popup select emotion when time reaches 20s, consider using ActionSheet instead*/}
       <Modal isOpen={showModal} size="full">
         <Modal.Content

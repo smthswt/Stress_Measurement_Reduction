@@ -1,6 +1,6 @@
-import {View} from "react-native";
-import {Box, Button, Divider, HStack, Pressable, Text, VStack} from "native-base";
-import React from "react";
+import {Alert, View} from "react-native";
+import {AlertDialog, Box, Button, Center, Divider, HStack, Pressable, Text, VStack} from "native-base";
+import React, {useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 /**
@@ -26,12 +26,23 @@ export const SettingsView = ({navigation}) => {
         navigation.navigate("SettingScreens", {screen:'Privacy'})
     }
 
+    const [isLogoutOpen, setLogOutOpen] = useState(false)
+
     const handleLogout = () => {
-        console.log("로그아웃 버튼이 클릭 되었습니다.")
-    }
+        setLogOutOpen(true)
+    };
+
+    const handleLogoutConfirm = () => {
+        navigation.navigate("LoginScreens", {screen:"Login"})
+        setLogOutOpen(false)
+    };
+
+    const handleLogoutCancel = () => {
+        setLogOutOpen(false)
+    };
 
     const handleQuitAccount = () => {
-        console.log("서비스 탈퇴가 클릭 되었습니다.")
+        navigation.navigate("서비스 탈퇴")
     }
 
 
@@ -92,6 +103,34 @@ export const SettingsView = ({navigation}) => {
             <Button variant={'unstyled'} marginBottom={10} onPress={handleQuitAccount}>
             <Text underline color={"red.500"} fontWeight={500}>서비스 탈퇴</Text>
             </Button>
+
+            <AlertDialog isOpen={isLogoutOpen}>
+                <AlertDialog.Content p={'2'}>
+                    <AlertDialog.CloseButton />
+                    <AlertDialog.Header>
+                        <Center>
+                            <Text bold>로그아웃</Text>
+                        </Center>
+                    </AlertDialog.Header>
+                    <AlertDialog.Body>
+                        <Center>
+                            <Text color={'#EB5147'}>로그아웃 하시겠습니까?</Text>
+                        </Center>
+                    </AlertDialog.Body>
+                    <HStack width={'100%'} p={3} space={5}>
+                        <Button
+                            flex={1}
+                            colorScheme="danger"
+                            variant={'outline'}
+                            onPress={handleLogoutCancel}>
+                            취소
+                        </Button>
+                        <Button flex={1} colorScheme="danger" onPress={handleLogoutConfirm}>
+                            확인
+                        </Button>
+                    </HStack>
+                </AlertDialog.Content>
+            </AlertDialog>
 
         </View>
         </VStack>
