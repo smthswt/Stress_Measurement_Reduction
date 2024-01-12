@@ -141,6 +141,13 @@ export default EnrollingDeviceView;
 
 const styles = StyleSheet.create({
     circular: {
-        width: 250, height: 250, borderRadius: 125, bg: "blue.300", position: "absolute"
+        height: 150, width: 150, borderWidth: 2, borderRadius: 125, borderColor: "#6aa1ff",
+        // position: "absolute"
+    },
+    box: {
+        height: 120,
+        width: 120,
+        backgroundColor: '#b58df1',
+        borderRadius: 20,
     },
 });
