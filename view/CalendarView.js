@@ -1,12 +1,23 @@
-import {TouchableOpacity, TouchableOpacityComponent, View} from "react-native";
-import {Box, Center, HStack, Image, Pressable, ScrollView, Text, useDisclose, VStack, Actionsheet} from "native-base";
-import React from "react";
+import {TouchableOpacity, View} from "react-native";
+import {
+    Actionsheet,
+    Box,
+    Button,
+    Center,
+    HStack,
+    Image,
+    Pressable,
+    ScrollView,
+    Text,
+    useDisclose,
+    VStack
+} from "native-base";
+import React, {useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import CalendarList from "./components/CalendarListActionsheet";
-import CalendarList_ActionSheet from "./components/CalendarListActionsheet";
+import Calendar_List from "./components/CalendarList";
 
 /**
  * React component for displaying a calendar view.
@@ -15,26 +26,42 @@ import CalendarList_ActionSheet from "./components/CalendarListActionsheet";
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
-export const CalendarView = ({ navigation }) => {
+export const CalendarView = ({ navigation,}) => {
     const {isOpen, onOpen, onClose } = useDisclose();
+    const todayDate = () => {
+        const date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let dateOfMonth = date.getDate();
 
-    const date = new Date()
-    let month = date.getMonth() + 1;
-    let dateOfMonth = date.getDate();
-    // let dayOfWeek = date.getDay();
-
-    const getDate = (offset) => {
-        const newDate = dateOfMonth + offset;
-        return `${month}/${newDate}`
+        return `${year}-${month}-${dateOfMonth}`
     };
+    console.log("--------------------")
+    console.log("오늘 날짜", todayDate())
 
-    const getDayOfWeek = (offset) => {
+    const [dateRange, setDateRange] = useState([todayDate()]);
+
+
+    const getDayOfWeek = (dateString) => {
         const week = ["일", '월', '화', '수', '목', '금', '토'];
-        return week[new Date().getDay() + offset]
+        const date = new Date(dateString);
+        return week[date.getDay()];
     };
 
-    console.log("오늘 날짜 :", `${month}/${dateOfMonth}`)
-    console.log("오늘 요일 :", getDayOfWeek(0))
+    const DateRanges = (newDateRange) => {
+        setDateRange(newDateRange);
+    };
+    console.log("DateRanges :", dateRange);
+
+    const formattedDateRange = dateRange.map(dateString => {
+        const date = new Date(dateString);
+        const month = date.getMonth() + 1; // 월은 0부터 시작하므로 1을 더함.
+        const day = date.getDate();
+
+        return `${month}/${day}`;
+    });
+    console.log("formattedDates :", formattedDateRange);
+
 
     const emotions = {
         emotion_happy:  require('../view/images/emotion_happy.png') ,
@@ -96,56 +123,47 @@ export const CalendarView = ({ navigation }) => {
     };
 
 
+    const dateRangeMapping = () => {
+        return formattedDateRange.map((date, index) => (
+            <Center key={index} h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
+                <Text textAlign={'center'}>{getDayOfWeek(dateRange[index])}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'}>{date}</Text>
+            </Center>
+        ))
+    };
+
+    const handleOnOpen = () => {
+        console.log("ActionSheet가 열렸습니다.");
+        onOpen();
+    }
+
+    const handleOnClose = () => {
+        console.log("날짜 선택 없이 ActionSheet가 닫혔습니다. dateRange :", dateRange )
+        // setDateRange([todayDate()]);
+        onClose();
+    };
+
 
 return (
     <VStack style={{flex: 1}}>
     <VStack space={2} bgColor={"white"} padding={5}>
         <HStack alignitems={"flex-start"} justifyContent={'space-between'}>
             <Text fontWeight={900} fontSize={18}>달력</Text>
-            <TouchableOpacity activeOpacity={0.7} onPress={onOpen}>
+            <TouchableOpacity activeOpacity={0.7} onPress={handleOnOpen}>
             <AntDesign name={"calendar"} size={22} color={"black"}/>
-                <CalendarList_ActionSheet isOpen={isOpen} onClose={onClose}/>
+
+                <Actionsheet isOpen={isOpen} onClose={handleOnClose} hideDragIndicator>
+                    <Actionsheet.Content backgroundColor={'white'}>
+                <Calendar_List isOpen={isOpen} onClose={handleOnClose} dateRanges={DateRanges}/>
+                    </Actionsheet.Content>
+                </Actionsheet>
+
             </TouchableOpacity>
         </HStack>
 
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
         <HStack space={3} justifyContent={"flex-start"} mt={2.5}>
-            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(0)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(0)}</Text>
-            </Center>
-            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(1)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(1)}</Text>
-            </Center>
-
-            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(2)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(2)}</Text>
-            </Center>
-            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(3)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(3)}</Text>
-            </Center>
-
-            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(4)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(4)}</Text>
-            </Center>
-            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(5)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(5)}</Text>
-            </Center>
-
-            <Center h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(6)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(6)}</Text>
-            </Center>
-            <Center h="55px" w="55px" p={1} rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(7)}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{getDate(7)}</Text>
-            </Center>
-
+            {dateRangeMapping()}
 
         </HStack>
         </ScrollView>

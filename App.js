@@ -47,6 +47,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {OnboardingOneScreen1} from "./view/onboarding/OnboardingOneScreen1";
 import {OnboardingOneScreen3} from "./view/onboarding/OnboardingOneScreen3";
 import {OnboardingOneScreen2} from "./view/onboarding/OnboardingOneScreen2";
+import {PrivacyPolicy} from "./view/PrivacyPolicyView";
+import {PP_Purpose} from "./view/components/PrivacyPolicy/PP_Purpose";
+import {PP_Period} from "./view/components/PrivacyPolicy/PP_Period";
+import {PP_ThirdMatters} from "./view/components/PrivacyPolicy/PP_ThirdMatters";
+import {PP_Drop} from "./view/components/PrivacyPolicy/PP_drop";
+import {PP_delegation} from "./view/components/PrivacyPolicy/PP_delegation";
+import {PP_Personal} from "./view/components/PrivacyPolicy/PP_Personal";
+import {PP_Safety} from "./view/components/PrivacyPolicy/PP_Safety";
+import EnrollingDeviceView from "./view/EnrollingDeviceView";
+import DeviceListView from "./view/DeviceListView";
+import CompleteSearchingDevice from "./view/CompleteSearchingDevice";
+
 
 /**
  * Object representing cross-fade transition configuration.
@@ -99,6 +111,27 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const StackNative = createNativeStackNavigator();
 
+// const LoginScreens = () => {
+//     return (
+//         <StackNative.Navigator initialRouteName={LoginView}>
+//             <StackNative.Screen
+//                 name="Login"
+//                 component={LoginView}
+//                 options={crossFadeTransition}
+//             />
+//             <StackNative.Screen
+//                 name="Register"
+//                 component={RegisterView}
+//                 options={crossFadeTransition}
+//             />
+//             <StackNative.Screen
+//                 name="RegisterSuccess"
+//                 component={RegisterSuccessView}
+//                 options={crossFadeTransition}
+//             />
+//         </StackNative.Navigator>
+//     );
+// };
 
 const TabScreens = () => {
     return (
@@ -174,6 +207,23 @@ const AnalysisViewScreens = () => {
     );
 };
 
+const SettingScreens =() => {
+    return (
+        <StackNative.Navigator initialRouteName={SettingsView}>
+            <StackNative.Screen name="Settings" component={SettingsView}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Device" component={SettingsView_Device}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Regular" component={SettingsView_Regular}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Manual" component={SettingsView_Manual}
+                                options={crossFadeTransition}/>
+            <StackNative.Screen name="Privacy" component={PrivacyPolicy}
+                                options={crossFadeTransition}/>
+        </StackNative.Navigator>
+    )
+}
+
 const RemeasureResultsViewScreens = () => {
     return (
         <StackNative.Navigator initialRouteName={RemeasureResultView}>
@@ -191,24 +241,28 @@ const RemeasureResultsViewScreens = () => {
     );
 };
 
-const SettingScreens = () => {
-    return (
-        <StackNative.Navigator>
-            <StackNative.Screen
-                name="Device"
-                component={SettingsView_Device}
-                options={crossFadeTransition}
-            />
-            <StackNative.Screen
-                name="Regular"
-                component={SettingsView_Regular}
-                options={crossFadeTransition}
-            />
-            <StackNative.Screen
-                name="Manual"
-                component={SettingsView_Manual}
-                options={crossFadeTransition}
-            />
+const PrivacyPolicyScreens = () => {
+    return(
+        <StackNative.Navigator initialRouteName={PrivacyPolicy}>
+            <StackNative.Screen name={"Purpose"} component={PP_Purpose} options={crossFadeTransition} />
+            <StackNative.Screen name={"Period"} component={PP_Period} options={crossFadeTransition} />
+            <StackNative.Screen name={"Third"} component={PP_ThirdMatters} options={crossFadeTransition} />
+            <StackNative.Screen name={"Drop"} component={PP_Drop} options={crossFadeTransition} />
+            <StackNative.Screen name={"delegation"} component={PP_delegation} options={crossFadeTransition} />
+            <StackNative.Screen name={"Personal"} component={PP_Personal} options={crossFadeTransition} />
+            <StackNative.Screen name={"Safety"} component={PP_Safety} options={crossFadeTransition} />
+
+        </StackNative.Navigator>
+    )
+};
+
+const DeviceSettingScreens = () => {
+    return(
+        <StackNative.Navigator initialRouteName={SettingsView_Device}>
+            <StackNative.Screen name={"Enroll"} component={EnrollingDeviceView} options={crossFadeTransition} />
+            <StackNative.Screen name={"Devicelist"} component={DeviceListView} options={crossFadeTransition} />
+            <StackNative.Screen name={"CompleteEnroll"} component={CompleteSearchingDevice} options={crossFadeTransition} />
+
         </StackNative.Navigator>
     );
 };
@@ -386,6 +440,10 @@ const App = () => {
                                     component={SettingsView_DeleteAccount}
                                     options={crossFadeTransitionWithHeader}
                                 />
+                                <StackNative.Screen name="PrivacyPolicyScreens" component={PrivacyPolicyScreens}
+                                                    options={crossFadeTransition}/>
+                                <StackNative.Screen name="DeviceSettingScreens" component={DeviceSettingScreens}
+                                                    options={crossFadeTransition}/>
                             </Stack.Navigator>
                         </VStack>
                     </NavigationContainer>
