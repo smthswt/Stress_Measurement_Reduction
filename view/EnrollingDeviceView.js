@@ -32,7 +32,6 @@ const EnrollingDeviceView = ({navigation}) => {
                     easing: Easing.out(Easing.ease),
                     // delay: index * 400,
                     loop: true,
-                    1
                 }}
                 // key={index}
                 style={styles.circular}
