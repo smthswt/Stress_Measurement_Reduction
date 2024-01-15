@@ -50,7 +50,7 @@ export const ECGMeasurementView = ({route}) => {
    *
    * @type {number}
    */
-  const totalTime = 100;
+  const totalTime = 50;
 
   /**
    * Reference to a message element used in a React component.
@@ -255,12 +255,12 @@ export const ECGMeasurementView = ({route}) => {
   };
 
   const emotions = [
-    {name: 'emotion_happy'},
-    {name: 'emotion_tired'},
-    {name: 'emotion_normal'},
-    {name: 'emotion_sad'},
-    {name: 'emotion_soso'},
-    {name: 'emotion_angry'},
+    {name: 'emotion_happy', title:'행복해요'},
+    {name: 'emotion_tired', title:'피곤해요'},
+    {name: 'emotion_normal', title:' 보통이에요'},
+    {name: 'emotion_sad', title:'슬퍼요'},
+    {name: 'emotion_soso', title: '그저그래요'},
+    {name: 'emotion_angry', title: '화나요'},
   ];
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const handleEmotionSelect = emotionName => {
@@ -286,7 +286,7 @@ export const ECGMeasurementView = ({route}) => {
               }}>
               {EmotionIcon[emotion.name]}
             </Button>
-            <Text fontSize={'xs'}>{emotion.name}</Text>
+            <Text fontSize={'xs'}>{emotion.title}</Text>
           </Center>
         </VStack>,
       );

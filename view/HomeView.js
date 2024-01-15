@@ -69,7 +69,7 @@ export const HomeView = ({navigation, route}) => {
      * @returns {void}
      */
     const handleAnalysisStart = () => {
-        navigation.navigate("AnalysisStart", {params:{name:route.params.name}});
+        navigation.navigate("AnalysisStart", {params:{name:name}});
     };
 
     /**

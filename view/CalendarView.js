@@ -154,7 +154,7 @@ return (
 
                 <Actionsheet isOpen={isOpen} onClose={handleOnClose} hideDragIndicator>
                     <Actionsheet.Content backgroundColor={'white'}>
-                <Calendar_List isOpen={isOpen} onClose={handleOnClose} dateRanges={DateRanges}/>
+                        <Calendar_List isOpen={isOpen} onClose={handleOnClose} dateRanges={DateRanges}/>
                     </Actionsheet.Content>
                 </Actionsheet>
 

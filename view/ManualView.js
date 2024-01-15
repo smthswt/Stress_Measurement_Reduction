@@ -20,6 +20,8 @@ import {MusicCircleProgressAnimation} from './components/MusicCircleProgressAnim
 import {useSharedValue, withTiming} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import deviceImage from './images/Renst_ISO.png';
+import healingbackground from "./images/healingbackground.png";
+import {ImageBackground} from "react-native";
 
 /**
  * The HealingView component represents the view for a massage healing process.
@@ -143,7 +145,7 @@ export const ManualView = ({route}) => {
     setIsCounting(true);
   };
 
-  const animationDuration = 100; // Duration in seconds (same as MusicCircleProgressAnimation)
+  const animationDuration = 30; // Duration in seconds (same as MusicCircleProgressAnimation)
   const [isCounting, setIsCounting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(animationDuration);
 
@@ -177,14 +179,17 @@ export const ManualView = ({route}) => {
     }, );
   };
 
+  const healingbackground = require("./images/healingbackground.png")
+
   return (
     <>
-      <VStack p={5} h={'100%'} justifyContent={'space-between'} bg={'#67ADFF'}>
+      <ImageBackground source={healingbackground} style={{height:'100%', width:'100%'}}>
+      <VStack p={5} h={'100%'} justifyContent={'space-between'}>
         <Center height={'10%'}>
           <Heading color={'white'}>Manual 모드</Heading>
           <Text color={'white'}>힘든 하루를 보낸 길동님을 위한 모드에요.</Text>
         </Center>
-        <VStack space={3} height={'90%'} justifyContent={'flex-end'}>
+        <VStack space={3} height={'75%'} justifyContent={'flex-end'} >
           <VStack bg={'white'} shadow={2} height={"80%"}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
@@ -278,6 +283,7 @@ export const ManualView = ({route}) => {
           </Box>
         </Actionsheet.Content>
       </Actionsheet>
+      </ImageBackground>
     </>
   );
 };

@@ -59,39 +59,39 @@ export const HomeView_AllResults = ({navigation}) => {
 
   const mockData = {
     max: [
-      {date: '12.15', bpm: 110},
-      {date: '12.16', bpm: 115},
-      {date: '12.17', bpm: 92},
-      {date: '12.18', bpm: 84},
-      {date: '12.19', bpm: 86},
+      {date: '01.11', bpm: 110},
+      {date: '01.12', bpm: 115},
+      {date: '01.13', bpm: 92},
+      {date: '01.14', bpm: 84},
+      {date: '01.15', bpm: 86},
     ],
     min: [
-      {date: '12.15', bpm: 98},
-      {date: '12.16', bpm: 105},
-      {date: '12.17', bpm: 81},
-      {date: '12.18', bpm: 82},
-      {date: '12.19', bpm: 83},
+      {date: '01.11', bpm: 98},
+      {date: '01.12', bpm: 105},
+      {date: '01.13', bpm: 81},
+      {date: '01.14', bpm: 82},
+      {date: '01.15', bpm: 83},
     ],
   };
 
   const emotionData = {
-    12.15: {
+    '01.11': {
       before: 'emotion_tired',
       after: 'emotion_soso',
     },
-    12.16: {
+    '01.12': {
       before: 'emotion_tired',
       after: 'emotion_happy',
     },
-    12.17: {
+    '01.13' : {
       before: 'emotion_normal',
       after: 'emotion_happy',
     },
-    12.18: {
+    '01.14': {
       before: 'emotion_sad',
       after: 'emotion_normal',
     },
-    12.19: {
+    '01.15': {
       before: 'emotion_angry',
       after: 'emotion_soso',
     },
@@ -136,11 +136,11 @@ export const HomeView_AllResults = ({navigation}) => {
   };
 
   const stressData = [
-    {date: '2023.12.15', stressIndex: 45},
-    {date: '2023.12.16', stressIndex: 50},
-    {date: '2023.12.17', stressIndex: 80},
-    {date: '2023.12.18', stressIndex: 75},
-    {date: '2023.12.19', stressIndex: 95},
+    {date: '2024.01.11', stressIndex: 45},
+    {date: '2024.01.12', stressIndex: 50},
+    {date: '2024.01.13', stressIndex: 80},
+    {date: '2024.01.14', stressIndex: 75},
+    {date: '2024.01.15', stressIndex: 95},
   ];
 
   const StressComponent = ({date, stressIndex}) => {

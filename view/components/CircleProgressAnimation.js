@@ -35,7 +35,7 @@ export const CircleProgressAnimation = ({navigation}) => {
   const scaleValue =  useSharedValue(0.8)
 
   useEffect(() => {
-    progress.value = withTiming(1, {duration: 100000});
+    progress.value = withTiming(1, {duration: 50000});
     scaleValue.value = withRepeat(withTiming(2, {duration:1000, easing:Easing.linear}), -1)
   }, []);
 

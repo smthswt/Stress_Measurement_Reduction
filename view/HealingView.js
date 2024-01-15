@@ -134,7 +134,7 @@ export const HealingView = ({route}) => {
   const [healingStart, setHealingStart] = useState(false);
 
 
-  const animationDuration = 100; // Duration in seconds (same as MusicCircleProgressAnimation)
+  const animationDuration = 30; // Duration in seconds (same as MusicCircleProgressAnimation)
   const [isCounting, setIsCounting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(animationDuration);
 

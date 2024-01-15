@@ -36,7 +36,7 @@ export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
 
   const startAnimation = () => {
     if (!animationStarted.current) {
-      progress.value = withTiming(1, { duration: 100000 });
+      progress.value = withTiming(1, { duration: 34000 });
       scaleValue.value = withRepeat(withTiming(2, {duration:1000, easing:Easing.linear}), -1)
       animationStarted.current = true;
     }

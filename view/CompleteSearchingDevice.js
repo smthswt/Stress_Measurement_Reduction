@@ -57,9 +57,11 @@ const CompleteSearchingDevice = ({navigation}) => {
         name: "lee's device",
     }, {
         name: "park's device",
+    } , {
+        name: "park's device",
     }
     ]
-    
+
     return(
         <View flex={1}>
             <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
