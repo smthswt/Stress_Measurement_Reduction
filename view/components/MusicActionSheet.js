@@ -38,8 +38,15 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data}) => {
         setShowInitializeView(true);
     }
 
+    const pressableStyle = (isPressed, isHovered) => {
+        return {
+            transform: [{scale: isPressed ? 0.95 : isHovered ? 1.05 : 1}],
+            transition: "transform 0.2s",
+        };
+    };
 
-    const Mp3ActionSheet = () => {
+
+    const Mp3ActionSheet = React.memo(() => {
 
         return(
             <VStack style={{width: "100%"}} justifyContent="center" alignItems={"center"}>
@@ -65,10 +72,8 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data}) => {
                         <HStack p={1} justifyContent="center" alignItems={"center"} marginTop={2}
                                 bgColor={"#F5F5F6"} marginBottom={1} borderColor={"#E6E6E7"} borderRadius={3}
                                 borderWidth={1} height={"120px"} width={"100%"}
-                            style={{
-                                transform: [{ scale: isPressed ? 0.95 : isHovered ? 1.05 : 1 }],
-                                transition: "transform 0.2s",
-                            }}>
+                            style={pressableStyle(isPressed, isHovered)}>
+
                             <Box mr={2} p={1} style={{ borderWidth: 1.5, borderColor: '#ADADAD',
                                     borderRadius: 3, borderStyle: 'dashed', }}>
                                 <AntDesign name={"plus"} color={"#ADADAD"} size={26} />
@@ -89,9 +94,9 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data}) => {
             </VStack>
 
         )
-    };
+    });
 
-    const InitializeActionSheet = () => {
+    const InitializeActionSheet = React.memo (() => {
 
         const stressLevel = data.stressLevel;
 
@@ -121,7 +126,7 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data}) => {
             </VStack>
 
         )
-    };
+    });
 
 
     return(

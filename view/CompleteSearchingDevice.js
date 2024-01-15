@@ -1,6 +1,6 @@
 import React, {useRef, useState} from "react";
 import {AlertDialog, Button, Center, HStack, Pressable, ScrollView, Text, View, VStack} from "native-base";
-import {TouchableOpacity} from "react-native";
+import {RefreshControl, TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
@@ -10,6 +10,8 @@ const CompleteSearchingDevice = ({navigation}) => {
     // const [clickCount, setClickCount] = useState(0);
     const [clickStates, setClickStates] = useState({});
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, SetIsLoading] = useState(false);
+    const [refreshing, setRefreshing] = React.useState(false);
 
     const onClose = () => setIsOpen(false);
     const alertRef = useRef(null);
@@ -23,28 +25,23 @@ const CompleteSearchingDevice = ({navigation}) => {
     };
     console.log(clickStates);
 
-    // const handleClickDevice = () => {
-    //     console.log(`연결할 디바이스 선택함 - device name: ${name}`);
-    //     // setIsClick(true);
-    //     if (clickCount === 0) {
-    //         setIsClick(true);
-    //         setClickCount(1);
-    //     } else {
-    //         setClickCount(0);
-    //         setIsClick(false)
-    //     }
-    // };
-    // console.log(isClick);
-    // console.log(clickCount)
-
     const handleEnroll = () => {
         console.log("등록하기")
         setIsOpen(true);
     };
 
     const  handleSearchAgain = () => {
-        console.log("다시 검색하기 = 새로고침?")
+        console.log("다시 검색하기 = 새로고침")
+        onRefresh();
+
     };
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
 
     const handleSubmit = () => {
         console.log("연결 확인")
@@ -57,7 +54,7 @@ const CompleteSearchingDevice = ({navigation}) => {
         name: "lee's device",
     }, {
         name: "park's device",
-    }
+    },
     ]
     
     return(
@@ -70,7 +67,9 @@ const CompleteSearchingDevice = ({navigation}) => {
             </HStack>
 
             <VStack flex={0.7}>
-            <ScrollView bg={"white"}>
+            <ScrollView bg={"white"}
+                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+            >
                 <VStack space={4} margin={5} flex={0.7}>
 
                     {data.map((device, index) => (

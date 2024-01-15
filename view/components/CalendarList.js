@@ -6,7 +6,7 @@ import Octicons from "react-native-vector-icons/Octicons";
 
 
 
-const Calendar_List = ({onClose, dateRanges,}) => {
+const Calendar_List = ({isOpen, onClose, dateRanges,}) => {
     const [selectedStartDate, setSelectedStartDate] = useState();
     const [selectedEndDate, setSelectedEndDate] = useState();
     const [clickCount, setClickCount] = useState(0);
@@ -115,39 +115,6 @@ const Calendar_List = ({onClose, dateRanges,}) => {
     };
     LocaleConfig.defaultLocale = 'fr';
 
-    // const memorizedCalendarList = useMemo(() => (
-    //         <CalendarList
-    //             style={{ marginTop: 0, width: Dimensions.get('window').width, alignSelf: 'center', }}
-    //             // 캘린더 내 스타일 수정
-    //             theme={{
-    //                 todayTextColor: 'red',
-    //                 textDayFontSize: 16,
-    //                 textDayFontWeight: 'bold',
-    //                 textMonthFontSize: 18,
-    //                 textMonthFontWeight: 'bold',
-    //                 textSectionTitleColor: 'rgba(138, 138, 138, 1)',
-    //                 // dayTextAtIndex1: { color: 'red' },
-    //
-    //             }}
-    //             markingType={"period"}
-    //             markedDates={markedSelectedDates}
-    //             onDayPress={onDayPress}
-    //             onVisibleMonthsChange={(months) => {console.log('보고 있는 달력 월', months);}}
-    //             monthFormat={"yyyy년 MM월"}
-    //             pastScrollRange={12}
-    //             futureScrollRange={12}
-    //             scrollEnabled={true}
-    //             horizontal={true}
-    //             pagingEnabled={true}
-    //             hideArrows={false}
-    //             renderArrow={renderArrow}
-    //             // disabledDaysIndexes={[0]}
-    //             hideExtraDays={false}
-    //
-    //
-    //         />
-    //     ),
-    //     []);
 
     const handleSubmitDateRange = () => {
         console.log("확인 버튼 - 날짜 범위가 선택 되었습니다.")
@@ -163,33 +130,26 @@ const Calendar_List = ({onClose, dateRanges,}) => {
 
 
     return (
-
+        // <Actionsheet isOpen={isOpen} onClose={onClose} hideDragIndicator>
+        //     <Actionsheet.Content backgroundColor={'white'}>
 
                     <VStack width={"100%"}>
                         <Center marginTop={3}>
                         <Text fontSize={20} fontWeight={700}>날짜 선택</Text>
                         </Center>
-                        {/*{memorizedCalendarList}*/}
-            <CalendarList
-                style={{ marginTop: 0, width: Dimensions.get('window').width, alignSelf: 'center', }}
-                // 캘린더 내 스타일 수정
-                theme={{
-                    todayTextColor: 'red',
-                    textDayFontSize: 16,
-                    textDayFontWeight: 'bold',
-                    textMonthFontSize: 18,
-                    textMonthFontWeight: 'bold',
-                    textSectionTitleColor: 'rgba(138, 138, 138, 1)',
-                    // dayTextAtIndex1: { color: 'red' },
 
-                }}
+            <CalendarList
+                style={styles.calendarlist}
+                // 캘린더 내 스타일 수정
+                theme={styles.theme}
+
                 markingType={"period"}
                 markedDates={markedSelectedDates}
                 onDayPress={onDayPress}
                 onVisibleMonthsChange={(months) => {console.log('보고 있는 달력 월', months);}}
                 monthFormat={"yyyy년 MM월"}
                 pastScrollRange={12}
-                futureScrollRange={12}
+                futureScrollRange={1}
                 scrollEnabled={true}
                 horizontal={true}
                 pagingEnabled={true}
@@ -197,7 +157,6 @@ const Calendar_List = ({onClose, dateRanges,}) => {
                 renderArrow={renderArrow}
                 // disabledDaysIndexes={[0]}
                 hideExtraDays={false}
-
 
             />
 
@@ -209,7 +168,26 @@ const Calendar_List = ({onClose, dateRanges,}) => {
                         </Box>
                         </Center>
                     </VStack>
+
+
     );
 };
 
-export default Calendar_List;
+export default React.memo(Calendar_List);
+
+const styles = StyleSheet.create({
+    calendarlist : {
+        marginTop: 0,
+        width: Dimensions.get('window').width,
+        alignSelf: 'center',
+    },
+    theme : {
+        todayTextColor: 'red',
+        textDayFontSize: 16,
+        textDayFontWeight: 'bold',
+        textMonthFontSize: 18,
+        textMonthFontWeight: 'bold',
+        textSectionTitleColor: 'rgba(138, 138, 138, 1)',
+        // dayTextAtIndex1: { color: 'red' },
+    }
+})

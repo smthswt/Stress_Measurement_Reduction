@@ -11,12 +11,13 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import React from "react";
+import React, {useState} from "react";
 import Music_ActionSheet from "./MusicActionSheet";
 
 
 export const MusicList = () => {
     const { isOpen, onOpen, onClose } = useDisclose();
+    const [selectedItemId, setSelectedItemId] = useState(null);
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
     const folderMusic_icon = <MaterialCommunityIcons name={"folder"} size={22} color={"#FFC431"} />
@@ -47,7 +48,18 @@ export const MusicList = () => {
         Song : "All I Want for Christmas Is You",
         Artist : "Mariah Carey",
     },
-    ]
+    ];
+
+    const openMusicActionSheet = (itemId) => {
+        setSelectedItemId(itemId);
+        onOpen();
+    };
+    console.log("선택된 data id: ", selectedItemId);
+
+    const closeMusicActionSheet = () => {
+        setSelectedItemId(null);
+        onClose();
+    };
 
     return (
         // <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
@@ -70,11 +82,11 @@ export const MusicList = () => {
                                           </VStack>
                                       </HStack>
 
-                                      <Button variant={"unstyled"} onPress={onOpen}>
+                                      <Button variant={"unstyled"} onPress={() => openMusicActionSheet(item.id)}>
                                           <View width={"100%"} borderWidth={1} borderRadius={30} borderColor={"#59BCFF"} padding={1.5}>
                                               <MaterialIcons name={"edit"} size={20} color={"#2785F4"}/>
                                           </View>
-                                          <Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} data={item}/>
+                                          {/*<Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} data={item}/>*/}
                                       </Button>
 
                                   </HStack>
@@ -82,6 +94,14 @@ export const MusicList = () => {
                           )}
                 />
             </View>
+            {isOpen && selectedItemId && (
+                <Music_ActionSheet
+                    onOpen={onOpen}
+                    onClose={closeMusicActionSheet}
+                    isOpen={isOpen}
+                    data={data.find((item) => item.id === selectedItemId)}
+                />
+            )}
         </VStack>
 
     );
