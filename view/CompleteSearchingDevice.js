@@ -10,6 +10,8 @@ const CompleteSearchingDevice = ({navigation}) => {
     // const [clickCount, setClickCount] = useState(0);
     const [clickStates, setClickStates] = useState({});
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, SetIsLoading] = useState(false);
+    const [refreshing, setRefreshing] = React.useState(false);
 
     const onClose = () => setIsOpen(false);
     const alertRef = useRef(null);
@@ -43,8 +45,17 @@ const CompleteSearchingDevice = ({navigation}) => {
     };
 
     const  handleSearchAgain = () => {
-        console.log("다시 검색하기 = 새로고침?")
+        console.log("다시 검색하기 = 새로고침")
+        onRefresh();
+
     };
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
 
     const handleSubmit = () => {
         console.log("연결 확인")
@@ -57,9 +68,7 @@ const CompleteSearchingDevice = ({navigation}) => {
         name: "lee's device",
     }, {
         name: "park's device",
-    } , {
-        name: "park's device",
-    }
+    },
     ]
 
     return(
@@ -72,7 +81,9 @@ const CompleteSearchingDevice = ({navigation}) => {
             </HStack>
 
             <VStack flex={0.7}>
-            <ScrollView bg={"white"}>
+            <ScrollView bg={"white"}
+                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+            >
                 <VStack space={4} margin={5} flex={0.7}>
 
                     {data.map((device, index) => (

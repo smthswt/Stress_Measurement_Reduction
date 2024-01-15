@@ -125,10 +125,12 @@ export const CalendarView = ({ navigation,}) => {
 
     const dateRangeMapping = () => {
         return formattedDateRange.map((date, index) => (
+            <TouchableOpacity activeOpacity={0.5}>
             <Center key={index} h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
                 <Text textAlign={'center'}>{getDayOfWeek(dateRange[index])}</Text>
                 <Text textAlign={'center'} fontWeight={'bold'}>{date}</Text>
             </Center>
+            </TouchableOpacity>
         ))
     };
 
@@ -167,6 +169,7 @@ return (
 
         </HStack>
         </ScrollView>
+
     </VStack>
 
         <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
