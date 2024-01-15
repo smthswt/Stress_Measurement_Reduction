@@ -1,6 +1,6 @@
 import React, {useRef, useState} from "react";
 import {AlertDialog, Button, Center, HStack, Pressable, ScrollView, Text, View, VStack} from "native-base";
-import {TouchableOpacity} from "react-native";
+import {RefreshControl, TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
