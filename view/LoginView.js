@@ -88,17 +88,17 @@ export const LoginView = ({ navigation, route }) => {
                             //console.log(user)
                             navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
                         } else {
-                            Alert.alert('Login Failed', 'Invalid username or password');
+                            Alert.alert('오류', '정확한 아이디 및 비밀번호를 입력해주세요.');
                         }
                     },
                     error => {
                         console.error('Error during login: ', error);
-                        Alert.alert('Login Failed', 'An error occurred during login');
+                        Alert.alert('오류', 'An error occurred during login');
                     }
                 );
             });
         } else {
-            Alert.alert('Invalid Form', 'Please fill in the required fields');
+            Alert.alert('오류', '아이디 및 비밀번호를 입력해주세요.');
         }
     };
 

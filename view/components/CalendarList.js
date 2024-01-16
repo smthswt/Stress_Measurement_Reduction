@@ -12,6 +12,15 @@ const Calendar_List = ({isOpen, onClose, dateRanges,}) => {
     const [clickCount, setClickCount] = useState(0);
     const [noClick, setNoClick] = useState(true);
 
+    const todayDate = () => {
+        const date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let dateOfMonth = date.getDate();
+
+        return `${year}-${month}-${dateOfMonth}`
+    };
+
 
     const renderArrow = (direction) => {
         const arrowIcon = direction === "left" ? <Octicons name={"chevron-left"} size={25} color={"black"} /> :
@@ -140,9 +149,8 @@ const Calendar_List = ({isOpen, onClose, dateRanges,}) => {
 
             <CalendarList
                 style={styles.calendarlist}
-                // 캘린더 내 스타일 수정
                 theme={styles.theme}
-
+                current={todayDate()}
                 markingType={"period"}
                 markedDates={markedSelectedDates}
                 onDayPress={onDayPress}
@@ -155,7 +163,6 @@ const Calendar_List = ({isOpen, onClose, dateRanges,}) => {
                 pagingEnabled={true}
                 hideArrows={false}
                 renderArrow={renderArrow}
-                // disabledDaysIndexes={[0]}
                 hideExtraDays={false}
 
             />

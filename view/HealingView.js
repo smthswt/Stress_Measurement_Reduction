@@ -299,11 +299,7 @@ export const HealingView = ({route}) => {
           </Center>
         </AlertDialog.Content>
       </AlertDialog>
-      <Actionsheet
-        isOpen={isRemeasureOpen}
-        onClose={() => {
-          setIsRemeasureOpen(false);
-        }}>
+      <Actionsheet hideDragIndicator isOpen={isRemeasureOpen}>
         <Actionsheet.Content>
           <Box w="100%" p={4} justifyContent="center">
             <Center>

@@ -1,6 +1,7 @@
 import React from 'react'
-import { Animated, View, StyleSheet, ViewPropTypes } from 'react-native'
+import { Animated, View, StyleSheet} from 'react-native'
 import PropTypes from 'prop-types'
+import {ViewPropTypes} from "deprecated-react-native-prop-types"
 
 export default class SemiCircleProgress extends React.PureComponent {
 
