@@ -1,4 +1,4 @@
-import {TouchableOpacity, View} from "react-native";
+import {RefreshControl, TouchableOpacity, View} from "react-native";
 import {
     Actionsheet,
     Box,
@@ -12,12 +12,13 @@ import {
     useDisclose,
     VStack
 } from "native-base";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Calendar_List from "./components/CalendarList";
+import CalendarList_Actionsheet from "./components/CalendarList_Actionsheet";
+import SemiCircleProgress from "./components/SemiCirle";
 
 /**
  * React component for displaying a calendar view.
@@ -26,21 +27,23 @@ import Calendar_List from "./components/CalendarList";
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
+
+const todayDate = () => {
+    const date = new Date();
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let dateOfMonth = date.getDate();
+
+    return `${year}-${month}-${dateOfMonth}`
+};
+console.log("--------------------")
+console.log("오늘 날짜", todayDate())
+
 export const CalendarView = ({ navigation,}) => {
     const {isOpen, onOpen, onClose } = useDisclose();
-    const todayDate = () => {
-        const date = new Date();
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        let dateOfMonth = date.getDate();
-
-        return `${year}-${month}-${dateOfMonth}`
-    };
-    console.log("--------------------")
-    console.log("오늘 날짜", todayDate())
-
     const [dateRange, setDateRange] = useState([todayDate()]);
-
+    const [selected, setSelected] = useState();
+    const [clickCount, setClickCount] = useState(0);
 
     const getDayOfWeek = (dateString) => {
         const week = ["일", '월', '화', '수', '목', '금', '토'];
@@ -125,49 +128,61 @@ export const CalendarView = ({ navigation,}) => {
 
     const dateRangeMapping = () => {
         return formattedDateRange.map((date, index) => (
-            <TouchableOpacity activeOpacity={0.5}>
-            <Center key={index} h="55px" w="55px" rounded="sm" borderWidth={1} borderColor={"#CFD0D2"}>
-                <Text textAlign={'center'}>{getDayOfWeek(dateRange[index])}</Text>
-                <Text textAlign={'center'} fontWeight={'bold'}>{date}</Text>
+            <Pressable key={index} onPress={() => handleSelected(index)}>
+            <Center h="55px" w="55px" rounded="sm" borderWidth={1}
+                    borderColor={selected === index ? "none" : "#CFD0D2"} backgroundColor={selected === index ? "#2785F4" : "white"}>
+                <Text textAlign={'center'} color={selected === index ? "white" : "black"}>{getDayOfWeek(dateRange[index])}</Text>
+                <Text textAlign={'center'} fontWeight={'bold'} color={selected === index ? "white" : "black"}>{date}</Text>
             </Center>
-            </TouchableOpacity>
+            </Pressable>
         ))
+    };
+
+    const handleSelected = (index) => {
+        console.log("측정 날짜가 선택됌.")
+        console.log(index)
+        if (clickCount === 0) {
+            setSelected(index)
+            setClickCount(1)
+        } else {
+            setSelected(undefined)
+            setClickCount(0)
+        }
     };
 
     const handleOnOpen = () => {
         console.log("ActionSheet가 열렸습니다.");
         onOpen();
-    }
+    };
 
     const handleOnClose = () => {
         console.log("날짜 선택 없이 ActionSheet가 닫혔습니다. dateRange :", dateRange )
-        // setDateRange([todayDate()]);
         onClose();
     };
-
 
 return (
     <VStack style={{flex: 1}}>
     <VStack space={2} bgColor={"white"} padding={5}>
         <HStack alignitems={"flex-start"} justifyContent={'space-between'}>
             <Text fontWeight={900} fontSize={18}>달력</Text>
-            <TouchableOpacity activeOpacity={0.7} onPress={handleOnOpen}>
+            <TouchableOpacity activeOpacity={0.7} onPress={handleOnOpen} >
             <AntDesign name={"calendar"} size={22} color={"black"}/>
 
                 <Actionsheet isOpen={isOpen} onClose={handleOnClose} hideDragIndicator>
-                    <Actionsheet.Content backgroundColor={'white'}>
-                        <Calendar_List isOpen={isOpen} onClose={handleOnClose} dateRanges={DateRanges}/>
+                    <Actionsheet.Content backgroundColor={'white'} justifyContent={"center"} alignItems={"center"}>
+                        <CalendarList_Actionsheet isOpen={isOpen} onClose={handleOnClose} dateRanges={DateRanges} />
                     </Actionsheet.Content>
                 </Actionsheet>
 
             </TouchableOpacity>
+
         </HStack>
 
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        <HStack space={3} justifyContent={"flex-start"} mt={2.5}>
-            {dateRangeMapping()}
+            <HStack space={3} justifyContent={"flex-start"} mt={2.5} >
+                {dateRangeMapping()}
 
-        </HStack>
+            </HStack>
         </ScrollView>
 
     </VStack>
