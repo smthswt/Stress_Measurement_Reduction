@@ -58,6 +58,7 @@ import {PP_Safety} from "./view/components/PrivacyPolicy/PP_Safety";
 import EnrollingDeviceView from "./view/EnrollingDeviceView";
 import DeviceListView from "./view/DeviceListView";
 import CompleteSearchingDevice from "./view/CompleteSearchingDevice";
+import {ResetIDPW} from "./view/ResetIDPW";
 
 
 /**
@@ -174,14 +175,6 @@ const TabScreens = () => {
                 component={SettingsView}
                 options={crossFadeTransition}
             />
-            {/*Analysis Sub Screen
-                                <Stack.Screen name="AnalysisStart" component={ECGMeasurementView}
-                                              options={crossFadeTransition}/>
-                                <Stack.Screen name="AnalysisEnd" component={AnalysisResultView}
-                                              options={crossFadeTransition}/>
-                                <Stack.Screen name="Healing" component={HealingView}
-                                              options={crossFadeTransition}/>
-                                 */}
         </Tab.Navigator>
     );
 };
@@ -280,12 +273,9 @@ const App = () => {
         setOnboarded(JSON.parse(onboarded));
     };
 
-    // -------------------- EFFECTS -------------------- //
     useEffect(() => {
         getStorage();
     }, []);
-
-    // -------------------- ACTIONS -------------------- //
 
     useEffect(() => {
         SplashScreen.hide()
@@ -323,6 +313,11 @@ const App = () => {
                     name="RegisterSuccess"
                     component={RegisterSuccessView}
                     options={crossFadeTransition}
+                />
+                <StackNative.Screen
+                    name="아이디/비밀번호 찾기"
+                    component={ResetIDPW}
+                    options={crossFadeTransitionWithHeader}
                 />
             </StackNative.Navigator>
         );

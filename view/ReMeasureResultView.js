@@ -156,11 +156,14 @@ export const RemeasureResultView = ({route}) => {
           <SemiCircleProgress
             percentage={40}
             progressColor={'#2785F4'}
-            progressWidth={15}>
+            progressWidth={15}
+            interiorCircleColor={"#67ADFF"}
+            progressShadowColor={'white'}
+          >
             <Text bold fontSize={'3xl'}>
               2
             </Text>
-            <Text fontSize={'xs'} color={'#ADADAD'}>
+            <Text fontSize={'xs'} color={'white'}>
               Stress Index
             </Text>
           </SemiCircleProgress>

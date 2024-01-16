@@ -11,7 +11,7 @@ import {
     Icon,
     HStack, Link, Divider, Checkbox
 } from "native-base";
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -40,7 +40,7 @@ const db = SQLite.openDatabase(
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
-export const LoginView = ({ navigation }) => {
+export const LoginView = ({ navigation, route }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const {setUserId} = useContext(UserContext)
@@ -65,6 +65,12 @@ export const LoginView = ({ navigation }) => {
         setErrors(errors)
         return valid
     };
+
+    useEffect(() => {
+        if (route.params && route.params.username) {
+            setUsername(route.params.username);
+        }
+    }, [route.params]);
 
     const handleLogin = () => {
         const isValid = validate()
@@ -100,6 +106,16 @@ export const LoginView = ({ navigation }) => {
         navigation.navigate("LoginScreens", {screen:"회원가입"})
     }
 
+    const handleResetID = () => {
+        navigation.navigate("LoginScreens", {screen:"아이디/비밀번호 찾기", params:{whichroute: 'one'}})
+    }
+
+    const handleResetPW = () => {
+        navigation.navigate("LoginScreens", {screen:"아이디/비밀번호 찾기", params:{whichroute: 'two'}})
+    }
+
+
+
     return (
         <ImageBackground source={login_background} style={{width: '100%', height: '100%'}}>
         <VStack height={"100%"}>
@@ -121,7 +137,7 @@ export const LoginView = ({ navigation }) => {
                             }}
                         />
                     </FormControl>
-                    <FormControl>
+                    <FormControl isRequired>
                         <Input
                             placeholder="Password"
                             onChangeText={(text) => setPassword(text)}
@@ -156,9 +172,9 @@ export const LoginView = ({ navigation }) => {
                 </VStack>
                 <Center>
                     <HStack space={5}>
-                        <Link><Text color={"white"} fontSize={"xs"}>아이디 찾기</Text></Link>
+                        <Link onPress={handleResetID}><Text color={"white"} fontSize={"xs"}>아이디 찾기</Text></Link>
                         <Divider thickness="1" orientation="vertical"/>
-                        <Link><Text color={"white"} fontSize={"xs"}>비밀번호 찾기</Text></Link>
+                        <Link onPress={handleResetPW}><Text color={"white"} fontSize={"xs"}>비밀번호 찾기</Text></Link>
                     </HStack>
                 </Center>
             </VStack>

@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useBLE} from './module/BLEProvider';
 import {CircleProgressAnimation} from './components/CircleProgressAnimation';
@@ -19,7 +19,9 @@ import {MusicCircleProgressAnimation} from './components/MusicCircleProgressAnim
 import {useSharedValue, withTiming} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import deviceImage from './images/Renst_ISO.png';
-import {ImageBackground} from "react-native";
+import {Alert, ImageBackground} from "react-native";
+import SQLite from "react-native-sqlite-storage";
+import {UserContext} from "./module/UserProvider";
 
 /**
  * The HealingView component represents the view for a massage healing process.
@@ -38,6 +40,16 @@ import {ImageBackground} from "react-native";
  *
  * @returns {JSX.Element} The HealingView component.
  */
+const db = SQLite.openDatabase(
+    {
+      name: 'RENST.db',
+      location: 'default',
+    },
+    () => {},
+    error => {
+      console.error('Error opening database: ', error);
+    }
+)
 export const HealingView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
@@ -178,13 +190,38 @@ export const HealingView = ({route}) => {
 
   const healingbackground = require("./images/healingbackground.png")
 
+  const {userId} = useContext(UserContext)
+  const [name, setName] = useState(null)
+
+  const getUserInfo = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+          'SELECT * FROM users WHERE id = ?',
+          [userId],
+          (_, { rows }) => {
+            if (rows.length > 0) {
+              const user = rows.item(0);
+              setName(user.name)
+            } else {
+              Alert.alert('Login Failed', 'Invalid username or password');
+            }
+          },
+      );
+    });
+  }
+
+  useEffect(() => {
+    getUserInfo()
+  }, []);
+
+
   return (
     <>
       <ImageBackground source={healingbackground} style={{height:'100%', width:'100%'}}>
       <VStack p={'20px'} height={'100%'} justifyContent={'space-between'}>
         <Center height={'5%'}>
           <Heading color={'white'}>AI 모드</Heading>
-          <Text color={'white'}>힘든 하루를 보낸 길동님을 위한 모드에요.</Text>
+          <Text color={'white'}>힘든 하루를 보낸 {name}님을 위한 모드에요.</Text>
         </Center>
         <VStack space={3} justifyContent={"flex-end"} height={'75%'}>
           <VStack bg={'white'} shadow={2} height={'80%'}>

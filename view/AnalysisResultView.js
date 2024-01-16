@@ -163,7 +163,8 @@ export const AnalysisResultView = ({route}) => {
           <SemiCircleProgress
             percentage={80}
             progressColor={'#2785F4'}
-            progressWidth={15}>
+            progressWidth={15}
+         >
             <Text bold fontSize={'3xl'}>
               4
             </Text>
