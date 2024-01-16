@@ -140,13 +140,15 @@ export const CalendarView = ({ navigation,}) => {
 
     const handleSelected = (index) => {
         console.log("측정 날짜가 선택됌.")
-        console.log(index)
-        if (clickCount === 0) {
-            setSelected(index)
-            setClickCount(1)
+        console.log("index :", index)
+        if (selected === index) {
+            // If the selected item is clicked again, deselect it
+            setSelected(undefined);
+            setClickCount(0);
         } else {
-            setSelected(undefined)
-            setClickCount(0)
+            // If a different item is clicked, select it
+            setSelected(index);
+            setClickCount(1);
         }
     };
 
