@@ -13,7 +13,14 @@ const CalendarList_Actionsheet = ({isOpen, onClose, onOpen, dateRanges,}) => {
     const [clickCount, setClickCount] = useState(0);
     const [noClick, setNoClick] = useState(true);
 
+    const todayDate = () => {
+        const date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let dateOfMonth = date.getDate();
 
+        return `${year}-${month}-${dateOfMonth}`
+    };
     const renderArrow = (direction) => {
         const arrowIcon = direction === "left" ? <Octicons name={"chevron-left"} size={25} color={"black"} /> :
             <Octicons name={"chevron-right"} size={25} color={"black"} />;
@@ -151,7 +158,7 @@ const CalendarList_Actionsheet = ({isOpen, onClose, onOpen, dateRanges,}) => {
                 style={styles.calendarlist}
                 // 캘린더 내 스타일 수정
                 theme={styles.theme}
-
+                current={todayDate()}
                 markingType={"period"}
                 markedDates={markedSelectedDates}
                 onDayPress={onDayPress}
@@ -182,7 +189,7 @@ const CalendarList_Actionsheet = ({isOpen, onClose, onOpen, dateRanges,}) => {
     );
 };
 
-export default React.memo(Calendar_List);
+export default React.memo(CalendarList_Actionsheet);
 
 const styles = StyleSheet.create({
     calendarlist : {
