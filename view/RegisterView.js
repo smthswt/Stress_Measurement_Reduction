@@ -170,7 +170,7 @@ export const RegisterView = ({navigation}) => {
   };
 
   return (
-      <View flex={1} >
+      <ScrollView backgroundColor={"white"}>
       <VStack
         height={'100%'}
         bgColor={'white'}
@@ -304,12 +304,15 @@ export const RegisterView = ({navigation}) => {
           variant={'outline'}
           borderColor={'#2785F4'}
           onPress={handleSummit}
-          height={55}>
+          height={55}
+          marginTop={10}>
           <Text bold color={'#2785F4'}>
             다음
           </Text>
         </Button>
+
+
       </VStack>
-      </View>
+      </ScrollView>
   );
 };
