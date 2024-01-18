@@ -347,7 +347,7 @@ const SecondRoute = () => {
                             <FormControl.ErrorMessage>{errors.age}</FormControl.ErrorMessage>
                         </FormControl>
                     </VStack>
-                    <VStack space={5}>
+                    <VStack space={5} marginTop={20}>
                         <Center>
                             <Text color={"#ADADAD"}>본인인증 후 비밀번호 초기화 할 수 있어요.</Text>
                         </Center>

@@ -6,8 +6,6 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 
 
 const CompleteSearchingDevice = ({navigation}) => {
-    // const [isClick, setIsClick] = useState(false);
-    // const [clickCount, setClickCount] = useState(0);
     const [clickStates, setClickStates] = useState({});
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, SetIsLoading] = useState(false);

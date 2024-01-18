@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from "react";
 import {Box, Button, Center, HStack, Image, Text, View, VStack} from "native-base";
 import {ImageBackground, TouchableOpacity, StyleSheet, Animated} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import {Easing} from "react-native-reanimated";
+import {Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
 
 
 const EnrollingDeviceView = ({navigation}) => {
@@ -118,6 +118,7 @@ const EnrollingDeviceView = ({navigation}) => {
                 </Box>
 
                 <Image source={deviceImage} alt={"Device Image"} position={"relative"}/>
+
             </Center>
             <VStack flex={0.28} py={3} justifyContent={"space-between"} alignItems={"center"}>
                 <VStack justifyContent={'center'} alignItems={'center'} space={2}>
