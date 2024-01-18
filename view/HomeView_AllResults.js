@@ -1,19 +1,11 @@
-import {View} from 'react-native';
 import {
-  Actionsheet,
-  Button,
-  Center,
   HStack,
-  Image,
-  Modal,
-  Pressable,
   Progress,
   ScrollView,
   Text,
   VStack,
 } from 'native-base';
 import React, {useEffect, useState} from 'react';
-import CalendarPicker from 'react-native-calendar-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   VictoryAxis,
@@ -24,7 +16,6 @@ import {
   VictoryLegend,
 } from 'victory-native';
 import {VictoryTheme} from 'victory';
-import Svg, {Circle} from 'react-native-svg';
 import EmotionHappy from "./icons/EmotionHappy";
 import EmotionNormal from "./icons/EmotionNormal";
 import EmotionSoso from "./icons/EmotionSoso";
@@ -215,7 +206,7 @@ export const HomeView_AllResults = ({navigation}) => {
                 domainPadding={10}
                 theme={VictoryTheme.material}>
                 <VictoryLegend
-                  x={250}
+                  x={280}
                   centerTitle
                   orientation="vertical"
                   gutter={20}
