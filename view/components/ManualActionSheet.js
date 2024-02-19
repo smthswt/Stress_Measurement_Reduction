@@ -1,15 +1,43 @@
 import {Actionsheet, Box, Button, HStack, Pressable, Text, useDisclose, View, VStack} from "native-base";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import React, {useState} from "react";
+import React, {useCallback, useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
-
+import DocumentPicker from 'react-native-document-picker'
+// import * as RNFS from "react-native-fs";
 
 const ManualActionSheet  = ({onOpen, onClose, isOpen}) => {
+    const [fileResponse, setFileResponse] = useState([]);
 
-    const handleFindMp3File = () => {
+    const handleMp3FilePicker = useCallback(async () => {
         console.log("핸드폰 내 Mp3 파일 찾기")
-    };
+        try {
+            const response = await DocumentPicker.pick({
+                presentationStyle: 'fullScreen',
+            });
+            setFileResponse(response);
+        } catch (error) {
+            console.warn(error);
+        }
+    }, []);
+
+    // try {
+    //     const pickedFile = await DocumentPicker.pickSingle({
+    //         type: [DocumentPicker.types.allFiles],
+    //     });
+    //     console.log('pickedFile :', pickedFile)
+    //
+    //     await RNFS.readFile(pickedFile.uri, 'base64').then(data => {
+    //         console.log('base64', data);
+    //     });
+    // } catch (err) {
+    //     if (DocumentPicker.isCancel(err)) {
+    //         console.log(err);
+    //     } else {
+    //         console.log(error);
+    //         throw err;
+    //     }
+    // }
 
     const handleUploadMusic = () => {
         console.log("업로드 할 핸드폰 내 파일을 선택해주세요. 선택 완료.")
@@ -38,7 +66,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen}) => {
 
 
                     <Pressable
-                        onPress={handleFindMp3File}
+                        onPress={handleMp3FilePicker}
                         width={"92%"}
                         alignItems={'center'}
                         justifyContent={'center'}
