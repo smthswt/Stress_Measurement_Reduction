@@ -17,7 +17,7 @@ import Music_ActionSheet from "./MusicActionSheet";
 
 export const MusicList = () => {
     const { isOpen, onOpen, onClose } = useDisclose();
-    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [selectedItemId, setSelectedItemId] = useState("");
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
     const folderMusic_icon = <MaterialCommunityIcons name={"folder"} size={22} color={"#FFC431"} />
@@ -57,7 +57,7 @@ export const MusicList = () => {
     console.log("선택된 data id: ", selectedItemId);
 
     const closeMusicActionSheet = () => {
-        setSelectedItemId(null);
+        setSelectedItemId("");
         onClose();
     };
 

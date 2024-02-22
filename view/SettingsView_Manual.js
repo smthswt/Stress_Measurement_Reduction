@@ -1,10 +1,12 @@
-import {BackHandler, TouchableOpacity, View} from "react-native";
-import {Button, Divider, HStack, Radio, Text, useDisclose, VStack} from "native-base";
-import React, {useEffect} from "react";
+import {Alert, BackHandler, TouchableOpacity, View} from "react-native";
+import {Box, Button, Divider, HStack, Radio, Text, useDisclose, VStack} from "native-base";
+import React, {useCallback, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MusicActionSheet from "./components/MusicActionSheet";
 import Music_ActionSheet from "./components/MusicActionSheet";
 import ManualActionSheet from "./components/ManualActionSheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 /**
  * React component for displaying a calendar view.
@@ -18,6 +20,55 @@ export const SettingsView_Manual = ({ navigation }) => {
     const [music, setMusic] = React.useState("music_two");
     const [move, setMove] = React.useState("move_two");
     const [time, setTime] = React.useState("time_one");
+    const [manualMusicName, setManualMusicName] = useState('');
+    const [options, setOptions] = useState([
+        { label: 'Rise Again (Feat. Will Bug)', value: 0 },
+        { label: 'Shin Seung Hun - Like a Beautiful Flame', value: 1 },
+        { label: 'Maroon 5 - Wipe your eyes', value: 2 },
+        { label: 'J.S Bach - Air on the G String', value: 3 },
+    ]);
+
+    const addOption = (musicName) => {
+        const lastValue = options[options.length - 1].value;
+        const newOption = {
+            label: musicName,
+            value: lastValue + 1,
+        };
+        setOptions([...options, newOption]);
+    };
+
+    const removeOption = (valueToRemove) => {
+        const updatedOptions = options.filter(option => option.value !== valueToRemove);
+        setOptions(updatedOptions);
+    };
+
+    //remove option 함수로 합치기
+    const removeMusicOption = () => {
+        Alert.alert('음원을 삭제하시겠습까?');
+    }
+
+
+    // 앱이 시작될 때 AsyncStorage에서 음원 이름 가져오기
+    useEffect(() => {
+        const fetchSelectedMusic = async () => {
+            try {
+                const selectedMusic = await AsyncStorage.getItem('selectedMusicName');
+                if (selectedMusic !== null) {
+                    setManualMusicName(selectedMusic);
+                }
+            } catch (error) {
+                console.error('Error fetching selected music:', error);
+            }
+        };
+
+        fetchSelectedMusic();
+    }, []); // []를 추가하여 한 번만 실행되도록 설정
+
+
+    const handleMusicName = (musicName) => {
+        // setManualMusicName(musicName);
+        addOption(musicName.split('.')[0]); // 새로운 음원을 추가합니다.
+    };
 
 
     return (
@@ -35,23 +86,22 @@ export const SettingsView_Manual = ({ navigation }) => {
                 <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={music} onChange={nextValue => {
                     setMusic(nextValue);
                 }}>
-                    <Radio value="music_one" my={1} size={"sm"}>
-                        Rise Again (Feat. Will Bug)
-                    </Radio>
-                    <Radio value="music_two" my={1} size={"sm"}>
-                        Shin Seung Hun - Like a Beautiful Flame
-                    </Radio>
-                    <Radio value="music_three" my={1} size={"sm"}>
-                        Maroon 5 - Wipe your eyes
-                    </Radio>
-                    <Radio value="music_four" my={1} size={"sm"}>
-                        J.S Bach - Air on the G String
-                    </Radio>
+
+                    {options.map(option => (
+                        <Radio key={option.value} value={option.value} size={"sm"} marginY={1} justifyContent={"space-between"}>
+                            {/*Pressable, TouchableOpacity로 바꾸기 바꾸기*/}
+                            <Button variant={'unstyled'} onLongPress={removeMusicOption}>
+                            {option.label}
+
+                            </Button>
+                        </Radio>
+                    ))}
+
                 </Radio.Group>
                 <Divider/>
                 <Button variant={"text"} onPress={onOpen}>
                     <Text>음원 추가하기 +</Text>
-                    <ManualActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} />
+                    <ManualActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} MusicName={handleMusicName}/>
                 </Button>
             </VStack>
             <VStack bg={"white"} p={5} space={2} shadow={2}>
@@ -78,6 +128,7 @@ export const SettingsView_Manual = ({ navigation }) => {
                 </Radio.Group>
             </VStack>
         </VStack>
+
 
         </VStack>
     )
