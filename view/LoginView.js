@@ -18,6 +18,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 const login_background = require('./images/Loginbg.png')
 import SQLite from 'react-native-sqlite-storage';
 import {UserContext} from "./module/UserProvider";
+import TrackPlayer from "react-native-track-player";
+
 
 const db = SQLite.openDatabase(
     {
@@ -47,6 +49,18 @@ export const LoginView = ({ navigation, route }) => {
     const [errors, setErrors] = useState({})
 
     const [show, setShow] = React.useState(false);
+
+    useEffect(() => {
+        // TrackPlayer를 초기화하는 코드
+        TrackPlayer.setupPlayer()
+            .catch(error => {
+                console.log("Error in TrackPlayer setup:", error)
+            });
+
+        return () => {
+            console.log("setupPlayer 실행")
+        };
+    }, [handleLogin]);
 
     const validate = () => {
         let valid = true

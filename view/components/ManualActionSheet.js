@@ -8,16 +8,18 @@ import axios from "axios";
 import {Alert, Platform} from "react-native";
 import {parseStream} from "music-metadata";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAll, getAlbums, searchSongs, SortSongFields, SortSongOrder } from 'react-native-get-music-files';
-import {check, PERMISSIONS, request, requestMultiple, RESULTS} from "react-native-permissions";
+import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
+// import { getAll, getAlbums, searchSongs, SortSongFields, SortSongOrder } from 'react-native-get-music-files';
+// import {check, PERMISSIONS, request, requestMultiple, RESULTS} from "react-native-permissions";
+import TrackPlayer from 'react-native-track-player';
+import {err} from "react-native-svg/lib/typescript/xml";
 
 
-const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
+const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName, MusicDataUri, MusicData}) => {
     const [fileSelected, setFileSelected] = useState(false);
     const [fileName, setFileName] = useState("")
-    const [audioFile, setAudioFile] = useState();
-    const [audioSize, setAudioSize] = useState()
-    const [manualMusicMetaData, setManualMusicMetaData] = useState([]);
+    const [audioFile, setAudioFile] = useState(null);
+    const [audioSize, setAudioSize] = useState(null)
 
 
     const handleMp3FilePicker = useCallback(async () => {
@@ -25,7 +27,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
         try {
             const fileResponse = await DocumentPicker.pickSingle({
                 presentationStyle: 'fullScreen',
-                type: [types.images, types.audio]
+                type: [types.audio]
             });
             setFileSelected(true);
             console.log('파일이 선택되었습니다.')
@@ -38,6 +40,9 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
             const sizeInMB = fileResponse.size / 1024**2;
             console.log("파일 용량: ", sizeInMB)
             setAudioSize(sizeInMB)
+            console.log("파일 URI: ", fileResponse.uri)
+
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
         } catch (error) {
             if (DocumentPicker.isCancel(error)) {
@@ -49,10 +54,8 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
     }, []);
 
     // const audioSize2MB = audioSize.toFixed(2);
-    const audioSize2MB = audioSize;
-    const fileFullName = fileName.split('.')[0]
-
-
+    const audioSize2MB = Number(audioSize).toFixed(2);
+    const fileFullName = fileName.replace('.mp3', '');
 
     //음원 파일 저장
     const handleUploadMusic = async () => {
@@ -62,9 +65,11 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
             const dataToStore = { fileCopyUri, name, size, type, uri };
             const jsonValue = JSON.stringify(dataToStore);
             await AsyncStorage.setItem('manualmusic', jsonValue)
-            setFileSelected(false);
-            console.log("저장된 내용: ", jsonValue)
+            console.log("저장된 내용 jsonValue: ", jsonValue)
+            console.log("저장된 내용 savedData: ", jsonValue)
             console.log("선택한 음원 파일이 저장되었습니다.")
+            await AsyncStorage.setItem('selectedMusicUri', JSON.stringify(uri));
+            const getSavedDataUri = await AsyncStorage.getItem("selectedMusicUri")
 
             const getJsonValue = await AsyncStorage.getItem('manualmusic');
             const parseData = JSON.parse(getJsonValue)
@@ -72,12 +77,20 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
 
             console.log("전체 데이터: ", parseData)
             console.log("데이터가 정상적으로 불러와졌습니다.");
+            console.log("musicName:", musicName )
 
-            MusicName(musicName)
-            // AsyncStorage에 음원 이름만 저장
-            await AsyncStorage.setItem('selectedMusicName', musicName);
-            // return jsonValue != null ? parseData : "불러올 데이터가 없습니다.";
+            await AsyncStorage.setItem('selectedMusicName', JSON.stringify(name));
+            const getSavedDataName = await AsyncStorage.getItem("selectedMusicName")
 
+            console.log("음원 이름이 selectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
+            console.log("음원 주소가 selectedMusicUri에 저장되었습니다", getSavedDataUri)
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>")
+
+            // MusicName(name)
+            // MusicDataUri(uri)
+            MusicData(name, uri)
+
+            setFileSelected(false);
             onClose();
         } catch (error) {
             console.error("에러: ", error)
@@ -92,90 +105,6 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName}) => {
         onClose();
     }
 
-    // const requestMediaPermissions = async () => {
-    //     if (Platform.OS === 'android') {
-    //         let hasPermission =
-    //             (await check(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE)) ===
-    //             RESULTS.GRANTED || (await check(PERMISSIONS.ANDROID.READ_MEDIA_AUDIO)) ===
-    //             RESULTS.GRANTED;
-    //
-    //         if (!hasPermission) {
-    //             hasPermission = await requestMultiple([
-    //                 PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-    //                 PERMISSIONS.ANDROID.READ_MEDIA_AUDIO,
-    //             ]);
-    //         }
-    //
-    //         return hasPermission;
-    //     }
-    //
-    //     if (Platform.OS === 'ios') {
-    //         let hasPermission =
-    //             (await check(PERMISSIONS.IOS.MEDIA_LIBRARY)) === RESULTS.GRANTED;
-    //         if (!hasPermission) {
-    //             hasPermission =
-    //                 (await request(PERMISSIONS.IOS.MEDIA_LIBRARY)) === RESULTS.GRANTED;
-    //         }
-    //
-    //         return hasPermission;
-    //     }
-    //
-    //     return false;
-    // };
-
-    // const test = async () => {
-    //     // const permissions = await requestMediaPermissions();
-    //     // if (permissions) {
-    //         const songsResults = await getAll({
-    //             limit: 20,
-    //             offset: 0,
-    //             // coverQuality: 50,
-    //             minSongDuration: 1000,
-    //             sortOrder: SortSongOrder.DESC,
-    //             sortBy: SortSongFields.TITLE,
-    //         })
-    //         // console.log("Permission pass")
-    //         if (typeof songsResults === 'string') {
-    //             console.log("Song Results === string")
-    //             return;
-    //         }
-    //         setManualMusicMetaData(songsResults);
-    //         console.log("메타 데이터: ", songsResults)
-    //     // }
-    // };
-    //
-    // useEffect(() => {
-    //     test();
-    // }, []);
-    //
-    // const render = () => {
-    //     if (manualMusicMetaData?.length === 0) {
-    //         return <Text>No items</Text>;
-    //     }
-    //
-    //     return manualMusicMetaData?.map((song) => (
-    //         <View key={song.url}>
-    //             <Image
-    //                 source={{
-    //                     uri: song.cover,
-    //                 }}
-    //                 resizeMode="cover"
-    //                 style={{
-    //                     width: 150,
-    //                     height: 150,
-    //                 }}
-    //             />
-    //             {/*<Text style={styles.text}>Album: {song.album}</Text>*/}
-    //             <Text style={styles.text}>Artist: {song.artist}</Text>
-    //             <Text style={styles.text}>Title: {song.title}</Text>
-    //             <Text style={styles.text}>Duration(ms): {song.duration}</Text>
-    //             {/*<Text style={styles.text}>Genre: {song.genre}</Text>*/}
-    //             {/*<Text style={styles.text}>FileUrl: {song.url}</Text>*/}
-    //         </View>
-    //     ));
-    // };
-    //
-    // console.log("메타 데이터: ", test())
 
 
     return(
