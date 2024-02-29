@@ -48,22 +48,22 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
 
             let metadataReceived = false;
 
-            // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
-            TrackPlayer.addEventListener("metadata-common-received", (data) => {
-                if (!metadataReceived) {
-                    console.log('Received metadata:', data);
+                // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
+                TrackPlayer.addEventListener("metadata-common-received", (data) => {
+                    if (!metadataReceived) {
+                        console.log('Received metadata:', data);
 
-                    const metaTitle = data.metadata.title
-                    const metaArtist = data.metadata.artist
+                        const metaTitle = data.metadata.title
+                        const metaArtist = data.metadata.artist
 
-                    console.log('Received metadata title:', metaTitle);
-                    console.log('Received metadata artist:', metaArtist);
+                        console.log('Received1 metadata title:', metaTitle);
+                        console.log('Received1 metadata artist:', metaArtist);
 
-                    setMetaMusicTitle(metaTitle)
-                    setMetaMusicArtist(metaArtist)
-                    metadataReceived = true
-                }
-            });
+                        setMetaMusicTitle(metaTitle)
+                        setMetaMusicArtist(metaArtist)
+                        metadataReceived = true
+                    }
+                });
 
             console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
@@ -88,7 +88,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
             const dataToStore = { fileCopyUri, name, size, type, uri };
             const jsonValue = JSON.stringify(dataToStore);
             await AsyncStorage.setItem('manualmusic', jsonValue)
-            console.log("저장된 내용 jsonValue: ", jsonValue)
+            console.log("저장된 내용 jsonValue: ", dataToStore)
             console.log("저장된 내용 savedData: ", jsonValue)
             console.log("선택한 음원 파일이 저장되었습니다.")
             await AsyncStorage.setItem('selectedMusicUri', JSON.stringify(uri));
@@ -107,11 +107,12 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
 
             console.log("음원 이름이 selectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
             console.log("음원 주소가 selectedMusicUri에 저장되었습니다", getSavedDataUri)
-            console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
-            // MusicName(name)
-            // MusicDataUri(uri)
-            MusicData(name, uri)
+
+                    MusicData(uri, name)
+
+
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
             setFileSelected(false);
             onClose();

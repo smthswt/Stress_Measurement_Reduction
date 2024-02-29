@@ -45,11 +45,13 @@ export const SettingsView_Manual = ({ navigation }) => {
     }, []);
 
 
-    const handleMusicData = (name, uri, MusicData) => {
+    const handleMusicData = (uri, name) => {
         const newMusicName = name.replace('.mp3', '');
-        console.log("선택된 음원 이름: ", newMusicName)
+        // console.log("선택된 음원 이름: ", newMusicName)
         console.log("선택된 음원 경로:", uri);
-        addOption(newMusicName, uri);
+        console.log("선택된 음원 이름: ", newMusicName)
+        // console.log("선택된 음원 아티스트:", metaMusicArtist);
+        addOption(uri, newMusicName);
     };
 
     const removeOption = (valueToRemove) => {
@@ -67,7 +69,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         });
     };
 
-    const addOption = (newMusicName, uri) => {
+    const addOption = (uri, newMusicName) => {
         // 현재 가장 큰 label 값 찾기
         let maxLabel = Math.max(...options.map(option => parseInt(option.label, 10)));
         if (!isFinite(maxLabel)) {
@@ -77,8 +79,9 @@ export const SettingsView_Manual = ({ navigation }) => {
         const newValue = maxLabel + 1;
         const newOption = {
             label: newValue,
-            value: newMusicName,
             uri: uri,
+            value: newMusicName,
+            // artist: metaMusicArtist,
         };
         console.log('Before adding option:', options);
         setOptions([...options, newOption]);
@@ -131,18 +134,14 @@ export const SettingsView_Manual = ({ navigation }) => {
                 await TrackPlayer.reset(); // 재생 목록 초기화
                 await TrackPlayer.add({
                     title: option.value,
+                    // artist: option.artist,
                     url: option.uri,
                 });
                 console.log("option.value: ", option.value)
+                // console.log("option.artist: ", option.artist)
                 console.log("option.uri: ", option.uri)
                 await TrackPlayer.play(); // 음원 재생
 
-                // // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
-                // TrackPlayer.addEventListener("metadata-common-received", (data) => {
-                //     console.log('Received metadata:', data);
-                //     console.log('Received metadata title:', data.metadata.title);
-                //     console.log('Received metadata artist:', data.metadata.artist);
-                // });
             } else {
                 console.error('Option not found for label:', nextValue);
             }
@@ -182,7 +181,7 @@ export const SettingsView_Manual = ({ navigation }) => {
                     {options.map(option => (
                         <Radio key={option.label} value={option.label} size={"sm"} marginY={1} justifyContent={"space-between"}>
                             <TouchableOpacity onLongPress={() => removeMusicAlert(option.label)} >
-                                <Text>{option.value}</Text>
+                                <Text>{option.value !== undefined && option.value !== "" ? option.value : "알수없음"}</Text>
 
                             </TouchableOpacity>
                         </Radio>
