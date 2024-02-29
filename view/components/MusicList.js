@@ -6,18 +6,20 @@ import {
     useDisclose,
     View,
     VStack,
-    FlatList
+    FlatList, Pressable
 } from "native-base";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import React, {useState} from "react";
 import Music_ActionSheet from "./MusicActionSheet";
+import {TouchableOpacity} from "react-native";
 
 
 export const MusicList = () => {
     const { isOpen, onOpen, onClose } = useDisclose();
     const [selectedItemId, setSelectedItemId] = useState("");
+    const [fileExist, setFileExist] =useState(false)
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
     const folderMusic_icon = <MaterialCommunityIcons name={"folder"} size={22} color={"#FFC431"} />
@@ -56,6 +58,17 @@ export const MusicList = () => {
     };
     console.log("선택된 data id: ", selectedItemId);
 
+    const handleMusicData = (name, uri, artist) => {
+        console.log("name: ", name)
+        console.log("uri: ", uri)
+        console.log("artist: ", artist)
+        console.log("음원 이름, 주소, 아티스트 정보가 전달되었습니다.")
+    }
+
+    const handleClickMusic = (musicTitle, musicArtist) => {
+        console.log("노래가 클릭되었습니다.", musicArtist, "-", musicTitle)
+    }
+
     const closeMusicActionSheet = () => {
         setSelectedItemId("");
         onClose();
@@ -71,6 +84,7 @@ export const MusicList = () => {
                           keyExtractor={(item) => item.id}
                           renderItem={({item}) => (
 
+                              <TouchableOpacity activeOpacity={0.8} onPress={() => handleClickMusic(item.Song, item.Artist)}>
                               <Center flex={1} backgroundColor={'white'} paddingY={2} paddingX={1}>
                                   <HStack justifyContent={"space-between"} width={"94%"} marginY={1}>
 
@@ -78,7 +92,11 @@ export const MusicList = () => {
                                           {item.musicType}
                                           <VStack space={1.5} alignItems={'flex-start'} justifyContent={'center'}>
                                               <Text bold fontSize={'md'} color={"#222222"}>스트레스 레벨 {item.stressLevel}</Text>
+                                              {(fileExist) ?
                                               <Text color={"#616161"}>{item.Artist} - {item.Song}</Text>
+                                                  :
+                                                  <Text color={"#616161"}>--</Text>
+                                              }
                                           </VStack>
                                       </HStack>
 
@@ -91,14 +109,16 @@ export const MusicList = () => {
 
                                   </HStack>
                               </Center>
-                          )}
-                />
+                              </TouchableOpacity>
+
+                          )}/>
             </View>
             {isOpen && selectedItemId && (
                 <Music_ActionSheet
                     onOpen={onOpen}
                     onClose={closeMusicActionSheet}
                     isOpen={isOpen}
+                    MusicData={handleMusicData}
                     data={data.find((item) => item.id === selectedItemId)}
                 />
             )}

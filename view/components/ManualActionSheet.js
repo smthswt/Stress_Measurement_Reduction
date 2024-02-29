@@ -1,25 +1,20 @@
 import {Actionsheet, Box, Button, HStack, Pressable, Text, useDisclose, View, VStack} from "native-base";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import DocumentPicker, {types} from 'react-native-document-picker'
-import axios from "axios";
 import {Alert, Platform} from "react-native";
-import {parseStream} from "music-metadata";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
-// import { getAll, getAlbums, searchSongs, SortSongFields, SortSongOrder } from 'react-native-get-music-files';
-// import {check, PERMISSIONS, request, requestMultiple, RESULTS} from "react-native-permissions";
-import TrackPlayer from 'react-native-track-player';
-import {err} from "react-native-svg/lib/typescript/xml";
+import TrackPlayer from "react-native-track-player";
 
 
-const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName, MusicDataUri, MusicData}) => {
+const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
     const [fileSelected, setFileSelected] = useState(false);
     const [fileName, setFileName] = useState("")
     const [audioFile, setAudioFile] = useState(null);
     const [audioSize, setAudioSize] = useState(null)
+    const [metaMusicTitle, setMetaMusicTitle] = useState("")
+    const [metaMusicArtist, setMetaMusicArtist] = useState();
 
 
     const handleMp3FilePicker = useCallback(async () => {
@@ -42,6 +37,34 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName, MusicDataUri, M
             setAudioSize(sizeInMB)
             console.log("파일 URI: ", fileResponse.uri)
 
+            await TrackPlayer.reset(); // 재생 목록 초기화
+            await TrackPlayer.add({
+                title: fileResponse.name,
+                url: fileResponse.uri,
+            });
+            console.log("fileResponse.name: ", fileResponse.name)
+            console.log("fileResponse.uri: ", fileResponse.uri)
+            console.log("track uri 수신")
+
+            let metadataReceived = false;
+
+            // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
+            TrackPlayer.addEventListener("metadata-common-received", (data) => {
+                if (!metadataReceived) {
+                    console.log('Received metadata:', data);
+
+                    const metaTitle = data.metadata.title
+                    const metaArtist = data.metadata.artist
+
+                    console.log('Received metadata title:', metaTitle);
+                    console.log('Received metadata artist:', metaArtist);
+
+                    setMetaMusicTitle(metaTitle)
+                    setMetaMusicArtist(metaArtist)
+                    metadataReceived = true
+                }
+            });
+
             console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
         } catch (error) {
@@ -53,7 +76,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicName, MusicDataUri, M
         }
     }, []);
 
-    // const audioSize2MB = audioSize.toFixed(2);
+
     const audioSize2MB = Number(audioSize).toFixed(2);
     const fileFullName = fileName.replace('.mp3', '');
 

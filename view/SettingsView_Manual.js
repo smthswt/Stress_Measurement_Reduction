@@ -1,13 +1,11 @@
 import {Alert, BackHandler, TouchableHighlight, TouchableOpacity, View} from "react-native";
-import {Box, Button, Divider, HStack, Pressable, Radio, ScrollView, Text, useDisclose, VStack} from "native-base";
+import {Box, Button, Divider, Radio, ScrollView, Text, useDisclose, VStack, HStack} from "native-base";
 import React, {useCallback, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MusicActionSheet from "./components/MusicActionSheet";
-import Music_ActionSheet from "./components/MusicActionSheet";
 import ManualActionSheet from "./components/ManualActionSheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { State } from 'react-native-track-player';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 /**
  * React component for displaying a calendar view.
@@ -22,9 +20,6 @@ export const SettingsView_Manual = ({ navigation }) => {
     const [time, setTime] = React.useState("time_one");
     const [options, setOptions] = useState([]);
     const [music, setMusic] = React.useState("");
-    const [MusicUri, setMusicUri] = useState(null);
-    const [selectedMusicName, setselectedMusicName] = useState("");
-    // const [MusicName, setMusicName] = useState('');
 
 
     useEffect(() => {
@@ -133,15 +128,21 @@ export const SettingsView_Manual = ({ navigation }) => {
             // 선택된 음원을 재생합니다.
             const option = options.find(opt => opt.label === nextValue);
             if (option) {
-                // 올바른 음원 URI와 이름으로 TrackPlayer에 트랙을 추가합니다.
                 await TrackPlayer.reset(); // 재생 목록 초기화
                 await TrackPlayer.add({
-                    title: option.value, // 제목은 음원의 이름으로 설정
-                    url: option.uri, // 음원의 URI를 트랙으로 추가
+                    title: option.value,
+                    url: option.uri,
                 });
                 console.log("option.value: ", option.value)
                 console.log("option.uri: ", option.uri)
                 await TrackPlayer.play(); // 음원 재생
+
+                // // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
+                // TrackPlayer.addEventListener("metadata-common-received", (data) => {
+                //     console.log('Received metadata:', data);
+                //     console.log('Received metadata title:', data.metadata.title);
+                //     console.log('Received metadata artist:', data.metadata.artist);
+                // });
             } else {
                 console.error('Option not found for label:', nextValue);
             }
@@ -149,6 +150,13 @@ export const SettingsView_Manual = ({ navigation }) => {
             console.error('Error updating selected music:', error);
         }
     };
+
+    const handleMusicPause = () => {
+        TrackPlayer.pause();
+        console.log("음악이 중지되었습니다.")
+    };
+
+    const optionsLength = options.length;
 
 
     return (
@@ -162,13 +170,18 @@ export const SettingsView_Manual = ({ navigation }) => {
 
         <VStack flex={1} p={6} space={6}>
             <VStack bg={"white"} p={5} space={2} shadow={2}>
+                <HStack justifyContent={"space-between"}>
                 <Text bold>음원 선택</Text>
+                    <TouchableOpacity activeOpacity={0.6} onPress={handleMusicPause}>
+                    <MaterialCommunityIcons name={'pause'} size={22} color={"black"} />
+                    </TouchableOpacity>
+                </HStack>
                 <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={music} onChange={handleMusicChange}>
 
-                    <ScrollView showsVerticalScrollIndicator style={{height: 170, width: "100%"}}>
+                    <ScrollView showsVerticalScrollIndicator style={{height: optionsLength > 6 ? 170 : 'auto', width: "100%"}}>
                     {options.map(option => (
                         <Radio key={option.label} value={option.label} size={"sm"} marginY={1} justifyContent={"space-between"}>
-                            <TouchableOpacity onLongPress={() => removeMusicAlert(option.label)}>
+                            <TouchableOpacity onLongPress={() => removeMusicAlert(option.label)} >
                                 <Text>{option.value}</Text>
 
                             </TouchableOpacity>
