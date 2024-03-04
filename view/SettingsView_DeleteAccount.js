@@ -1,8 +1,22 @@
-import {Button, Center, Checkbox, FormControl, Heading, HStack, Input, List, Text, TextArea, VStack} from "native-base";
+import {
+    Button,
+    Center,
+    Checkbox,
+    FormControl,
+    Heading,
+    HStack,
+    Input,
+    List,
+    ScrollView,
+    Text,
+    TextArea, View,
+    VStack
+} from "native-base";
 import React, {useContext, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
+import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 
 /**
@@ -60,11 +74,12 @@ export const SettingsView_DeleteAccount = ({ navigation }) => {
 
 
     return (
-        <VStack flex={1} p={5} bg={"white"}>
+        // <ScrollView max p={5} bg={"blue.200"} >
+        <VStack space={5} flex={1} p={5} bg={"white"}>
             <Center flex={2}>
                 <Text color={"#2785F4"} fontSize={"6xl"}>RENST</Text>
             </Center>
-            <VStack space={2} flex={2}>
+            <VStack space={1}>
                 <FormControl>
                     <FormControl.Label _text={{bold: true}}>서비스를 탈퇴하시려는 이유가 있으신가요?</FormControl.Label>
                     <TextArea
@@ -78,13 +93,16 @@ export const SettingsView_DeleteAccount = ({ navigation }) => {
                         }}
                     />
                 </FormControl>
+
                 <HStack alignItems={"center"} space={1}>
                     <Ionicons name={"ellipse"} size={5}></Ionicons>
                     <Text>서비스 탈퇴이후 모든 데이터는 복구가 불가능합니다.</Text>
                 </HStack>
             </VStack>
-            <VStack space={5} flex={1} justifyContent={"flex-end"}>
-                <HStack space={6} alignItems={"center"}>
+
+            {/*<ScrollView>*/}
+            <VStack space={5} justifyContent={"flex-end"}>
+                <HStack  alignItems={"center"}>
                     <Checkbox shadow={2} colorScheme="blue" value={check} accessibilityLabel="Delete account checkbox" onChange={newValue => setCheck(newValue)}>
                         안내사항을 모두 확인하였으며, 이에 동의합니다.
                     </Checkbox>
@@ -93,7 +111,9 @@ export const SettingsView_DeleteAccount = ({ navigation }) => {
                     <Text bold color={"white"} fontSize={'md'}>탈퇴하기</Text>
                 </Button>
             </VStack>
+            {/*</ScrollView>*/}
         </VStack>
+        // </ScrollView>
     );
 };
 

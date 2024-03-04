@@ -134,6 +134,35 @@ export const MusicList = () => {
     };
 
 
+    const handleInitialSelectedMusic = () => {
+        console.log("설정 초기화 버튼 클릭");
+        // 선택된 아이템의 ID를 가져옵니다.
+        const itemId = selectedItemId;
+        // 데이터를 복제하여 변경사항을 적용합니다.
+        const updatedData = data.map(item => {
+            if (item.id === itemId) {
+                return {
+                    ...item,
+                    Song: "", // Song을 빈 문자열로 설정합니다.
+                    Url: ""   // Url을 빈 문자열로 설정합니다.
+                };
+            }
+            return item;
+        });
+        // 변경된 데이터로 상태를 업데이트합니다.
+        setData(updatedData);
+        // AsyncStorage에 업데이트된 데이터를 저장합니다.
+        AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData))
+            .then(() => {
+                console.log("음원 설정 초기화 완료");
+                console.log("초기화된 데이터: ", data)
+            })
+            .catch(error => {
+                console.error("음원 설정 초기화 실패:", error);
+            });
+    };
+
+
 
     const handleClickMusic = async (newMusicName, musicArtist, itemId, uri) => {
         console.log("노래가 클릭되었습니다.", newMusicName);
@@ -218,6 +247,7 @@ export const MusicList = () => {
                     MusicData={handleMusicData}
                     data={data.find((item) => item.id === selectedItemId)}
                     url={data.find((item) => item.id === selectedItemId).url}
+                    handleInitialSelectedMusic={handleInitialSelectedMusic}
                 />
             )}
         </VStack>

@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Alert} from "react-native";
 
 
-const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData}) => {
+const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInitialSelectedMusic}) => {
     const [showMp3UploadView, setShowMp3UploadView] = useState(false);
     const [showInitializeView, setShowInitializeView] = useState(true);
     const [fileSelected, setFileSelected] = useState(false);
@@ -26,10 +26,6 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData}) => {
         setShowMp3UploadView(true);
     };
 
-    const handleInitialButton = () => {
-        console.log("설정 초기화 버튼 클릭")
-        setShowInitializeView(false);
-    };
 
     const handleMp3Picker = useCallback(async () => {
         console.log("핸드폰 내 Mp3 파일 찾기")
@@ -172,9 +168,16 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData}) => {
         }
     };
 
-    const handleInitialMusicList = () => {
-        console.log("음원 리스트. 초기화 완료.")
+    const handleInitialButton = () => {
+        console.log("설정 초기화 버튼 클릭")
+        setShowInitializeView(false);
     };
+
+    const handleConfirmInitialMusic = () => {
+        handleInitialSelectedMusic();
+        console.log("음원 초기화 완료.")
+        onClose();
+    }
 
     const handleOnClose = () => {
         console.log("닫기")
@@ -278,7 +281,7 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData}) => {
                 </HStack>
 
                 <VStack width={"92%"} marginTop={8}>
-                    <Button size={"lg"} bg={"#2785F4"} onPress={handleInitialMusicList}>
+                    <Button size={"lg"} bg={"#2785F4"} onPress={handleConfirmInitialMusic}>
                         <Text fontWeight={800} fontSize={'18px'} color={"white"}>초기화 하기</Text>
                     </Button>
                 </VStack>
