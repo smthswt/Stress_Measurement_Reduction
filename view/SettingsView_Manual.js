@@ -27,7 +27,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         const fetchOptions = async () => {
             try {
                 const storedOptions = await AsyncStorage.getItem('options');
-                const selectedMusicName = await AsyncStorage.getItem('selectedMusicName');
+                // const selectedMusicName = await AsyncStorage.getItem('selectedMusicName');
                 if (storedOptions !== null) {
                     setOptions(JSON.parse(storedOptions));
                     console.log(storedOptions)
