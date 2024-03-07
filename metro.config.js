@@ -8,5 +8,16 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
  *
  * @type {import('metro-config').MetroConfig}
  */
-const config = {}
+const config = {
+    // server: {
+    //     port: 8081,
+    //     host: '0.0.0.0', //호스트 변경
+    // }
+}
 module.exports = mergeConfig(defaultConfig, config);
+
+
+/**
+ * 특정 포트 실행 명령어
+ * npx react-native start --port=8081
+ */

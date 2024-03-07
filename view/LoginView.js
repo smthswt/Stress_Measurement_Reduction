@@ -30,16 +30,19 @@ const db = SQLite.openDatabase(
         console.log('Database opened successfully');
         // Perform further operations or setup here
     },
-    error => {
+    (error) => {
         console.error('Error opening database: ', error);
     }
 );
+
+
 
 /**
  * React component for displaying a calendar view.
  *
  * @component
  * @param {object} navigation - Navigation object used for navigating between screens.
+ * @param route
  * @returns {ReactElement} - The rendered component.
  */
 export const LoginView = ({ navigation, route }) => {
@@ -50,17 +53,10 @@ export const LoginView = ({ navigation, route }) => {
 
     const [show, setShow] = React.useState(false);
 
-    useEffect(() => {
-        // TrackPlayer를 초기화하는 코드
-        TrackPlayer.setupPlayer()
-            .catch(error => {
-                console.log("Error in TrackPlayer setup:", error)
-            });
 
-        return () => {
-            console.log("setupPlayer 실행")
-        };
-    }, [handleLogin]);
+    TrackPlayer.setupPlayer().then(() => {
+        // Player is ready to use
+    });
 
     const validate = () => {
         let valid = true
@@ -89,7 +85,7 @@ export const LoginView = ({ navigation, route }) => {
     const handleLogin = () => {
         const isValid = validate()
         if (isValid) {
-            db.transaction(tx => {
+            db.transaction((tx) => {
                 tx.executeSql(
                     'SELECT * FROM users WHERE username = ? AND password = ?',
                     [username, password],
@@ -99,7 +95,7 @@ export const LoginView = ({ navigation, route }) => {
                             const user = rows.item(0);
                             const userId = rows.item(0).id
                             setUserId(userId)
-                            //console.log(user)
+                            console.log(user)
                             navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
                         } else {
                             Alert.alert('오류', '정확한 아이디 및 비밀번호를 입력해주세요.');

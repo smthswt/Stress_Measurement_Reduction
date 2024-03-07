@@ -24,6 +24,7 @@ export const MusicList = () => {
     const [fileExist, setFileExist] =useState(false)
     const [currentPlayingId, setCurrentPlayingId] = useState(null);
     const [selectedSongID, setSelectedSongID] = useState()
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
     // const folderMusic_icon = <MaterialCommunityIcons name={"folder"} size={22} color={"#FFC431"} />
@@ -63,6 +64,11 @@ export const MusicList = () => {
         },
     ]);
 
+    const LoadData = () => {
+        AsyncStorage.getItem("AImusicData")
+        console.log("AImusicData 데이터 가져옴.")
+    };
+
     // 로컬 스토리지에서 데이터를 가져와서 data 상태를 업데이트합니다.
     useEffect(() => {
         const fetchData = async () => {
@@ -72,7 +78,8 @@ export const MusicList = () => {
                 if (storedData !== null) {
                     // const newestData = JSON.parse(storedData);
                     setData(JSON.parse(storedData));
-                    console.log("데이터가 성공적으로 가져와졌습니다:", data)
+                    console.log("데이터가 성공적으로 가져와졌습니다:", (data))
+                    // console.log("데이터가 성공적으로 가져와졌습니다:", data)
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -89,6 +96,7 @@ export const MusicList = () => {
 
     // 데이터 확인을 위한 로그 출력
     useEffect(() => {
+        LoadData();
         console.log("Received saved data:", data);
     }, [data]);
 
@@ -169,21 +177,25 @@ export const MusicList = () => {
         console.log("selectedSongID", itemId)
         console.log("selected URl", uri)
 
+        // TrackPlayer.setupPlayer()
 
         if (uri) {
             if (currentPlayingId === itemId) {
                 await TrackPlayer.pause(); // 노래 일시정지
                 setCurrentPlayingId(null); // 현재 재생 중인 ID 초기화
+                setIsPlaying(false)
                 console.log("currentPlayingId", currentPlayingId)
             } else {
                 if (currentPlayingId) {
                     await TrackPlayer.pause(); // 현재 재생 중인 노래 정지
+                    setIsPlaying(false)
                 }
                 await TrackPlayer.reset(); // 재생 목록 초기화
                 await TrackPlayer.add({
                     url: uri,
                     title: newMusicName,
                 });
+                setIsPlaying(true)
                 await TrackPlayer.play(); // 음원 재생
                 setCurrentPlayingId(itemId); // 현재 재생 중인 ID 설정
                 console.log("currentPlayingId", currentPlayingId)
@@ -220,7 +232,10 @@ export const MusicList = () => {
                                           <VStack space={1.5} alignItems={'flex-start'} justifyContent={'center'}>
                                               <Text bold fontSize={'md'} color={"#222222"}>스트레스 레벨 {item.stressLevel}</Text>
 
-                                              <Text color={"#616161"}>{item.Song ? (item.Song.length > 28 ? item.Song.substring(0, 26) + "..." : item.Song) : "등록된 음원이 없습니다"}
+                                              <Text
+                                                  style={{
+                                                      color: (isPlaying && currentPlayingId === item.id) ? "black" : "#616161", fontWeight: (isPlaying && currentPlayingId === item.id) ? "500" : "400"}}>
+                                                  {item.Song ? (item.Song.length > 25 ? item.Song.substring(0, 23) + "..." : item.Song) : "등록된 음원이 없습니다"}
                                               </Text>
 
                                           </VStack>
@@ -250,6 +265,7 @@ export const MusicList = () => {
                     handleInitialSelectedMusic={handleInitialSelectedMusic}
                 />
             )}
+            <Text>{JSON.stringify(data)}</Text>
         </VStack>
 
     );

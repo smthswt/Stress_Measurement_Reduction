@@ -203,7 +203,8 @@ export const HomeView = ({navigation, route}) => {
                 (_, { rows }) => {
                     if (rows.length > 0) {
                         const user = rows.item(0);
-                        setName(user.name)
+                        setName(user.name);
+                        console.log(user);
                     } else {
                         Alert.alert('Login Failed', 'Invalid username or password');
                     }

@@ -78,8 +78,9 @@ const xml =`
 </svg>
 `
 
-export default HomeBarWave = ({width, height}) => {
+const HomeBarWave = ({width, height}) => {
     return (
         <SvgXml xml={xml} width={width} height={height}/>
     )
 }
+export default HomeBarWave;
