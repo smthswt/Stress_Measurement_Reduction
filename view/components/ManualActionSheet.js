@@ -6,6 +6,7 @@ import DocumentPicker, {types} from 'react-native-document-picker'
 import {Alert, Platform} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrackPlayer from "react-native-track-player";
+import * as RNFS from "react-native-fs";
 
 
 const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
@@ -15,6 +16,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
     const [audioSize, setAudioSize] = useState(null)
     const [metaMusicTitle, setMetaMusicTitle] = useState("")
     const [metaMusicArtist, setMetaMusicArtist] = useState();
+    const [manualCopyfilePath, setManualCopyFilePath] = useState();
 
 
     const handleMp3FilePicker = useCallback(async () => {
@@ -37,33 +39,53 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
             setAudioSize(sizeInMB)
             console.log("파일 URI: ", fileResponse.uri)
 
-            await TrackPlayer.reset(); // 재생 목록 초기화
-            await TrackPlayer.add({
-                title: fileResponse.name,
-                url: fileResponse.uri,
-            });
+            // await TrackPlayer.reset(); // 재생 목록 초기화
+            // await TrackPlayer.add({
+            //     title: fileResponse.name,
+            //     url: fileResponse.uri,
+            // });
             console.log("fileResponse.name: ", fileResponse.name)
             console.log("fileResponse.uri: ", fileResponse.uri)
             console.log("track uri 수신")
 
-            let metadataReceived = false;
+            // let metadataReceived = false;
+            //
+            //     // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
+            //     TrackPlayer.addEventListener("metadata-common-received", (data) => {
+            //         if (!metadataReceived) {
+            //             console.log('Received metadata:', data);
+            //
+            //             const metaTitle = data.metadata.title
+            //             const metaArtist = data.metadata.artist
+            //
+            //             console.log('Received1 metadata title:', metaTitle);
+            //             console.log('Received1 metadata artist:', metaArtist);
+            //
+            //             setMetaMusicTitle(metaTitle)
+            //             setMetaMusicArtist(metaArtist)
+            //             metadataReceived = true
+            //         }
+            //     });
 
-                // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
-                TrackPlayer.addEventListener("metadata-common-received", (data) => {
-                    if (!metadataReceived) {
-                        console.log('Received metadata:', data);
+            // 앱 데이터 디렉토리 경로 가져오기, 백업
+            const appDataDir = Platform.select({
+                // ios: `${RNFS.DocumentDirectoryPath}/RENST`,
+                android: `${RNFS.ExternalStorageDirectoryPath}/Android/data/com.renst`,
+            });
 
-                        const metaTitle = data.metadata.title
-                        const metaArtist = data.metadata.artist
+            const parseName = fileResponse.name
+            const parseUri = fileResponse.uri
 
-                        console.log('Received1 metadata title:', metaTitle);
-                        console.log('Received1 metadata artist:', metaArtist);
+            // 백업할 위치 경로 설정
+            const backupPath = `${appDataDir}/${parseName}`;
+            console.log("backupPath :", backupPath)
+            setManualCopyFilePath(backupPath)
 
-                        setMetaMusicTitle(metaTitle)
-                        setMetaMusicArtist(metaArtist)
-                        metadataReceived = true
-                    }
-                });
+            // 파일을 백업 경로로 복사 또는 이동
+            // 예시: 파일을 복사하는 경우
+            await RNFS.copyFile(parseUri, backupPath);
+            console.log("음원 파일이 백업되었습니다.")
+
 
             console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
@@ -86,30 +108,30 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
         try {
             const {fileCopyUri, name, size, type, uri} = audioFile;
             const dataToStore = { fileCopyUri, name, size, type, uri };
-            const jsonValue = JSON.stringify(dataToStore);
-            await AsyncStorage.setItem('manualmusic', jsonValue)
-            console.log("저장된 내용 jsonValue: ", dataToStore)
-            console.log("저장된 내용 savedData: ", jsonValue)
-            console.log("선택한 음원 파일이 저장되었습니다.")
-            await AsyncStorage.setItem('selectedMusicUri', JSON.stringify(uri));
-            const getSavedDataUri = await AsyncStorage.getItem("selectedMusicUri")
+            // const jsonValue = JSON.stringify(dataToStore);
+            // await AsyncStorage.setItem('manualmusic', jsonValue)
+            // console.log("저장된 내용 jsonValue: ", dataToStore)
+            // console.log("저장된 내용 savedData: ", jsonValue)
+            // console.log("선택한 음원 파일이 저장되었습니다.")
+            // await AsyncStorage.setItem('selectedMusicUri', JSON.stringify(uri));
+            // const getSavedDataUri = await AsyncStorage.getItem("selectedMusicUri")
+            //
+            // const getJsonValue = await AsyncStorage.getItem('manualmusic');
+            // const parseData = JSON.parse(getJsonValue)
+            // const musicName = parseData.name
+            //
+            // console.log("전체 데이터: ", parseData)
+            // console.log("데이터가 정상적으로 불러와졌습니다.");
+            // console.log("musicName:", musicName )
+            //
+            // await AsyncStorage.setItem('selectedMusicName', JSON.stringify(name));
+            // const getSavedDataName = await AsyncStorage.getItem("selectedMusicName")
+            //
+            // console.log("음원 이름이 selectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
+            // console.log("음원 주소가 selectedMusicUri에 저장되었습니다", getSavedDataUri)
 
-            const getJsonValue = await AsyncStorage.getItem('manualmusic');
-            const parseData = JSON.parse(getJsonValue)
-            const musicName = parseData.name
 
-            console.log("전체 데이터: ", parseData)
-            console.log("데이터가 정상적으로 불러와졌습니다.");
-            console.log("musicName:", musicName )
-
-            await AsyncStorage.setItem('selectedMusicName', JSON.stringify(name));
-            const getSavedDataName = await AsyncStorage.getItem("selectedMusicName")
-
-            console.log("음원 이름이 selectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
-            console.log("음원 주소가 selectedMusicUri에 저장되었습니다", getSavedDataUri)
-
-
-                    MusicData(uri, name)
+                    MusicData(uri, name, manualCopyfilePath)
 
 
             console.log(">>>>>>>>>>>>>>>>>>>>>>>")

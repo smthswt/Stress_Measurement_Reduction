@@ -96,7 +96,7 @@ export const MusicList = () => {
 
     // 데이터 확인을 위한 로그 출력
     useEffect(() => {
-        LoadData();
+        // LoadData();
         console.log("Received saved data:", data);
     }, [data]);
 
@@ -107,12 +107,11 @@ export const MusicList = () => {
     };
     console.log("선택된 data id: ", selectedItemId);
 
-    const handleMusicData = async (name, uri) => {
+    const handleMusicData = async (name, uri, copyfilePath) => {
         const newMusicName = name.replace('.mp3', '');
         console.log("name: ", newMusicName)
         console.log("uri: ", uri)
-
-        let temp = [];
+        console.log("copyfilePath22", copyfilePath)
 
         try {
             // 클릭된 음악의 id를 찾아서 해당 음악의 데이터를 업데이트합니다.
@@ -121,7 +120,7 @@ export const MusicList = () => {
                     // 새로운 객체를 생성하여 순환 참조를 방지합니다.
                     const updatedItem = { ...item };
                     updatedItem.Song = newMusicName;
-                    updatedItem.Url = uri;
+                    updatedItem.Url = copyfilePath;
                     return updatedItem;
                 }
                 return item;
@@ -135,6 +134,9 @@ export const MusicList = () => {
 
             // AsyncStorage에 업데이트된 데이터를 저장합니다.
             await AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData));
+
+            const savedData = await AsyncStorage.getItem('AImusicData')
+            console.log("after save data :", savedData)
             console.log("Music data updated and saved successfully!");
         } catch (error) {
             console.error("Error updating and saving music data:", error);
@@ -173,13 +175,21 @@ export const MusicList = () => {
 
 
     const handleClickMusic = async (newMusicName, musicArtist, itemId, uri) => {
-        console.log("노래가 클릭되었습니다.", newMusicName);
+        // console.log("노래가 클릭되었습니다.", newMusicName);
         console.log("selectedSongID", itemId)
-        console.log("selected URl", uri)
+        // console.log("selected URl", uri)
 
-        // TrackPlayer.setupPlayer()
+        const savedData = await AsyncStorage.getItem('AImusicData')
 
-        if (uri) {
+        const musicData = JSON.parse(savedData);
+        const selectedMusic = musicData.find(item => item.id === itemId);
+        const selectedUri = selectedMusic ? selectedMusic.Url : null;
+        const selectedSong = selectedMusic ? selectedMusic.Song : null;
+
+        console.log("Selected SONG:", selectedSong);
+        console.log("Selected URI:", selectedUri);
+
+        if (selectedUri) {
             if (currentPlayingId === itemId) {
                 await TrackPlayer.pause(); // 노래 일시정지
                 setCurrentPlayingId(null); // 현재 재생 중인 ID 초기화
@@ -192,8 +202,8 @@ export const MusicList = () => {
                 }
                 await TrackPlayer.reset(); // 재생 목록 초기화
                 await TrackPlayer.add({
-                    url: uri,
-                    title: newMusicName,
+                    url: selectedUri,
+                    title: selectedSong,
                 });
                 setIsPlaying(true)
                 await TrackPlayer.play(); // 음원 재생
@@ -211,6 +221,10 @@ export const MusicList = () => {
         setSelectedItemId("");
         onClose();
     };
+
+    const handleMusicPlay = () => {
+
+    }
 
     return (
         // <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
@@ -265,7 +279,7 @@ export const MusicList = () => {
                     handleInitialSelectedMusic={handleInitialSelectedMusic}
                 />
             )}
-            <Text>{JSON.stringify(data)}</Text>
+            {/*<Text>{JSON.stringify(data)}</Text>*/}
         </VStack>
 
     );

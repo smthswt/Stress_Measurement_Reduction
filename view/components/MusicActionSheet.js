@@ -6,7 +6,9 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import DocumentPicker, {types} from "react-native-document-picker";
 import TrackPlayer from "react-native-track-player";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {Alert} from "react-native";
+import {Alert, Platform} from "react-native";
+import * as RNFS from "react-native-fs";
+import backdrop from "native-base/src/components/composites/Backdrop";
 
 
 const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInitialSelectedMusic}) => {
@@ -19,6 +21,7 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
     const [metaMusicTitleAI, setMetaMusicTitleAI] = useState("")
     const [metaMusicArtistAI, setMetaMusicArtistAI] = useState("");
     const [metadataReceived, setMetadataReceived] = useState(false)
+    const [copyfilePath, setCopyFilePath] = useState();
 
 
     const handleMp3Button = () => {
@@ -47,34 +50,53 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
             setAudioSize(sizeInMB)
             console.log("파일 URI: ", fileResponse.uri)
 
-            await TrackPlayer.reset(); // 재생 목록 초기화
-            await TrackPlayer.add({
-                title: fileResponse.name,
-                url: fileResponse.uri,
-            });
+            // await TrackPlayer.reset(); // 재생 목록 초기화
+            // await TrackPlayer.add({
+            //     title: fileResponse.name,
+            //     url: fileResponse.uri,
+            // });
             console.log("fileResponse.name: ", fileResponse.name)
             console.log("fileResponse.uri: ", fileResponse.uri)
             console.log("track uri 수신")
 
-            // metadata 수신 여부를 나타내는 변수
-            let metadataReceived = false;
-
-            // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 처리합니다.
-            const metadataListener = TrackPlayer.addEventListener("metadata-common-received", (data) => {
-                if (!metadataReceived) {
-                    console.log('Received metadata:', data);
-
-                    const metaTitle = data.metadata.title;
-                    const metaArtist = data.metadata.artist;
-
-                    console.log('Received metadata title:', metaTitle);
-                    console.log('Received metadata artist:', metaArtist);
-
-                    setMetaMusicTitleAI(metaTitle);
-                    setMetaMusicArtistAI(metaArtist);
-                    metadataReceived = true;
-                }
+            // 앱 데이터 디렉토리 경로 가져오기, 백업
+            const appDataDir = Platform.select({
+                // ios: `${RNFS.DocumentDirectoryPath}/RENST`,
+                android: `${RNFS.ExternalStorageDirectoryPath}/Android/data/com.renst`,
             });
+
+            const parseName = fileResponse.name
+            const parseUri = fileResponse.uri
+
+            // 백업할 위치 경로 설정
+            const backupPath = `${appDataDir}/${parseName}`;
+            console.log("backupPath :", backupPath)
+            setCopyFilePath(backupPath)
+
+            // 파일을 백업 경로로 복사 또는 이동
+            // 예시: 파일을 복사하는 경우
+            await RNFS.copyFile(parseUri, backupPath);
+            console.log("음원 파일이 백업되었습니다.")
+
+            // // metadata 수신 여부를 나타내는 변수
+            // let metadataReceived = false;
+
+            // // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 처리합니다.
+            // const metadataListener = TrackPlayer.addEventListener("metadata-common-received", (data) => {
+            //     if (!metadataReceived) {
+            //         console.log('Received metadata:', data);
+            //
+            //         const metaTitle = data.metadata.title;
+            //         const metaArtist = data.metadata.artist;
+            //
+            //         console.log('Received metadata title:', metaTitle);
+            //         console.log('Received metadata artist:', metaArtist);
+            //
+            //         setMetaMusicTitleAI(metaTitle);
+            //         setMetaMusicArtistAI(metaArtist);
+            //         metadataReceived = true;
+            //     }
+            // });
 
             console.log(">>>>>>>>>>>>>>>>>>>>>>>")
 
@@ -98,67 +120,34 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
         try {
             const {fileCopyUri, name, size, type, uri} = audioFile;
             const dataToStore = { fileCopyUri, name, size, type, uri };
-            const jsonValue = JSON.stringify(dataToStore);
-            await AsyncStorage.setItem('AIMusic', jsonValue)
-            console.log("저장된 내용 jsonValue: ", jsonValue)
-            console.log("저장된 내용 savedData: ", jsonValue)
-            console.log("선택한 음원 파일이 저장되었습니다.")
-            await AsyncStorage.setItem('AIselectedMusicUri', JSON.stringify(uri));
-            const getSavedDataUri = await AsyncStorage.getItem("AIselectedMusicUri")
+            // const jsonValue = JSON.stringify(dataToStore);
+            // await AsyncStorage.setItem('AIMusic', jsonValue)
+            // console.log("저장된 내용 jsonValue: ", jsonValue)
+            // console.log("저장된 내용 savedData: ", jsonValue)
+            // console.log("선택한 음원 파일이 저장되었습니다.")
+            // await AsyncStorage.setItem('AIselectedMusicUri', JSON.stringify(uri));
+            // const getSavedDataUri = await AsyncStorage.getItem("AIselectedMusicUri")
+            //
+            // const getJsonValue = await AsyncStorage.getItem('AIMusic');
+            // const parseData = JSON.parse(getJsonValue)
+            // const musicName = parseData.name
+            //
+            // console.log("전체 데이터: ", parseData)
+            // console.log("데이터가 정상적으로 불러와졌습니다.");
+            // console.log("musicName:", musicName )
+            //
+            // await AsyncStorage.setItem('AIselectedMusicName', JSON.stringify(name));
+            // const getSavedDataName = await AsyncStorage.getItem("AIselectedMusicName")
 
-            const getJsonValue = await AsyncStorage.getItem('AIMusic');
-            const parseData = JSON.parse(getJsonValue)
-            const musicName = parseData.name
+            // console.log("음원 이름이 AIselectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
+            // console.log("음원 주소가 AIselectedMusicUri에 저장되었습니다", getSavedDataUri)
 
-            console.log("전체 데이터: ", parseData)
-            console.log("데이터가 정상적으로 불러와졌습니다.");
-            console.log("musicName:", musicName )
-
-            await AsyncStorage.setItem('AIselectedMusicName', JSON.stringify(name));
-            const getSavedDataName = await AsyncStorage.getItem("AIselectedMusicName")
-
-            console.log("음원 이름이 AIselectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
-            console.log("음원 주소가 AIselectedMusicUri에 저장되었습니다", getSavedDataUri)
-
-            // await TrackPlayer.reset(); // 재생 목록 초기화
-            // await TrackPlayer.add({
-            //     title: name,
-            //     url: uri,
-            // });
-            // console.log("name: ", name)
-            // console.log("파일 uri: ", uri)
-            // console.log("track add 수신")
-
-            // // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
-            // TrackPlayer.addEventListener("metadata-common-received", async (data) => {
-            //     if (!metadataReceived) {
-            //         console.log('Received metadata:', data);
-
-            //         const metaTitle = data.metadata.title
-            //         const metaArtist = data.metadata.artist
-
-            //         console.log('Received metadata title:', data.metadata.title);
-            //         console.log('Received metadata artist:', data.metadata.artist);
-            //         console.log('Received metadata title2:', metaTitle);
-            //         console.log('Received metadata artist2:', metaArtist);
-
-            //         setMetaMusicTitleAI(metaTitle)
-            //         setMetaMusicArtistAI(metaArtist)
-            //         setMetadataReceived(true)
-
-            //         console.log(">>>>>>>>>>>>>>>>>>>>>>>")
-
-            //         console.log('전달2:', metaTitle);
-            //         console.log('전달3:', metaArtist);
-
-            //         // MusicData(uri, metaMusicTitleAI, metaMusicArtistAI)
-            //     }
-            // });
 
             console.log('전달0:', name);
             console.log('전달1:', uri);
+            console.log('전달2: ', copyfilePath)
 
-            MusicData(name, uri)
+            MusicData(name, uri, copyfilePath)
 
             setFileSelected(false);
             onClose();

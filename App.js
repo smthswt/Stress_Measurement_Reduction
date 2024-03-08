@@ -59,6 +59,9 @@ import EnrollingDeviceView from "./view/EnrollingDeviceView";
 import DeviceListView from "./view/DeviceListView";
 import CompleteSearchingDevice from "./view/CompleteSearchingDevice";
 import {ResetIDPW} from "./view/ResetIDPW";
+import TrackPlayer, {Capability} from "react-native-track-player";
+
+
 
 
 /**
@@ -280,6 +283,22 @@ const App = () => {
     useEffect(() => {
         SplashScreen.hide()
     }, []);
+
+    const TrackPlayerInitializer = async () => {
+        TrackPlayer.setupPlayer({ waitForBuffer: true }).then(async () => {
+            await TrackPlayer.updateOptions({
+                stopWithApp: true,
+                capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+                compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+                notificationCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+            });
+        });
+    };
+
+        useEffect(() => {
+            TrackPlayerInitializer()
+            console.log("플레이어가 성공적으로 초기화되었습니다.")
+        }, []);
 
     const LoginScreens = () => {
         return (

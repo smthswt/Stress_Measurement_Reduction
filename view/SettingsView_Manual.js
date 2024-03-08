@@ -45,13 +45,14 @@ export const SettingsView_Manual = ({ navigation }) => {
     }, []);
 
 
-    const handleMusicData = (uri, name) => {
+    const handleMusicData = (uri, name, manualCopyfilePath) => {
         const newMusicName = name.replace('.mp3', '');
         // console.log("선택된 음원 이름: ", newMusicName)
         console.log("선택된 음원 경로:", uri);
         console.log("선택된 음원 이름: ", newMusicName)
+        console.log("선택된 백업 경로", manualCopyfilePath)
         // console.log("선택된 음원 아티스트:", metaMusicArtist);
-        addOption(uri, newMusicName);
+        addOption(manualCopyfilePath, newMusicName);
     };
 
     const removeOption = (valueToRemove) => {
@@ -69,7 +70,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         });
     };
 
-    const addOption = (uri, newMusicName) => {
+    const addOption = (manualCopyfilePath, newMusicName) => {
         // 현재 가장 큰 label 값 찾기
         let maxLabel = Math.max(...options.map(option => parseInt(option.label, 10)));
         if (!isFinite(maxLabel)) {
@@ -79,7 +80,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         const newValue = maxLabel + 1;
         const newOption = {
             label: newValue,
-            uri: uri,
+            uri: manualCopyfilePath,
             value: newMusicName,
             // artist: metaMusicArtist,
         };
