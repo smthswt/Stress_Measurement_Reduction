@@ -79,7 +79,7 @@ const FirstRoute = () => {
                             setFoundUsers(users);
                             setFindPressed(true)
                         } else {
-                            Alert.alert('No User Found', 'Check the name and age again.');
+                            Alert.alert('일치하는 사용자가 없습니다.', '이름과 나이를 다시 확인해주세요.');
                         }
                     },
                 );
@@ -164,9 +164,13 @@ const FirstRoute = () => {
                                     borderColor={selectedItem === item.username ? '#2785F4' : "white"}
                                     alignItems={'center'}>
                                 <VStack>
-                                    <Text bold>{item.name}</Text>
-                                    <Text>{item.username}</Text>
-                                    <Text>{item.age}</Text>
+                                    <Text>
+                                        <Text style={{fontWeight: 'bold'}}>닉네임:</Text> {item.name}
+                                    </Text>
+                                    <Text>
+                                        <Text style={{fontWeight: 'bold'}}>아이디:</Text> {item.username}
+                                    </Text>
+                                    {/*<Text>나이: {item.age}</Text>*/}
                                 </VStack>
                                 <Box display={selectedItem === item.username ? 'block':'none'}>
                                     <Ionicons name={"checkmark-circle"} color={"#2785F4"} size={25}/>
@@ -361,7 +365,9 @@ const SecondRoute = () => {
                 <View flex={1} bg={"white"} p={5} justifyContent={"space-between"}>
                     <KeyboardAvoidingView flex={1}>
                     <VStack space={5}>
-                        <Text>아이디: {foundUser.username}</Text>
+                        <Text>
+                            <Text style={{fontWeight: 'bold'}}>아이디: </Text> {foundUser.username}
+                        </Text>
                         <FormControl isRequired>
                             <FormControl.Label _text={{bold: true}}>새로운 비밀번호</FormControl.Label>
                             <Input

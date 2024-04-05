@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "492576170303",
+    "project_id": "renst-app",
+    "storage_bucket": "renst-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492576170303:android:661cae12c9f2a8c410338a",
+        "android_client_info": {
+          "package_name": "com.renst"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMUhm-NO_AiZBN4nHSUA0sSNNqzeQ244M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

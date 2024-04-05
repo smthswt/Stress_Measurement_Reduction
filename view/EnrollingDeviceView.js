@@ -1,18 +1,43 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useContext} from "react";
 import {Box, Button, Center, HStack, Image, Text, View, VStack} from "native-base";
 import {ImageBackground, TouchableOpacity, StyleSheet, Animated} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import {Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
+import {DEVICE_ID, SERVICE_UUID} from "./module/BLEProvider";
+import {BLEContext} from "./module/BLEProvider";
 
 
 const EnrollingDeviceView = ({navigation}) => {
+    const bleContext = useContext(BLEContext)
 
     const deviceImage = require("./images/RenstDevice.png");
     const backgroundImage = require('./images/BackgroundofRenstDevice.png');
 
-    const handleSearch = () => {
-        console.log("검색 버튼 클릭")
-        navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll"})
+    // const handleSearch = () => {
+    //     console.log("검색 버튼 클릭")
+    //     navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll"})
+    // }
+
+    const handleSearch = async () => {
+        try {
+            console.log("검색 버튼 클릭")
+            // BLE 디바이스 검색
+            const device = await bleContext.findDevice(SERVICE_UUID);
+            console.log("디바이스를 찾는 중입니다...")
+            if (device) {
+                console.log("디바이스를 찾았습니다:", device.name);
+                // 디바이스를 찾았으므로 해당 디바이스에 연결
+                // await connectToDevice(device.id);
+                // 디바이스 목록 페이지로 이동
+                navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll"});
+            } else {
+                console.log("디바이스를 찾을 수 없습니다.");
+                // 디바이스를 찾지 못한 경우에 대한 처리 (선택사항)
+            }
+        } catch (error) {
+            console.error("검색 중 오류 발생:", error);
+            // 오류가 발생한 경우에 대한 처리 (선택사항)
+        }
     }
 
     const animatedValue1 = new Animated.Value(0);

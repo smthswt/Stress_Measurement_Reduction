@@ -18,9 +18,6 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
     const [fileName, setFileName] = useState("")
     const [audioFile, setAudioFile] = useState(null);
     const [audioSize, setAudioSize] = useState(null)
-    const [metaMusicTitleAI, setMetaMusicTitleAI] = useState("")
-    const [metaMusicArtistAI, setMetaMusicArtistAI] = useState("");
-    const [metadataReceived, setMetadataReceived] = useState(false)
     const [copyfilePath, setCopyFilePath] = useState();
 
 
@@ -120,28 +117,6 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
         try {
             const {fileCopyUri, name, size, type, uri} = audioFile;
             const dataToStore = { fileCopyUri, name, size, type, uri };
-            // const jsonValue = JSON.stringify(dataToStore);
-            // await AsyncStorage.setItem('AIMusic', jsonValue)
-            // console.log("저장된 내용 jsonValue: ", jsonValue)
-            // console.log("저장된 내용 savedData: ", jsonValue)
-            // console.log("선택한 음원 파일이 저장되었습니다.")
-            // await AsyncStorage.setItem('AIselectedMusicUri', JSON.stringify(uri));
-            // const getSavedDataUri = await AsyncStorage.getItem("AIselectedMusicUri")
-            //
-            // const getJsonValue = await AsyncStorage.getItem('AIMusic');
-            // const parseData = JSON.parse(getJsonValue)
-            // const musicName = parseData.name
-            //
-            // console.log("전체 데이터: ", parseData)
-            // console.log("데이터가 정상적으로 불러와졌습니다.");
-            // console.log("musicName:", musicName )
-            //
-            // await AsyncStorage.setItem('AIselectedMusicName', JSON.stringify(name));
-            // const getSavedDataName = await AsyncStorage.getItem("AIselectedMusicName")
-
-            // console.log("음원 이름이 AIselectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
-            // console.log("음원 주소가 AIselectedMusicUri에 저장되었습니다", getSavedDataUri)
-
 
             console.log('전달0:', name);
             console.log('전달1:', uri);

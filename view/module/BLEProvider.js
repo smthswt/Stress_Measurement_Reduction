@@ -2,8 +2,8 @@ import {Buffer} from 'buffer';
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import {BleManager} from 'react-native-ble-plx';
 
-const DEVICE_ID = 'ESP32_BLE';
-const SERVICE_UUID = 'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f';
+export const DEVICE_ID = 'ESP32_BLE';
+export const SERVICE_UUID = 'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f';
 const CHARACTERISTIC_UUID = 'ed890871-07e9-4967-81b1-22ce3df7728e';
 
 /**
@@ -293,7 +293,7 @@ export const BLEProvider = ({children}) => {
 
             manager.startDeviceScan(null, null, (error, device) => {
                 if (error) {
-                    console.log(error);
+                    console.log("find error: ", error);
                     setIsScanning(false);
                     reject(error); // 에러 발생 시 reject
                     return;
@@ -324,7 +324,7 @@ export const BLEProvider = ({children}) => {
     const scanAndConnect = () => {
         manager.startDeviceScan(null, null, (error, device) => {
             if (error) {
-                console.log(error);
+                console.log("ScanAndConnect error:", error);
                 return;
             }
 
