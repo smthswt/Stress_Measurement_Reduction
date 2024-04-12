@@ -19,25 +19,17 @@ import {useState, useContext, useEffect} from "react";
 import SQLite from "react-native-sqlite-storage";
 import navigationContainer from "@react-navigation/native/src/NavigationContainer";
 import {useNavigation} from "@react-navigation/native";
+import firestore from "@react-native-firebase/firestore";
 
 /**
  * React component for displaying a calendar view.
  *
- * @component
+ * @componentㅂ
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
-const db = SQLite.openDatabase(
-    {
-        name: 'RENST.db',
-        location: 'default',
-    },
-    () => {},
-    error => {
-        console.error('Error opening database: ', error);
-    }
-)
 
+/*아이디 찾기*/
 const FirstRoute = () => {
     const [name, setName] = useState('')
     const [age, setAge] = useState('')
@@ -63,27 +55,31 @@ const FirstRoute = () => {
         return valid
     };
 
-    const handleFindIDPW = () => {
+
+    const handleFindIDPW = async () => {
         const isValid = validate()
         if (isValid) {
-            db.transaction(tx => {
-                tx.executeSql(
-                    'SELECT * FROM users WHERE name = ? AND age = ?',
-                    [name, age],
-                    (_, { rows }) => {
-                        if (rows.length > 0) {
-                            const users = [];
-                            for (let i = 0; i < rows.length; i++) {
-                                users.push(rows.item(i));
-                            }
-                            setFoundUsers(users);
-                            setFindPressed(true)
-                        } else {
-                            Alert.alert('일치하는 사용자가 없습니다.', '이름과 나이를 다시 확인해주세요.');
-                        }
-                    },
-                );
-            });
+            try {
+                const userRef = firestore().collection('Users')
+                    .where('name', '==', name)
+                    .where('age', '==', age);
+                const snapshot = await userRef.get();
+                if (!snapshot.empty) {
+                    const userDoc = snapshot.docs[0];
+                    const userData = userDoc.data();
+                    console.log('userDoc:', userDoc)
+                    console.log("userData:", userData)
+
+
+                    setFoundUsers([userData]);
+                    setFindPressed(true);
+                } else {
+                    Alert.alert('일치하는 사용자가 없습니다.', '이름과 나이를 다시 확인해주세요.');
+                }
+            } catch (error) {
+                console.error('Error searching for users:', error);
+                Alert.alert('Error', 'Failed to search for users. Please try again later.');
+            }
         } else {
             Alert.alert('Invalid Form', 'Please fill in the required fields');
         }
@@ -168,7 +164,7 @@ const FirstRoute = () => {
                                         <Text style={{fontWeight: 'bold'}}>닉네임:</Text> {item.name}
                                     </Text>
                                     <Text>
-                                        <Text style={{fontWeight: 'bold'}}>아이디:</Text> {item.username}
+                                        <Text style={{fontWeight: 'bold'}}>아이디:</Text> {item.userId}
                                     </Text>
                                     {/*<Text>나이: {item.age}</Text>*/}
                                 </VStack>
@@ -189,6 +185,7 @@ const FirstRoute = () => {
 )
 };
 
+/*비밀번호 재설정*/
 const SecondRoute = () => {
     const [username, setUsername] = useState('')
     const [name, setName] = useState('')
@@ -220,23 +217,31 @@ const SecondRoute = () => {
         return valid
     };
 
-    const handleIdentityVerification = () => {
+    const handleIdentityVerification = async () => {
         const isValid = validate()
         if (isValid) {
-            db.transaction(tx => {
-                tx.executeSql(
-                    'SELECT * FROM users WHERE username = ? AND name = ? AND age = ?',
-                    [username, name, age],
-                    (_, { rows }) => {
-                        if (rows.length > 0) {
-                            setFoundUser(rows.item(0));
-                            setFindPressed(true)
-                        } else {
-                            Alert.alert('본인인증 실패', '정확한 정보를 입력하세요.');
-                        }
-                    },
-                );
-            });
+            try {
+                const userRef = firestore().collection('Users')
+                    .where('userId', '==', username)
+                    .where('name', '==', name)
+                    .where('age', '==', age);
+                const snapshot = await userRef.get();
+                if (!snapshot.empty) {
+                    const userDoc = snapshot.docs[0];
+                    const userData = userDoc.data();
+                    console.log('userDoc:', userDoc)
+                    console.log("userData:", userData)
+
+
+                    setFoundUser([userData]);
+                    setFindPressed(true);
+                } else {
+                    Alert.alert('일치하는 사용자가 없습니다.', '정보를 다시 확인해주세요.');
+                }
+            } catch (error) {
+                console.error('Error searching for users:', error);
+                Alert.alert('Error', 'Failed to search for users. Please try again later.');
+            }
         } else {
             Alert.alert('Invalid Form', 'Please fill in the required fields');
         }
@@ -266,26 +271,39 @@ const SecondRoute = () => {
 
     const [finalAlertOpen, setFinalAlertOpen] = useState(false)
 
-    const handleUpdateNewPW = () => {
+    const handleUpdateNewPW = async () => {
         const isValidPW = validatePW()
         if (isValidPW) {
-            db.transaction(tx => {
-                tx.executeSql(
-                    'UPDATE users SET password = ? WHERE username = ?',
-                    [password, username],
-                    (_, result) => {
-                        console.log('Password updated successfully');
-                        setFinalAlertOpen(true)
-                    },
-                    error => {
-                        console.error('Error updating password: ', error);
-                    }
-                );
-            });
+            try {
+                const userRef = firestore().collection('Users')
+                    .where('userId', '==', username)
+                const snapshot = await userRef.get();
+                if (!snapshot.empty) {
+                    const userDoc = snapshot.docs[0];
+                    // const userData = userDoc.data();
+
+                    // 업데이트할 데이터
+                    const updateData = {
+                        password: password,
+                    };
+
+                    // 문서 업데이트
+                    await userDoc.ref.update(updateData);
+
+                    console.log('Password updated successfully');
+                    setFinalAlertOpen(true);
+                } else {
+                    Alert.alert('사용할 수 없는 비밀번호입니다.', '정보를 다시 확인해주세요.');
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+                Alert.alert('Error', 'Failed to update password. Please try again later.');
+            }
         } else {
             Alert.alert('Invalid Form', '\n'+ Object.values(errorsPW).join('\n'));
         }
     };
+
 
     const [show, setShow] = useState(false)
     const [showAgain, setShowAgain] = useState(false)

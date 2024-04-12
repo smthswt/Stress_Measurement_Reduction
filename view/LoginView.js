@@ -19,21 +19,22 @@ const login_background = require('./images/Loginbg.png')
 import SQLite from 'react-native-sqlite-storage';
 import {UserContext} from "./module/UserProvider";
 import TrackPlayer from "react-native-track-player";
+import firestore from "@react-native-firebase/firestore";
 
 
-const db = SQLite.openDatabase(
-    {
-        name: 'RENST.db',
-        location: 'default',
-    },
-    () => {
-        console.log('Database opened successfully');
-        // Perform further operations or setup here
-    },
-    (error) => {
-        console.error('Error opening database: ', error);
-    }
-);
+// const db = SQLite.openDatabase(
+//     {
+//         name: 'RENST.db',
+//         location: 'default',
+//     },
+//     () => {
+//         console.log('Database opened successfully');
+//         // Perform further operations or setup here
+//     },
+//     (error) => {
+//         console.error('Error opening database: ', error);
+//     }
+// );
 
 
 
@@ -53,10 +54,6 @@ export const LoginView = ({ navigation, route }) => {
 
     const [show, setShow] = React.useState(false);
 
-
-    TrackPlayer.setupPlayer().then(() => {
-        // Player is ready to use
-    });
 
     const validate = () => {
         let valid = true
@@ -82,35 +79,68 @@ export const LoginView = ({ navigation, route }) => {
         }
     }, [route.params]);
 
-    const handleLogin = () => {
-        const isValid = validate()
+    // const handleLogin = () => {
+    //     const isValid = validate()
+    //     if (isValid) {
+    //         const userRef = firestore().collection('Users').where('userId', '==', username);
+    //         const snapshot = await userRef.get();
+    //         const docId = snapshot.id
+    //         console.log("snapshot:", snapshot)
+    //
+    //                         setUserId(docId)
+    //                         console.log(userId)
+    //                         navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
+    //                     } else {
+    //                         Alert.alert('오류', '정확한 아이디 및 비밀번호를 입력해주세요.');
+    //                     }
+    //                 },
+    //                 error => {
+    //                     console.error('Error during login: ', error);
+    //                     Alert.alert('오류', 'An error occurred during login');
+    //                 }
+    //             );
+    //         });
+    //     } else {
+    //         Alert.alert('오류', '아이디 및 비밀번호를 입력해주세요.');
+    //     }
+    // };
+
+    const handleLogin = async () => {
+        const isValid = validate();
         if (isValid) {
-            db.transaction((tx) => {
-                tx.executeSql(
-                    'SELECT * FROM users WHERE username = ? AND password = ?',
-                    [username, password],
-                    (_, { rows }) => {
-                        if (rows.length > 0) {
-                            // Authentication successful, navigate to Home screen or other screens
-                            const user = rows.item(0);
-                            const userId = rows.item(0).id
-                            setUserId(userId)
-                            console.log(user)
-                            navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
-                        } else {
-                            Alert.alert('오류', '정확한 아이디 및 비밀번호를 입력해주세요.');
-                        }
-                    },
-                    error => {
-                        console.error('Error during login: ', error);
-                        Alert.alert('오류', 'An error occurred during login');
+            try {
+                const userRef = firestore().collection('Users').where('userId', '==', username);
+                const snapshot = await userRef.get();
+                console.log("snapshot:", snapshot)
+
+                if (!snapshot.empty) {
+                    const userDoc = snapshot.docs[0];
+                    const userData = userDoc.data();
+                    console.log('userDoc:', userDoc)
+                    console.log("userData:", userData)
+
+                    // 비밀번호 일치 확인
+                    if (userData.password === password) {
+                        const userId = userDoc.id;
+                        setUserId(userId);
+                        console.log("userDocId: ", userId)
+                        navigation.navigate('TabScreens', { screen: 'Home', params: { name: userData.name } });
+                    } else {
+                        Alert.alert('오류', '비밀번호를 확인해주세요.');
                     }
-                );
-            });
+                } else {
+                    Alert.alert('오류', '아이디를 확인해주세요.');
+                }
+            } catch (error) {
+                console.error('Error during login: ', error);
+                Alert.alert('오류', 'An error occurred during login');
+            }
         } else {
             Alert.alert('오류', '아이디 및 비밀번호를 입력해주세요.');
         }
     };
+
+
 
     const handleRegister = () => {
         navigation.navigate("LoginScreens", {screen:"회원가입"})

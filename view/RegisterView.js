@@ -16,6 +16,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Alert} from 'react-native';
 import SQLite from 'react-native-sqlite-storage';
 import {UserContext} from "./module/UserProvider";
+import firestore from "@react-native-firebase/firestore";
+
 
 /**
  * React component for displaying a calendar view.
@@ -24,16 +26,7 @@ import {UserContext} from "./module/UserProvider";
  * @param {object} navigation - Navigation object used for navigating between screens.
  * @returns {ReactElement} - The rendered component.
  */
-const db = SQLite.openDatabase(
-    {
-      name: 'RENST.db',
-      location: 'default',
-    },
-    () => {},
-    error => {
-      console.error('Error opening database: ', error);
-    }
-)
+
 
 export const RegisterView = ({navigation}) => {
   const [formData, setData] = useState({});
@@ -43,32 +36,70 @@ export const RegisterView = ({navigation}) => {
   const [gender, setGender] = useState('male');
 
 
-  const createTables = async () => {
-    db.transaction(txn => {
-      txn.executeSql(
-          `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE, password VARCHAR, name VARCHAR, age INTEGER, gender VARCHAR)`,
-          [],
-          (sqlTxn, res) => {
-            console.log('table created successfully')
-          },
-          error => {
-            console.log("error on creating table" + error.message)
-          }
-      )
-    })
-  }
+  //add - 랜덤 유니크 문서 아이디 생성, set - 문서 아이디 지정
+  //컬랙션 생성, 사용자 정보 추가
+  const addNewUser = async () => {
+    try {
+      const isUserIdExists = await checkUserIdExists(formData.username);
 
-  useEffect(() => {
-    createTables()
-  }, []);
+      if (isUserIdExists) {
+        console.log('User already exists');
+        Alert.alert(
+            '가입 오류',
+            '기입한 정보를 확인해주세요.',
+        );
+        return; // 중복된 아이디가 있으면 함수 종료
+      }
 
-  const validate = () => {
+      const userCollection = await firestore().collection('Users');
+
+      const userDoc = await userCollection.add({
+        name: formData.name,
+        userId: formData.username,
+        password: formData.password,
+        age: formData.age,
+        gender: gender,
+      });
+
+      console.log('User registered successfully!');
+
+      return userDoc.id;
+
+    } catch (error) {
+      console.error('Error adding user:', error);
+      Alert.alert(
+          '가입 오류',
+          '다시 시도 해주세요.',
+      );
+    }
+  };
+
+
+  const checkUserIdExists = async (userId) => {
+    try {
+      const userRef = firestore().collection('Users').where('userId', '==', formData.username);
+      const snapshot = await userRef.get();
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('Error checking userId: ', error);
+      return false;
+    }
+  };
+
+
+  const validate = async () => {
     let valid = true;
     const errors = {};
 
     if (!formData.username || formData.username.trim() === '') {
       errors.username = 'Username is required';
       valid = false;
+    } else {
+      const isUserIdExists = await checkUserIdExists(formData.username);
+      if (isUserIdExists) {
+        errors.username = 'Username already exists';
+        valid = false;
+      }
     }
 
     if (!formData.password || formData.password.trim() === '') {
@@ -99,23 +130,6 @@ export const RegisterView = ({navigation}) => {
       valid = false;
     }
 
-    db.transaction(tx => {
-      tx.executeSql(
-          'SELECT * FROM users WHERE username = ?',
-          [formData.username],
-          (_, { rows }) => {
-            if (rows.length > 0) {
-              errors.username = 'Username already exists';
-              valid = false;
-              setErrors(errors);
-            }
-          },
-          error => {
-            console.error('Error checking username: ', error);
-          }
-      );
-    });
-
     setErrors(errors);
 
     return valid;
@@ -124,41 +138,21 @@ export const RegisterView = ({navigation}) => {
   const {setUserId} = useContext(UserContext)
 
   const handleSummit =  async () => {
-    const isValid = validate();
+    const isValid = await validate();
 
     if (isValid) {
       const fullFormData = {...formData, gender: gender};
-      db.transaction(tx => {
-        tx.executeSql(
-            'INSERT INTO users (username, password, name, age, gender) VALUES (?, ?, ?, ?, ?)',
-            [
-              fullFormData.username,
-              fullFormData.password,
-              fullFormData.name,
-              fullFormData.age,
-              fullFormData.gender,
-            ],
-            (_,result) => {
-              console.log('User registered successfully');
-              const userId = result.insertId
-              setUserId(userId)
-              navigation.navigate('LoginScreens', {
-                screen: 'RegisterSuccess',
-                params: { name: formData.name, username: formData.username, password:formData.password },
-              });
-            },
-            error => {
-              console.error('Error registering user in database: ', error);
-            }
-        );
-      });
+      const userDocId = await addNewUser();
+
+      console.log("userDocId :", userDocId)
+      setUserId(userDocId)
+
+      navigation.navigate('LoginScreens', {
+        screen: 'RegisterSuccess',
+        params: { name: formData.name, username: formData.username, password: formData.password },
+      })
 
       console.log(fullFormData);
-    } else {
-      Alert.alert(
-        'Invalid Form',
-        'Please fill in the required fields correctly.',
-      );
     }
   };
 

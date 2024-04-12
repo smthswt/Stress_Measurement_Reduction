@@ -16,7 +16,7 @@ import React, {useContext, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
-import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+// import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 
 /**
@@ -45,7 +45,7 @@ export const SettingsView_DeleteAccount = ({ navigation }) => {
     const[check, setCheck] = useState(false)
 
     const {userId} = useContext(UserContext)
-    console.log(userId)
+    console.log("userId :", userId)
 
     const handleDeleteAccount = async () => {
         if (check) {

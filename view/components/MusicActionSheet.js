@@ -62,17 +62,17 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
                 android: `${RNFS.ExternalStorageDirectoryPath}/Android/data/com.renst`,
             });
 
-            const parseName = fileResponse.name
-            const parseUri = fileResponse.uri
+            const backupName = fileResponse.name
+            const backupUri = fileResponse.uri
 
             // 백업할 위치 경로 설정
-            const backupPath = `${appDataDir}/${parseName}`;
+            const backupPath = `${appDataDir}/${backupName}`;
             console.log("backupPath :", backupPath)
             setCopyFilePath(backupPath)
 
             // 파일을 백업 경로로 복사 또는 이동
             // 예시: 파일을 복사하는 경우
-            await RNFS.copyFile(parseUri, backupPath);
+            await RNFS.copyFile(backupUri, backupPath);
             console.log("음원 파일이 백업되었습니다.")
 
             // // metadata 수신 여부를 나타내는 변수

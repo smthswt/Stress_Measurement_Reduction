@@ -44,31 +44,6 @@ const AnalysisDataNotFound = () => (
  * @param navigation - The navigation object used to navigate between screens.
  * @returns JSX element representing the home screen.
  */
-const db = SQLite.openDatabase(
-    {
-        name: 'RENST.db',
-        location: 'default',
-    },
-    () => {},
-    error => {
-        console.error('Error opening database: ', error);
-    }
-)
-
-const getData = async () => {
-    try {
-        const testCollection = await firestore().collection('Test')
-        const testDocument = await testCollection.doc("4nxV8Dmw6lkuPqI94ard").get();
-        console.log("test:", testDocument.data())
-
-
-        const testData = await firestore().collection('Test').doc('1').get();
-        console.log(testData.data())
-    } catch (error) {
-        console.error('Error fetching data from Firestore:', error);
-    }
-};
-
 
 
 export const HomeView = ({navigation, route}) => {
@@ -78,11 +53,6 @@ export const HomeView = ({navigation, route}) => {
      * @type {boolean}
      */
     const {isConnected} = useBLE();
-
-    useEffect(() => {
-        getData()
-        console.log("getData working")
-    }, []);
 
     /**
      * This function handles the analysis start event by navigating to the "AnalysisStart" screen.
@@ -215,47 +185,27 @@ export const HomeView = ({navigation, route}) => {
     }, []);
 
     const {userId} = useContext(UserContext)
-    console.log(userId)
+    console.log("userId:", userId)
     const [name, setName] = useState(null)
 
-    //FIRESTORE로 변경할때 참고할 코드 해당 userid가 1인 문서필드의 데이터 가져오기.
-    // getUserInfo sqlite를 파이어베이스로 교체.
-    // 특정 필드의 값이 1인 문서들을 가져오기
-    // firestore().collection('your_collection_name')
-    //     .where('your_field_name', '==', 1)
-    //     .get()
-    //     .then(querySnapshot => {
-    //         querySnapshot.forEach(doc => {
-    //             // 각 문서의 데이터를 사용할 수 있습니다.
-    //             console.log(doc.id, ' => ', doc.data());
-    //         });
-    //     })
-    //     .catch(error => {
-    //         console.error('Error fetching documents: ', error);
-    //     });
+    const getUserData = async () => {
+        try {
+            const userRef = await firestore().collection("Users");
+            const docRef = await userRef.doc(userId).get();
+            const userData = docRef.data()
+            console.log('userid:', userId) //전역 관리
+            console.log("userData :", userData)
 
+            setName(userData.name)
 
-
-    const getUserInfo = () => {
-        db.transaction(tx => {
-            tx.executeSql(
-                'SELECT * FROM users WHERE id = ?',
-                [userId],
-                (_, { rows }) => {
-                    if (rows.length > 0) {
-                        const user = rows.item(0);
-                        setName(user.name);
-                        console.log(user);
-                    } else {
-                        Alert.alert('Login Failed', 'Invalid username or password');
-                    }
-                },
-            );
-        });
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error)
+        }
     }
 
+
     useEffect(() => {
-        getUserInfo()
+        getUserData()
     }, []);
 
     const ECGwidth = useRef(new Animated.Value(0)).current;
