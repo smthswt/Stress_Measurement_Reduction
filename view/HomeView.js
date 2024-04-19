@@ -21,7 +21,6 @@ import HomeBarWave from "./icons/HomeBarWave";
 import AllResultsIcon from "./icons/AllResultsIcon";
 import AllStressIcon from "./icons/AllStressIcon";
 import {Easing} from "react-native-reanimated";
-import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
 import ECGIcon from "./icons/ECGIcon";
 import firestore from '@react-native-firebase/firestore';
@@ -185,7 +184,7 @@ export const HomeView = ({navigation, route}) => {
     }, []);
 
     const {userId} = useContext(UserContext)
-    console.log("userId:", userId)
+    console.log("userId:", userId) //전역관리
     const [name, setName] = useState(null)
 
     const getUserData = async () => {
@@ -193,7 +192,6 @@ export const HomeView = ({navigation, route}) => {
             const userRef = await firestore().collection("Users");
             const docRef = await userRef.doc(userId).get();
             const userData = docRef.data()
-            console.log('userid:', userId) //전역 관리
             console.log("userData :", userData)
 
             setName(userData.name)

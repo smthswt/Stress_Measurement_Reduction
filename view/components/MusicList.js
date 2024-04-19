@@ -11,11 +11,13 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext} from "react";
 import Music_ActionSheet from "./MusicActionSheet";
 import {Alert, TouchableOpacity} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrackPlayer from "react-native-track-player";
+import {UserContext} from "../module/UserProvider";
+import firestore from "@react-native-firebase/firestore";
 
 
 export const MusicList = () => {
@@ -24,7 +26,8 @@ export const MusicList = () => {
     const [fileExist, setFileExist] =useState(false)
     const [currentPlayingId, setCurrentPlayingId] = useState(null);
     const [selectedSongID, setSelectedSongID] = useState()
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false)
+
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
     // const folderMusic_icon = <MaterialCommunityIcons name={"folder"} size={22} color={"#FFC431"} />
@@ -64,157 +67,164 @@ export const MusicList = () => {
         },
     ]);
 
-    const LoadData = () => {
-        AsyncStorage.getItem("AImusicData")
-        console.log("AImusicData 데이터 가져옴.")
+
+    // //로컬 스토리지에서 데이터를 가져와서 data 상태를 업데이트합니다.
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const storedData = await AsyncStorage.getItem("AImusicData");
+    //             console.log("데이터가 성공적으로 가져와졌습니다1:", JSON.parse(storedData))
+    //             if (storedData !== null) {
+    //                 // const newestData = JSON.parse(storedData);
+    //                 setData(JSON.parse(storedData));
+    //                 console.log("데이터가 성공적으로 가져와졌습니다:", (data))
+    //                 // console.log("데이터가 성공적으로 가져와졌습니다:", data)
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //         }
+    //     };
+    //
+    //     fetchData().then(() => {
+    //         console.log('Data fetched successfully',);
+    //     }).catch(error => {
+    //         console.error('Error fetching data:', error);
+    //     });
+    // }, []);
+
+
+    //노래 정보 가져오기
+    const getMusicData = () => {
+        try {
+            const userRef = firestore().collection("Users").doc(userId);
+            const aiMusicRef = userRef.collection("AI_Music");
+
+            // 실시간으로 데이터베이스 변경 사항을 감지
+            aiMusicRef.onSnapshot(snapshot => {
+                const updatedData = data.map(item => {
+                    const musicData = snapshot.docs.find(doc => doc.data().itemId === item.id);
+                    if (musicData) {
+                        const { song, copyfilePath } = musicData.data();
+                        return { ...item, Song: song, Url: copyfilePath };
+                    } else {
+                        return item;
+                    }
+                });
+
+                setData(updatedData);
+            });
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+        }
     };
 
-    // 로컬 스토리지에서 데이터를 가져와서 data 상태를 업데이트합니다.
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const storedData = await AsyncStorage.getItem("AImusicData");
-                console.log("데이터가 성공적으로 가져와졌습니다1:", JSON.parse(storedData))
-                if (storedData !== null) {
-                    // const newestData = JSON.parse(storedData);
-                    setData(JSON.parse(storedData));
-                    console.log("데이터가 성공적으로 가져와졌습니다:", (data))
-                    // console.log("데이터가 성공적으로 가져와졌습니다:", data)
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData().then(() => {
-            console.log('Data fetched successfully',);
-        }).catch(error => {
-            console.error('Error fetching data:', error);
-        });
+        getMusicData();
     }, []);
 
-
-    // 데이터 확인을 위한 로그 출력
-    useEffect(() => {
-        // LoadData();
-        console.log("Received saved data:", data);
-    }, [data]);
 
 
     const openMusicActionSheet = (itemId) => {
         setSelectedItemId(itemId);
         onOpen();
     };
-    console.log("선택된 data id: ", selectedItemId);
 
+
+    const {userId} = useContext(UserContext)
+    // console.log("전역 userId:", userId) //전역관리
+
+    //노래 정보 저장
     const handleMusicData = async (name, uri, copyfilePath) => {
         const newMusicName = name.replace('.mp3', '');
         console.log("name: ", newMusicName)
         console.log("uri: ", uri)
-        console.log("copyfilePath22", copyfilePath)
+        console.log("copyfilePath: ", copyfilePath)
 
-        try {
-            // 클릭된 음악의 id를 찾아서 해당 음악의 데이터를 업데이트합니다.
-            const updatedData = data.map(item => {
-                if (item.id === selectedItemId) {
-                    // 새로운 객체를 생성하여 순환 참조를 방지합니다.
-                    const updatedItem = { ...item };
-                    updatedItem.Song = newMusicName;
-                    updatedItem.Url = copyfilePath;
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            // 상태 업데이트
-            setData(updatedData);
-            console.log("Before save updatedData:", updatedData)
 
             console.log("음원 이름, 주소 정보가 업데이트되었습니다.");
 
             // AsyncStorage에 업데이트된 데이터를 저장합니다.
-            await AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData));
+            // await AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData));
 
-            const savedData = await AsyncStorage.getItem('AImusicData')
-            console.log("after save data :", savedData)
-            console.log("Music data updated and saved successfully!");
-        } catch (error) {
-            console.error("Error updating and saving music data:", error);
-        }
-    };
+            //firebase 에 저장.
+            const userRef = await firestore().collection("Users");
+            const aiMusicRef = await userRef.doc(userId).collection("AI_Music");
 
-
-    const handleInitialSelectedMusic = () => {
-        console.log("설정 초기화 버튼 클릭");
-        // 선택된 아이템의 ID를 가져옵니다.
-        const itemId = selectedItemId;
-        // 데이터를 복제하여 변경사항을 적용합니다.
-        const updatedData = data.map(item => {
-            if (item.id === itemId) {
-                return {
-                    ...item,
-                    Song: "", // Song을 빈 문자열로 설정합니다.
-                    Url: ""   // Url을 빈 문자열로 설정합니다.
-                };
-            }
-            return item;
-        });
-        // 변경된 데이터로 상태를 업데이트합니다.
-        setData(updatedData);
-        // AsyncStorage에 업데이트된 데이터를 저장합니다.
-        AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData))
-            .then(() => {
-                console.log("음원 설정 초기화 완료");
-                console.log("초기화된 데이터: ", data)
-            })
-            .catch(error => {
-                console.error("음원 설정 초기화 실패:", error);
+            const aiMusicDoc = await aiMusicRef.add({
+                song: newMusicName,
+                copyfilePath: copyfilePath,
+                itemId: selectedItemId
             });
+
+            console.log('music file added successfully!');
+            console.log("음원 파일 경로 저장 완료.");
     };
 
 
+    //노래 데이터 초기화, 삭제
+    const handleInitialSelectedMusic = async () => {
+        console.log("설정 초기화 버튼 클릭");
 
-    const handleClickMusic = async (newMusicName, musicArtist, itemId, uri) => {
-        // console.log("노래가 클릭되었습니다.", newMusicName);
-        console.log("selectedSongID", itemId)
-        // console.log("selected URl", uri)
+        try {
+            const userRef = firestore().collection("Users").doc(userId);
+            const aiMusicRef = userRef.collection("AI_Music");
+            const querySnapshot = await aiMusicRef.where("itemId", '==', selectedItemId).get();
 
-        const savedData = await AsyncStorage.getItem('AImusicData')
-
-        const musicData = JSON.parse(savedData);
-        const selectedMusic = musicData.find(item => item.id === itemId);
-        const selectedUri = selectedMusic ? selectedMusic.Url : null;
-        const selectedSong = selectedMusic ? selectedMusic.Song : null;
-
-        console.log("Selected SONG:", selectedSong);
-        console.log("Selected URI:", selectedUri);
-
-        if (selectedUri) {
-            if (currentPlayingId === itemId) {
-                await TrackPlayer.pause(); // 노래 일시정지
-                setCurrentPlayingId(null); // 현재 재생 중인 ID 초기화
+            querySnapshot.forEach(doc => {
+                doc.ref.delete();
                 setIsPlaying(false)
-                console.log("currentPlayingId", currentPlayingId)
-            } else {
-                if (currentPlayingId) {
-                    await TrackPlayer.pause(); // 현재 재생 중인 노래 정지
-                    setIsPlaying(false)
+                console.log("선택한 노래 삭제");
+            });
+        } catch (error) {
+            console.error("Error removing document: ", error);
+        }
+
+
+    };
+
+    // console.log('------------------')
+
+
+    // 노래 재생 및 일시정지
+    const handleClickMusic = async (newMusicName, musicArtist, itemId) => {
+        try {
+            const selectedMusic = data.find(item => item.id === itemId);
+            const selectedUri = selectedMusic.Url;
+            const selectedSong = selectedMusic.Song;
+
+            console.log("Selected SONG:", selectedSong);
+            console.log("Selected URI:", selectedUri);
+
+            if (selectedUri) {
+                if (currentPlayingId === itemId) {
+                    await TrackPlayer.pause();
+                    setCurrentPlayingId(null);
+                    setIsPlaying(false);
+                } else {
+                    if (currentPlayingId) {
+                        await TrackPlayer.pause();
+                        setIsPlaying(false);
+                    }
+                    console.log("음원 재생 시작")
+                    await TrackPlayer.reset();
+                    await TrackPlayer.add({
+                        url: selectedUri,
+                        title: selectedSong,
+                    });
+                    await TrackPlayer.play();
+                    setCurrentPlayingId(itemId);
+                    setIsPlaying(true);
+                    console.log("Music playing...");
                 }
-                await TrackPlayer.reset(); // 재생 목록 초기화
-                await TrackPlayer.add({
-                    url: selectedUri,
-                    title: selectedSong,
-                });
-                setIsPlaying(true)
-                await TrackPlayer.play(); // 음원 재생
-                setCurrentPlayingId(itemId); // 현재 재생 중인 ID 설정
-                console.log("currentPlayingId", currentPlayingId)
+            } else {
+                Alert.alert("음원이 없습니다.", ".mp3 음원을 업로드 해주세요.");
             }
-        } else {
-            // 노래가 없는 경우에는 알림 창을 표시
-            Alert.alert("음원이 없습니다.", ".mp3 음원을 업로드 해주세요.");
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
         }
     };
+
+
 
 
     const closeMusicActionSheet = () => {
@@ -222,9 +232,6 @@ export const MusicList = () => {
         onClose();
     };
 
-    const handleMusicPlay = () => {
-
-    }
 
     return (
         // <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
@@ -237,33 +244,33 @@ export const MusicList = () => {
                           renderItem={({item}) => (
 
                               <TouchableOpacity activeOpacity={0.8} onPress={() => handleClickMusic(item.Song, item.Artist, item.id, item.Url)}>
-                              <Center flex={1} backgroundColor={'white'} paddingY={2} paddingX={1}>
-                                  <HStack justifyContent={"space-between"} width={"94%"} marginY={1}>
+                                  <Center flex={1} backgroundColor={'white'} paddingY={2} paddingX={1}>
+                                      <HStack justifyContent={"space-between"} width={"94%"} marginY={1}>
 
-                                      <HStack space={6} margin={2} width={"70%"} alignItems={"center"} justifyContent={'flex-start'}>
-                                          {/*{item.musicType}*/}
-                                          {music_icon}
-                                          <VStack space={1.5} alignItems={'flex-start'} justifyContent={'center'}>
-                                              <Text bold fontSize={'md'} color={"#222222"}>스트레스 레벨 {item.stressLevel}</Text>
+                                          <HStack space={6} margin={2} width={"70%"} alignItems={"center"} justifyContent={'flex-start'}>
+                                              {/*{item.musicType}*/}
+                                              {music_icon}
+                                              <VStack space={1.5} alignItems={'flex-start'} justifyContent={'center'}>
+                                                  <Text bold fontSize={'md'} color={"#222222"}>스트레스 레벨 {item.stressLevel}</Text>
 
-                                              <Text
-                                                  style={{
-                                                      color: (isPlaying && currentPlayingId === item.id) ? "black" : "#616161", fontWeight: (isPlaying && currentPlayingId === item.id) ? "500" : "400"}}>
-                                                  {item.Song ? (item.Song.length > 25 ? item.Song.substring(0, 23) + "..." : item.Song) : "등록된 음원이 없습니다"}
-                                              </Text>
+                                                  <Text
+                                                      style={{
+                                                          color: (isPlaying && currentPlayingId === item.id) ? "black" : "#616161", fontWeight: (isPlaying && currentPlayingId === item.id) ? "500" : "400"}}>
+                                                      {item.Song ? (item.Song.length > 25 ? item.Song.substring(0, 23) + "..." : item.Song) : "등록된 음원이 없습니다"}
+                                                  </Text>
 
-                                          </VStack>
+                                              </VStack>
+                                          </HStack>
+
+                                          <Button variant={"unstyled"} onPress={() => openMusicActionSheet(item.id)}>
+                                              <View width={"100%"} borderWidth={1} borderRadius={30} borderColor={"#59BCFF"} padding={1.5}>
+                                                  <MaterialIcons name={"edit"} size={20} color={"#2785F4"}/>
+                                              </View>
+                                              {/*<Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} data={item}/>*/}
+                                          </Button>
+
                                       </HStack>
-
-                                      <Button variant={"unstyled"} onPress={() => openMusicActionSheet(item.id)}>
-                                          <View width={"100%"} borderWidth={1} borderRadius={30} borderColor={"#59BCFF"} padding={1.5}>
-                                              <MaterialIcons name={"edit"} size={20} color={"#2785F4"}/>
-                                          </View>
-                                          {/*<Music_ActionSheet onOpen={onOpen} onClose={onClose} isOpen={isOpen} data={item}/>*/}
-                                      </Button>
-
-                                  </HStack>
-                              </Center>
+                                  </Center>
                               </TouchableOpacity>
 
                           )}/>
@@ -284,4 +291,3 @@ export const MusicList = () => {
 
     );
 };
-

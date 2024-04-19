@@ -16,6 +16,8 @@ import React, {useContext, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
+import firestore from "@react-native-firebase/firestore";
+import {Alert} from "react-native";
 // import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 
@@ -28,16 +30,6 @@ import {UserContext} from "./module/UserProvider";
  *
  */
 
-const db = SQLite.openDatabase(
-    {
-        name: 'RENST.db',
-        location: 'default',
-    },
-    () => {},
-    error => {
-        console.error('Error opening database: ', error);
-    }
-)
 
 export const SettingsView_DeleteAccount = ({ navigation }) => {
 
@@ -45,32 +37,31 @@ export const SettingsView_DeleteAccount = ({ navigation }) => {
     const[check, setCheck] = useState(false)
 
     const {userId} = useContext(UserContext)
-    console.log("userId :", userId)
+
+
 
     const handleDeleteAccount = async () => {
         if (check) {
-            db.transaction(tx => {
-                tx.executeSql(
-                    'DELETE FROM users WHERE id = ?',
-                    [userId],
-                    (_, { rowsAffected }) => {
-                        if (rowsAffected > 0) {
-                            console.log('User deleted successfully');
-                        } else {
-                            console.log('User deletion failed');
-                        }
-                    },
-                    error => {
-                        console.error('Error deleting user: ', error);
-                        // Handle error case while deleting user
-                    }
-                );
-            })
-            await (navigation.navigate("LoginScreens", {screen:"Login"}));
+            try {
+                const userRef = firestore().collection('Users').doc(userId);
+                const snapshot = await userRef.get();
+
+                if (snapshot.exists) {
+                    await userRef.delete();
+                    await (navigation.navigate("LoginScreens", {screen:"Login"}));
+                    Alert.alert('성공', '계정이 성공적으로 삭제되었습니다.');
+                    console.log("탈퇴 사유 :", feedback)
+                } else {
+                    Alert.alert('오류', '사용자를 찾을 수 없습니다.');
+                }
+            } catch (error) {
+                console.error("Error deleting account: ", error);
+                Alert.alert('오류', '계정 삭제 중 오류가 발생했습니다. 다시 시도 해주세요.');
+            }
         } else {
-            console.log('Please check the confirmation checkbox before deleting');
+            Alert.alert('오류', '정보를 확인해주세요.');
         }
-    };
+    }
 
 
     return (

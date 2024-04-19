@@ -22,19 +22,6 @@ import TrackPlayer from "react-native-track-player";
 import firestore from "@react-native-firebase/firestore";
 
 
-// const db = SQLite.openDatabase(
-//     {
-//         name: 'RENST.db',
-//         location: 'default',
-//     },
-//     () => {
-//         console.log('Database opened successfully');
-//         // Perform further operations or setup here
-//     },
-//     (error) => {
-//         console.error('Error opening database: ', error);
-//     }
-// );
 
 
 
@@ -79,31 +66,18 @@ export const LoginView = ({ navigation, route }) => {
         }
     }, [route.params]);
 
-    // const handleLogin = () => {
-    //     const isValid = validate()
-    //     if (isValid) {
-    //         const userRef = firestore().collection('Users').where('userId', '==', username);
-    //         const snapshot = await userRef.get();
-    //         const docId = snapshot.id
-    //         console.log("snapshot:", snapshot)
-    //
-    //                         setUserId(docId)
-    //                         console.log(userId)
-    //                         navigation.navigate('TabScreens', { screen: 'Home', params:{name:user.name} });
-    //                     } else {
-    //                         Alert.alert('오류', '정확한 아이디 및 비밀번호를 입력해주세요.');
-    //                     }
-    //                 },
-    //                 error => {
-    //                     console.error('Error during login: ', error);
-    //                     Alert.alert('오류', 'An error occurred during login');
-    //                 }
-    //             );
-    //         });
-    //     } else {
-    //         Alert.alert('오류', '아이디 및 비밀번호를 입력해주세요.');
-    //     }
-    // };
+    useEffect(() => {
+        // TrackPlayer를 초기화하는 코드
+        TrackPlayer.setupPlayer()
+            .catch(error => {
+                console.log("Error in TrackPlayer setup:", error)
+            });
+
+        return () => {
+            console.log("setupPlayer 실행")
+        };
+    }, []);
+
 
     const handleLogin = async () => {
         const isValid = validate();
@@ -124,6 +98,8 @@ export const LoginView = ({ navigation, route }) => {
                         const userId = userDoc.id;
                         setUserId(userId);
                         console.log("userDocId: ", userId)
+                        // await TrackPlayer.setupPlayer()
+                        console.log("setupPlayer 실행")
                         navigation.navigate('TabScreens', { screen: 'Home', params: { name: userData.name } });
                     } else {
                         Alert.alert('오류', '비밀번호를 확인해주세요.');

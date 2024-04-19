@@ -5,7 +5,6 @@ import React, {useCallback, useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import DocumentPicker, {types} from "react-native-document-picker";
 import TrackPlayer from "react-native-track-player";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Alert, Platform} from "react-native";
 import * as RNFS from "react-native-fs";
 import backdrop from "native-base/src/components/composites/Backdrop";
@@ -52,9 +51,9 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
             //     title: fileResponse.name,
             //     url: fileResponse.uri,
             // });
-            console.log("fileResponse.name: ", fileResponse.name)
-            console.log("fileResponse.uri: ", fileResponse.uri)
-            console.log("track uri 수신")
+            // console.log("fileResponse.name: ", fileResponse.name)
+            // console.log("fileResponse.uri: ", fileResponse.uri)
+            // console.log("track uri 수신")
 
             // 앱 데이터 디렉토리 경로 가져오기, 백업
             const appDataDir = Platform.select({
@@ -70,7 +69,7 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
             console.log("backupPath :", backupPath)
             setCopyFilePath(backupPath)
 
-            // 파일을 백업 경로로 복사 또는 이동
+            // 앱 내 데이터 백업 경로로 음원 파일복사/저장
             // 예시: 파일을 복사하는 경우
             await RNFS.copyFile(backupUri, backupPath);
             console.log("음원 파일이 백업되었습니다.")
