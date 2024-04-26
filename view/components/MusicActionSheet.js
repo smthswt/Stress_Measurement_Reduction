@@ -65,7 +65,7 @@ const Music_ActionSheet = ({onOpen, onClose, isOpen, data, MusicData, handleInit
             const backupUri = fileResponse.uri
 
             // 백업할 위치 경로 설정
-            const backupPath = `${appDataDir}/${backupName}`;
+            const backupPath = `${appDataDir}/ai-${backupName}`;
             console.log("backupPath :", backupPath)
             setCopyFilePath(backupPath)
 

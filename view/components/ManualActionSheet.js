@@ -14,8 +14,8 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
     const [fileName, setFileName] = useState("")
     const [audioFile, setAudioFile] = useState(null);
     const [audioSize, setAudioSize] = useState(null)
-    const [metaMusicTitle, setMetaMusicTitle] = useState("")
-    const [metaMusicArtist, setMetaMusicArtist] = useState();
+    // const [metaMusicTitle, setMetaMusicTitle] = useState("")
+    // const [metaMusicArtist, setMetaMusicArtist] = useState();
     const [manualCopyfilePath, setManualCopyFilePath] = useState();
 
 
@@ -39,33 +39,10 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
             setAudioSize(sizeInMB)
             console.log("파일 URI: ", fileResponse.uri)
 
-            // await TrackPlayer.reset(); // 재생 목록 초기화
-            // await TrackPlayer.add({
-            //     title: fileResponse.name,
-            //     url: fileResponse.uri,
-            // });
             console.log("fileResponse.name: ", fileResponse.name)
             console.log("fileResponse.uri: ", fileResponse.uri)
             console.log("track uri 수신")
 
-            // let metadataReceived = false;
-            //
-            //     // AudioCommonMetadataReceived 이벤트를 구독하여 수신된 메타데이터를 콘솔에 출력합니다.
-            //     TrackPlayer.addEventListener("metadata-common-received", (data) => {
-            //         if (!metadataReceived) {
-            //             console.log('Received metadata:', data);
-            //
-            //             const metaTitle = data.metadata.title
-            //             const metaArtist = data.metadata.artist
-            //
-            //             console.log('Received1 metadata title:', metaTitle);
-            //             console.log('Received1 metadata artist:', metaArtist);
-            //
-            //             setMetaMusicTitle(metaTitle)
-            //             setMetaMusicArtist(metaArtist)
-            //             metadataReceived = true
-            //         }
-            //     });
 
             // 앱 데이터 디렉토리 경로 가져오기, 백업
             const appDataDir = Platform.select({
@@ -77,7 +54,7 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
             const parseUri = fileResponse.uri
 
             // 백업할 위치 경로 설정
-            const backupPath = `${appDataDir}/${parseName}`;
+            const backupPath = `${appDataDir}/manual-${parseName}`;
             console.log("backupPath :", backupPath)
             setManualCopyFilePath(backupPath)
 
@@ -108,27 +85,6 @@ const ManualActionSheet  = ({onOpen, onClose, isOpen, MusicData}) => {
         try {
             const {fileCopyUri, name, size, type, uri} = audioFile;
             const dataToStore = { fileCopyUri, name, size, type, uri };
-            // const jsonValue = JSON.stringify(dataToStore);
-            // await AsyncStorage.setItem('manualmusic', jsonValue)
-            // console.log("저장된 내용 jsonValue: ", dataToStore)
-            // console.log("저장된 내용 savedData: ", jsonValue)
-            // console.log("선택한 음원 파일이 저장되었습니다.")
-            // await AsyncStorage.setItem('selectedMusicUri', JSON.stringify(uri));
-            // const getSavedDataUri = await AsyncStorage.getItem("selectedMusicUri")
-            //
-            // const getJsonValue = await AsyncStorage.getItem('manualmusic');
-            // const parseData = JSON.parse(getJsonValue)
-            // const musicName = parseData.name
-            //
-            // console.log("전체 데이터: ", parseData)
-            // console.log("데이터가 정상적으로 불러와졌습니다.");
-            // console.log("musicName:", musicName )
-            //
-            // await AsyncStorage.setItem('selectedMusicName', JSON.stringify(name));
-            // const getSavedDataName = await AsyncStorage.getItem("selectedMusicName")
-            //
-            // console.log("음원 이름이 selectedMusicName에 저장되었습니다", JSON.parse(getSavedDataName))
-            // console.log("음원 주소가 selectedMusicUri에 저장되었습니다", getSavedDataUri)
 
 
                     MusicData(uri, name, manualCopyfilePath)

@@ -23,10 +23,11 @@ import firestore from "@react-native-firebase/firestore";
 export const MusicList = () => {
     const { isOpen, onOpen, onClose } = useDisclose();
     const [selectedItemId, setSelectedItemId] = useState("");
-    const [fileExist, setFileExist] =useState(false)
     const [currentPlayingId, setCurrentPlayingId] = useState(null);
-    const [selectedSongID, setSelectedSongID] = useState()
     const [isPlaying, setIsPlaying] = useState(false)
+
+    const {userId} = useContext(UserContext)
+    // console.log("전역 userId:", userId) //전역관리
 
 
     const music_icon = <Ionicons name="musical-notes-sharp" size={22} color={"#59BCFF"} />
@@ -68,31 +69,6 @@ export const MusicList = () => {
     ]);
 
 
-    // //로컬 스토리지에서 데이터를 가져와서 data 상태를 업데이트합니다.
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const storedData = await AsyncStorage.getItem("AImusicData");
-    //             console.log("데이터가 성공적으로 가져와졌습니다1:", JSON.parse(storedData))
-    //             if (storedData !== null) {
-    //                 // const newestData = JSON.parse(storedData);
-    //                 setData(JSON.parse(storedData));
-    //                 console.log("데이터가 성공적으로 가져와졌습니다:", (data))
-    //                 // console.log("데이터가 성공적으로 가져와졌습니다:", data)
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching data:', error);
-    //         }
-    //     };
-    //
-    //     fetchData().then(() => {
-    //         console.log('Data fetched successfully',);
-    //     }).catch(error => {
-    //         console.error('Error fetching data:', error);
-    //     });
-    // }, []);
-
-
     //노래 정보 가져오기
     const getMusicData = () => {
         try {
@@ -130,35 +106,46 @@ export const MusicList = () => {
     };
 
 
-    const {userId} = useContext(UserContext)
-    // console.log("전역 userId:", userId) //전역관리
-
     //노래 정보 저장
     const handleMusicData = async (name, uri, copyfilePath) => {
         const newMusicName = name.replace('.mp3', '');
-        console.log("name: ", newMusicName)
-        console.log("uri: ", uri)
-        console.log("copyfilePath: ", copyfilePath)
+        console.log("name: ", newMusicName);
+        console.log("uri: ", uri);
+        console.log("copyfilePath: ", copyfilePath);
 
+        try {
 
-            console.log("음원 이름, 주소 정보가 업데이트되었습니다.");
+            const userRef = firestore().collection("Users").doc(userId);
+            const aiMusicRef = userRef.collection("AI_Music");
 
-            // AsyncStorage에 업데이트된 데이터를 저장합니다.
-            // await AsyncStorage.setItem("AImusicData", JSON.stringify(updatedData));
+            // 이미 같은 itemId를 가진 문서가 있는지 확인
+            const querySnapshot = await aiMusicRef.where("itemId", "==", selectedItemId).get();
 
-            //firebase 에 저장.
-            const userRef = await firestore().collection("Users");
-            const aiMusicRef = await userRef.doc(userId).collection("AI_Music");
+            if (!querySnapshot.empty) {
+                // 이미 존재하는 문서가 있을 경우 해당 문서를 업데이트
+                querySnapshot.forEach(doc => {
+                    doc.ref.update({
+                        song: newMusicName,
+                        copyfilePath: copyfilePath,
+                    });
+                    console.log("기존에 있던 음악 데이터 업데이트 완료.");
+                });
+            } else {
+                // 같은 itemId를 가진 문서가 없을 경우 새로운 문서 추가
+                const aiMusicDoc = await aiMusicRef.add({
+                    song: newMusicName,
+                    copyfilePath: copyfilePath,
+                    itemId: selectedItemId
+                });
 
-            const aiMusicDoc = await aiMusicRef.add({
-                song: newMusicName,
-                copyfilePath: copyfilePath,
-                itemId: selectedItemId
-            });
-
-            console.log('music file added successfully!');
-            console.log("음원 파일 경로 저장 완료.");
+                console.log('New music file added successfully!');
+                console.log("새로운 음원 파일 경로 저장 완료.");
+            }
+        } catch (error) {
+            console.error("Error updating music data:", error);
+        }
     };
+
 
 
     //노래 데이터 초기화, 삭제
@@ -188,41 +175,61 @@ export const MusicList = () => {
     // 노래 재생 및 일시정지
     const handleClickMusic = async (newMusicName, musicArtist, itemId) => {
         try {
-            const selectedMusic = data.find(item => item.id === itemId);
-            const selectedUri = selectedMusic.Url;
-            const selectedSong = selectedMusic.Song;
+            console.log("itemid :", itemId);
+            const userRef = firestore().collection("Users").doc(userId);
+            const selectedMusicRef = userRef.collection("AI_Music");
+            const musicSnapshot = await selectedMusicRef.where("itemId", '==', itemId).get();
 
-            console.log("Selected SONG:", selectedSong);
-            console.log("Selected URI:", selectedUri);
+            // Promise 배열 생성
+            const promises = musicSnapshot.docs.map(async doc => {
+                // 문서의 데이터를 콘솔에 출력
+                console.log("data :", doc.data());
 
-            if (selectedUri) {
-                if (currentPlayingId === itemId) {
-                    await TrackPlayer.pause();
-                    setCurrentPlayingId(null);
-                    setIsPlaying(false);
-                } else {
-                    if (currentPlayingId) {
+                const selectedSong = doc.data().song;
+                const selectedUri = doc.data().copyfilePath;
+                console.log("Song :", selectedSong);
+                console.log("Uri :", selectedUri);
+
+                // 음원이 선택되면 음원을 재생합니다.
+                if (selectedUri) {
+                    // 현재 재생 중인 음악이 선택된 음악과 동일한 경우, 일시 중지합니다.
+                    if (currentPlayingId === itemId) {
                         await TrackPlayer.pause();
+                        setCurrentPlayingId(null);
                         setIsPlaying(false);
+                    } else {
+                        // 다른 음악을 재생합니다.
+                        if (currentPlayingId) {
+                            await TrackPlayer.pause();
+                            setIsPlaying(false);
+                        }
+                        console.log("음원 재생 시작");
+                        await TrackPlayer.reset();
+                        await TrackPlayer.add({
+                            url: selectedUri,
+                            title: selectedSong,
+                        });
+                        await TrackPlayer.play();
+                        setCurrentPlayingId(itemId);
+                        setIsPlaying(true);
+                        console.log("Music playing...");
                     }
-                    console.log("음원 재생 시작")
-                    await TrackPlayer.reset();
-                    await TrackPlayer.add({
-                        url: selectedUri,
-                        title: selectedSong,
-                    });
-                    await TrackPlayer.play();
-                    setCurrentPlayingId(itemId);
-                    setIsPlaying(true);
-                    console.log("Music playing...");
+                } else {
+                    // 선택된 음악에 대한 음원이 없는 경우 경고를 표시합니다.
+                    console.log("음원이 없습니다.");
+                    Alert.alert("음원이 없습니다.", ".mp3 음원을 업로드 해주세요.");
                 }
-            } else {
-                Alert.alert("음원이 없습니다.", ".mp3 음원을 업로드 해주세요.");
-            }
+            });
+            console.log('>>>>>>>')
+            // 모든 비동기 작업을 병렬로 실행
+            await Promise.all(promises);
         } catch (error) {
+            console.log("에러 발생");
             console.error("Error fetching data from Firestore:", error);
         }
     };
+
+
 
 
 

@@ -1,7 +1,11 @@
 import {Alert, View} from "react-native";
 import {AlertDialog, Box, Button, Center, Divider, HStack, Pressable, Text, VStack} from "native-base";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import {useDispatch, useSelector} from "react-redux";
+import {getConnectedDevices} from "../data/RealmDatabase";
+import {fetchReports, setConnectDevice, setConnectionStatus} from "../data/store";
+import {useBLE} from "./module/BLEProvider";
 
 /**
  * Component for displaying settings view.
@@ -44,6 +48,35 @@ export const SettingsView = ({navigation}) => {
     const handleQuitAccount = () => {
         navigation.navigate("서비스 탈퇴")
     }
+
+
+    const {connectAndSubscribe} = useBLE();
+
+    const isConnected = useSelector(state => state.device.isConnected);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        console.log("Home useEffect");
+
+        async function deviceConnect() {
+            let device = await getConnectedDevices();
+            if (device) {
+                console.log(`connecting to device: ${device.id}`);
+
+                let success = await connectAndSubscribe(device.id);
+                if (success) {
+                    dispatch(setConnectDevice(device.id));
+                    dispatch(setConnectionStatus(true));
+                } else {
+                    // 연결 불안정 플래그 처리 하거나 연결 해제 상태를 기록
+                }
+            }
+        }
+
+        deviceConnect();
+        dispatch(fetchReports());
+
+    }, []);
 
 
     return (

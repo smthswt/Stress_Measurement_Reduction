@@ -59,8 +59,10 @@ import EnrollingDeviceView from "./view/EnrollingDeviceView";
 import DeviceListView from "./view/DeviceListView";
 import CompleteSearchingDevice from "./view/CompleteSearchingDevice";
 import {ResetIDPW} from "./view/ResetIDPW";
-// import TrackPlayer, {Capability} from "react-native-track-player";
-
+import {Provider} from "react-redux";
+import store from "./data/store";
+import {initializeRealm} from "./data/RealmDatabase";
+import Realm from "realm";
 
 
 
@@ -284,21 +286,6 @@ const App = () => {
         SplashScreen.hide()
     }, []);
 
-    // const TrackPlayerInitializer = async () => {
-    //     TrackPlayer.setupPlayer({ waitForBuffer: true }).then(async () => {
-    //         await TrackPlayer.updateOptions({
-    //             stopWithApp: true,
-    //             capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-    //             compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-    //             notificationCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-    //         });
-    //     });
-    // };
-
-        // useEffect(() => {
-        //     TrackPlayerInitializer()
-        //     console.log("플레이어가 성공적으로 초기화되었습니다.")
-        // }, []);
 
     const LoginScreens = () => {
         return (
@@ -384,12 +371,53 @@ const App = () => {
         }
     };
 
-    useEffect(() => {
+    // useEffect(() => {
+    //     requestLocationPermission();
+    // }, []);
+
+
+    const requestBLEPermissions = async () => {
+        if (Platform.OS === "android" && Platform.Version >= 31) {
+            const granted = await PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+                PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
+                PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT
+            ]);
+
+            if (granted['android.permission.BLUETOOTH_SCAN'] === PermissionsAndroid.RESULTS.GRANTED &&
+                granted['android.permission.BLUETOOTH_ADVERTISE'] === PermissionsAndroid.RESULTS.GRANTED &&
+                granted['android.permission.BLUETOOTH_CONNECT'] === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log("All BLE permissions granted");
+                // 여기서 BLE 관련 작업을 수행할 수 있습니다.
+            } else {
+                console.log("BLE permissions denied");
+                // 권한이 거부된 경우 처리 로직
+            }
+        }
+    }
+
+
+    useEffect( () => {
+
+        async function fetch() {
+            await initializeRealm().catch(error => {
+                console.error("Error opening Realm: ", error);
+            });
+
+            if (__DEV__) {
+                console.log("Development mode");
+                Realm.deleteFile({});
+            }
+        }
+
+        fetch();
         requestLocationPermission();
+        requestBLEPermissions();
     }, []);
 
+
     return (
-        // <Provider store={store}>
+        <Provider store={store}>
         <UserProvider>
         <BLEProvider>
             <NativeBaseProvider>
@@ -465,6 +493,7 @@ const App = () => {
             </NativeBaseProvider>
         </BLEProvider>
         </UserProvider>
+        </Provider>
     );
 };
 
