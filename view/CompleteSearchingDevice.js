@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useContext, useRef, useState} from "react";
 import {AlertDialog, Button, Center, HStack, Pressable, ScrollView, Text, View, VStack} from "native-base";
 import {RefreshControl, TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -12,13 +12,18 @@ import moment from "moment";
 import {Paragraph} from "react-native-paper";
 import {DeviceItem} from "./components/DeviceItem";
 import DeviceListView from "./DeviceListView";
+import firestore from "@react-native-firebase/firestore";
+import {UserContext} from "./module/UserProvider";
 
 
 const CompleteSearchingDevice = ({navigation, route}) => {
     const [clickStates, setClickStates] = useState({});
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, SetIsLoading] = useState(false);
+    const [isExist, setIsExist] = useState(false)
+    const [isConnect, setIsConnect] = useState(true)
     const [refreshing, setRefreshing] = React.useState(false);
+    const {setdevicesId} = useContext(UserContext)
     const devices = route.params.devices; // Accessing devices from route params
 
     // 클릭된 디바이스의 정보를 저장하는 상태 변수
@@ -36,25 +41,26 @@ const CompleteSearchingDevice = ({navigation, route}) => {
 
 
     const handleClickDevice = (name, id) => {
-        console.log(`연결할 디바이스 선택함 - Name: ${name}`);
         setSelectedDevice({ name, id });
         setClickStates((prevClickStates) => ({
             ...prevClickStates,
             [name]: !prevClickStates[name],
         }));
-        console.log("click 상태: ", clickStates);
+        console.log("click 상태: ", name, " : ", id);
     };
 
 
     // 등록하기 버튼을 눌렀을 때 호출되는 함수
     const handleEnroll = () => {
-        console.log("등록하기");
+        console.log("기기 등록하기");
+        console.log('선택된 기기: ', selectedDevice)
         if (selectedDevice) {
             // 선택된 디바이스 정보를 이용하여 연결 시도
             handleDeviceConnect(selectedDevice.id, selectedDevice.name);
         }
     };
 
+    const {userId} = useContext(UserContext)
 
     const handleDeviceConnect = async (id, name) => {
         console.log(`handleDeviceConnect: ${id}, name=${name}`);
@@ -66,22 +72,59 @@ const CompleteSearchingDevice = ({navigation, route}) => {
                 let now = moment();
                 console.log(now);
 
-                if (!getDeviceById(id))
-                    addDevice(id, name, now.toDate(), true);
-                console.log("Adding new device:", id, name)
-                // addDevice({id: id, name: name, registrationDate: now.toDate(), isConnected: true});
+                const userRef = firestore().collection("Users").doc(userId);
+                const checkExist = userRef.collection("Ble_Devices").where("id", "==", id).where("name", "==", name);
 
-                dispatch(setConnectDevice(id));
-                dispatch(setConnectionStatus(true));
-                setIsMessageOpen(true);
+                // Firestore에서 기기를 확인하고 처리하는 부분을 비동기로 처리
+                checkExist.get().then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        console.log("Device does not exist in Firestore");
+                        // 해당 기기가 존재하지 않는 경우에 대한 처리
+                        setIsConnect(false);
+                        console.log("isConnect :", isConnect);
 
-                console.log("블루투스 기기 등록 완료")
-                setIsOpen(true);
+                        // FIREBASE로 교체
+                        if (!isExist) {
+                            const deviceManage = userRef.collection("Ble_Devices");
+                            deviceManage.doc().set({
+                                name: name,
+                                id: id,
+                                registrationDate: now.toDate(),
+                                isConnect: isConnect,
+                            }).then(() => {
+                                console.log("Adding new device:", id, name);
+
+                                // addDevice({id: id, name: name, registrationDate: now.toDate(), isConnected: true});
+
+                                // setdevicesId(id)
+
+                                // 디바이스 등록 완료 후 처리
+                                dispatch(setConnectDevice(id));
+                                dispatch(setConnectionStatus(true));
+                                setIsMessageOpen(true);
+
+                                console.log("블루투스 기기 등록 완료");
+                                setIsOpen(true);
+                            }).catch((error) => {
+                                console.error("Error adding device:", error);
+                            });
+                        }
+                    } else {
+                        console.log("Device already exists in Firestore");
+                        // 이미 해당 기기가 존재하는 경우에 대한 처리
+                        setIsExist(true);
+                        alert("이미 등록된 기기입니다.")
+                        console.log("isExist :", isExist);
+                    }
+                }).catch((error) => {
+                    console.error("Error checking document:", error);
+                });
             }
         } catch (e) {
             console.error("Error connecting to device: ", e);
         }
     }
+
 
     /**
      * Handles the successful connection event.
@@ -92,32 +135,13 @@ const CompleteSearchingDevice = ({navigation, route}) => {
      * @return {void} No return value.
      */
     const handleConnectOk = () => {
-        console.log("handleConnectOk");
-        setIsMessageOpen(false);
+        console.log("연결 확인");
+        // setIsMessageOpen(false);
+        setIsOpen(false);
 
-        navigation.goBack();
+        navigation.navigate("SettingScreens", {screen: "Device"});
     }
 
-
-
-    // const handleClickDevice = () => {
-    //     console.log(`연결할 디바이스 선택함 - device name: ${name}`);
-    //     // setIsClick(true);
-    //     if (clickCount === 0) {
-    //         setIsClick(true);
-    //         setClickCount(1);
-    //     } else {
-    //         setClickCount(0);
-    //         setIsClick(false)
-    //     }
-    // };
-    // console.log(isClick);
-    // console.log(clickCount)
-
-    // const handleEnroll = () => {
-    //     console.log("등록하기")
-    //     setIsOpen(true);
-    // };
 
     //이건 빼자
     const  handleSearchAgain = () => {

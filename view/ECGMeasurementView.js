@@ -10,7 +10,7 @@ import {
   Modal,
   HStack,
 } from 'native-base';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useBLE} from './module/BLEProvider';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -23,6 +23,10 @@ import EmotionTired from "./icons/EmotionTired";
 import EmotionSad from "./icons/EmotionSad";
 import EmotionAngry from "./icons/EmotionAngry";
 import {ImageBackground} from "react-native";
+import {UserContext} from "./module/UserProvider";
+import firestore from "@react-native-firebase/firestore";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchReports} from "../data/store";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -30,6 +34,9 @@ import {ImageBackground} from "react-native";
  * @returns {JSX.Element} The Electrocardiogram Measurement view component.
  */
 export const ECGMeasurementView = ({route}) => {
+  const dispatch = useDispatch();
+  // const reports = useSelector(state => state.report.reports);
+  // console.log("reports :", reports)
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
@@ -43,14 +50,16 @@ export const ECGMeasurementView = ({route}) => {
    * @throws {Error} If connection to the Arduino device fails.
    * @returns {boolean} True if the data was successfully sent, false otherwise.
    */
-  const {sendData, receivedData} = useBLE();
+  // const {sendData, receivedData} = useBLE();
+  const {analysisStart, analysisFinish, getRRList, getHRList, getAvgHR, getSDNN, getStressIndex} = useBLE();
 
   /**
    * Represents the total time in minutes.
    *
    * @type {number}
    */
-  const totalTime = 50;
+      //측정 분석 시간 60초, 테스트할땐 40초
+  const totalTime = 40;
 
   /**
    * Reference to a message element used in a React component.
@@ -119,14 +128,13 @@ export const ECGMeasurementView = ({route}) => {
    * @function startAnalysis
    * @returns {void}
    */
-  const startAnalysis = () => {
-    const message = 'AnalysisStart';
-    console.log(message);
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
+  const {isConnected} = useBLE();
+
+  const startAnalysis = async () => {
+      const message = 'AnalysisStart';
+      console.log(message);
+      await analysisStart();
+
   };
 
   /**
@@ -135,14 +143,42 @@ export const ECGMeasurementView = ({route}) => {
    * @function endAnalysis
    * @returns {void}
    */
-  const endAnalysis = () => {
+
+  const {userId} = useContext(UserContext)
+
+  const endAnalysis = async () => {
     const message = 'AnalysisEnd';
     console.log(message);
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
+
+    const userRef = firestore().collection("Users").doc(userId);
+    const reportRef = userRef.collection("Report");
+
+    await analysisFinish();
+
+    let rrList = getRRList();
+    let hrList = getHRList();
+
+    console.log(`HR: ${hrList}, Length: ${hrList.length}`);
+    console.log(`RR: ${rrList}, Length: ${rrList.length}`);
+
+    let now = moment();
+    // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
+    await reportRef.add({
+      name : userId,
+      avgHr : getAvgHR(),
+      sdnn : getSDNN(),
+      stressIndex : getStressIndex(),
+      hrList : hrList,
+      rrList : rrList,
+      createAt : now.toDate(),
+    })
+
+    dispatch(fetchReports());
+    // sendData(
+    //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+    //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+    //   message,
+    // );
   };
 
   /**
@@ -186,13 +222,14 @@ export const ECGMeasurementView = ({route}) => {
    * Data processing received from BLE
    * Called whenever receivedData is updated.
    */
-  useEffect(() => {
-    if (receivedData === null || receivedData === '') {
-      return;
-    }
-
-    console.log('Received Data: ' + receivedData);
-  }, [receivedData]);
+  //제거?
+  // useEffect(() => {
+  //   if (receivedData === null || receivedData === '') {
+  //     return;
+  //   }
+  //
+  //   console.log('Received Data: ' + receivedData);
+  // }, [receivedData]);
 
   /**
    * This function opens the Stop Analysis message box.

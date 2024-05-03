@@ -3,6 +3,7 @@ import React, {createContext, useContext, useRef, useState} from "react";
 import {BleManager} from "react-native-ble-plx";
 import {useDispatch} from "react-redux";
 import {setConnectDevice, setConnectionStatus} from "../../data/store";
+import {useNavigation} from "@react-navigation/native";
 // import {setConnectedDevice} from "../../data/store";
 
 
@@ -65,7 +66,7 @@ export const BLEProvider = ({children}) => {
      * @param {number} [scanTimeout=10000] - The scan timeout in milliseconds.
      * @returns {Promise<Array>} - A promise that resolves with an array of discovered devices.
      */
-    const scanAllDevices = (scanTimeout = 2 * 1000) => {
+    const scanAllDevices = (scanTimeout = 2.5 * 1000) => {
         return new Promise((resolve, reject) => {
             console.log("BLEProvider BLE Scanning...");
 
@@ -522,9 +523,12 @@ export const BLEProvider = ({children}) => {
      * @param {Uint8Array} message - The message to be sent.
      * @returns {Promise<boolean>} - A promise that resolves once the data has been sent.
      */
+    // const navigation = useNavigation();
+
     const sendData = async (message) => {
         if (!connectedDevice) {
             console.log("There are no devices connected.");
+            // navigation.navigate("TabScreens",{screen:"Home"});
             return false;
         }
 
@@ -826,7 +830,7 @@ export const BLEProvider = ({children}) => {
 
 
 
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // import {Buffer} from 'buffer';
 // import React, {createContext, useContext, useEffect, useState} from 'react';

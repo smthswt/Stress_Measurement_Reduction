@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Center, HStack, Image, Pressable, Text, useDisclose, View, VStack} from "native-base";
 import {TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -11,25 +11,49 @@ import {useBLE} from "./module/BLEProvider";
 import {fetchDevices, setConnectDevice, setConnectionStatus} from "../data/store";
 import {Paragraph} from "react-native-paper";
 import moment from "moment";
+import firestore from "@react-native-firebase/firestore";
+import {UserContext} from "./module/UserProvider";
 
 const DeviceListView = ({navigation}) => {
     const {isOpen, onOpen, onClose} = useDisclose();
-    const [selectedDevice, setSelectedDevice] = useState();
+    const [device, setDevice] = useState(null);
+    const [deviceData, setDeviceData] = useState([])
 
     const deviceImageBlueBack = require('./images/DevaiceImagewithBlue.png')
 
-    const devices = getDevices();
+    const {userId} = useContext(UserContext)
 
-// devices 배열을 매핑하여 각 디바이스의 id와 name 값을 추출합니다.
-    const deviceList = devices.map(device => ({
-        id: device.id,
-        name: device.name
-    }));
 
-// deviceList 배열에는 모든 디바이스의 id와 name이 포함됩니다.
+    useEffect(() => {
+        const userRef = firestore().collection("Users").doc(userId);
+        const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(snapshot => {
+            const devicesData = snapshot.docs.map(doc => doc.data());
+            console.log("devicelist :", devicesData);
+            setDeviceData(devicesData);
 
-// 예를 들어, 첫 번째 디바이스의 id와 name을 가져오려면 다음과 같이 할 수 있습니다.
-    const device = deviceList[0];
+            // 데이터를 가져온 후에 device 변수 설정
+            const deviceList = devicesData.map(device => ({
+                id: device.id,
+                name: device.name
+            }));
+
+            const selectedDevice = deviceList.length > 0 ? deviceList[0] : null;
+            setDevice(selectedDevice);
+        });
+
+        return () => {
+            unsubscribe(); // Cleanup 함수로 사용자 구독 해제
+        };
+    }, []);
+
+
+
+
+    console.log("deviceData :", device)
+
+
+    // const devices = getDevices();
+
 
 
     // Redux store에서 디바이스 정보 가져오기
@@ -37,60 +61,100 @@ const DeviceListView = ({navigation}) => {
     const dispatch = useDispatch();
     const {connectAndSubscribe, disconnect} = useBLE();
     console.log("connectDevice info :", connectDevice);
-    console.log("device info id :", device.id)
-    console.log("device info name :", device.name)
+    console.log("device info id :", device?.id)
 
     const handleDeviceConnect = async () => {
+        if (!device) return; // device가 null인 경우 처리
+
         console.log("Device Connect", device.id);
+
+        const userRef = firestore().collection("Users").doc(userId);
+        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", device.id);
+        const deviceSnapshot  = await deviceRef.get()
 
         try {
             if (await connectAndSubscribe(device.id)) {
-                updateDevice(device.id, true);
+                // updateDevice(device.id, true);
+                deviceSnapshot.forEach(async (doc) => {
+                    await doc.ref.update({
+                        isConnect: true,
+                    });
+                });
                 dispatch(setConnectDevice(device.id));
                 dispatch(setConnectionStatus(true));
             }
         } catch (e) {
             // TODO: 상용화에서는 에러 처리를 구현해야 함.
         }
-    }
+    };
 
-    // const handleCancelConnect = () => {
-    //     console.log("연결해제 버튼 클릭 됌.")
-    // };
-    //
-    // const deviceData = [{
-    //     name: "kim's device",
-    //     date: "2024/01/11",
-    //     connectState: true,
-    // }, {
-    //     name: "lee's device",
-    //     date: "2024/01/10",
-    //     connectState: false,
-    // }
-    // ];
 
-    const handleDeviceDisconnect = async (device) => {
+    const handleDeviceDisconnect = async () => {
+        if (!device) return; // device가 null인 경우 처리
+
         console.log("Device Disconnect", device.id);
 
+        const userRef = firestore().collection("Users").doc(userId);
+        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", device.id);
+        const deviceSnapshot  = await deviceRef.get()
+
+        if (deviceSnapshot.empty) {
+            console.log("해당 기기를 찾을 수 없습니다.");
+            return;
+        }
+
         if (connectDevice === "") {
-            updateDevice(device.id, false);
+            deviceSnapshot.forEach(async (doc) => {
+                await doc.ref.update({
+                    isConnect: false,
+                });
+            });
             dispatch(setConnectDevice(""));
             dispatch(setConnectionStatus(false));
             return;
         }
 
         if (await disconnect()) {
-            updateDevice(device.id, false);
+            deviceSnapshot.forEach(async (doc) => {
+                await doc.ref.update({
+                    isConnect: false,
+                });
+            });
+
+        // // 모든 문서 업데이트 작업을 위한 Promise 배열 생성
+        // const updatePromises = [];
+        // deviceSnapshot.forEach((doc) => {
+        //     const updatePromise = doc.ref.update({
+        //         isConnect: false,
+        //     });
+        //     updatePromises.push(updatePromise);
+        // });
+        //
+        // // 모든 업데이트 작업이 완료될 때까지 기다림
+        // await Promise.all(updatePromises);
+
             dispatch(setConnectDevice(""));
             dispatch(setConnectionStatus(false));
         }
-    }
+    };
 
     const handleDeviceDelete = async (dev) => {
-        console.log("블루투스 기기 등록 삭제.")
-        deleteDevice(dev.id);
-        dispatch(fetchDevices());
-    }
+        //선택에 따른 기기만 삭제하게 세부 구현 필요
+        if (!device) return; // device가 null인 경우 처리
+
+        console.log("블루투스 기기 등록 삭제중...");
+        const userRef = firestore().collection("Users").doc(userId);
+        const devicesSnapshot = userRef.collection("Ble_Devices");
+        const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
+
+        querySnapshot.forEach(doc => {
+            doc.ref.delete();
+            console.log("선택된 기기 등록 삭제");
+
+            //redux 최신 상태로 업데이트
+            dispatch(fetchDevices());
+        });
+    };
 
 
     const handleOnOpen = (device) => {
@@ -100,32 +164,50 @@ const DeviceListView = ({navigation}) => {
 
 
     const ConnectedDevice = () => {
-        console.log("등록된 블루투스 기기 재연결")
-        return (connectDevice === device.id ? <VStack space={2}>
-            <Paragraph>연결된 디바이스</Paragraph>
-            <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                <Button flex={1} disabled backgroundColor={'black'}>연결됨</Button>
-                <Button onPress={handleDeviceDisconnect} backgroundColor={'red.800'}>연결해제</Button>
-            </HStack>
-        </VStack> : <VStack space={2}>
-            <Paragraph>연결되지 않은 디바이스</Paragraph>
-            <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                <Button flex={1} disabled backgroundColor={'gray.100'}></Button>
-                <Button onPress={handleDeviceDelete}>삭제하기2</Button>
-            </HStack>
-        </VStack>);
-    }
+        if (!device) return null; // device가 null인 경우 처리
+
+        console.log("등록된 블루투스 기기 목록");
+        return connectDevice === device.id ? (
+            <VStack space={2}>
+                <Paragraph>연결된 디바이스</Paragraph>
+                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
+                    <Button flex={1} disabled backgroundColor={"black"}>
+                        연결됨
+                    </Button>
+                    <Button onPress={handleDeviceDisconnect} backgroundColor={"red.800"}>
+                        연결해제
+                    </Button>
+                </HStack>
+            </VStack>
+        ) : (
+            <VStack space={2}>
+                <Paragraph>연결되지 않은 디바이스</Paragraph>
+                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
+                    <Button flex={1} disabled backgroundColor={"gray.100"}></Button>
+                    <Button onPress={handleDeviceDelete}>삭제하기</Button>
+                </HStack>
+            </VStack>
+        );
+    };
 
     const DisconnectedDevice = () => {
-        console.log("등록된 블루투스 기기 연결해제")
-        return (<VStack space={2}>
-            <Paragraph>연결되지 않은 디바이스</Paragraph>
-            <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                <Button flex={1} onPress={handleDeviceConnect}>연결하기</Button>
-                <Button onPress={handleDeviceDelete} backgroundColor={'red.800'}>삭제하기</Button>
-            </HStack>
-        </VStack>);
-    }
+        if (!device) return null; // device가 null인 경우 처리
+
+        console.log("등록된 블루투스 기기 연결해제");
+        return (
+            <VStack space={2}>
+                <Paragraph>연결되지 않은 디바이스</Paragraph>
+                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
+                    <Button flex={1} onPress={handleDeviceConnect}>
+                        연결하기
+                    </Button>
+                    <Button onPress={handleDeviceDelete} backgroundColor={"red.800"}>
+                        삭제하기
+                    </Button>
+                </HStack>
+            </VStack>
+        );
+    };
 
     // let momentDate = moment(device.createdAt);
     let momentDate = device ? moment(device?.createdAt) : moment();
@@ -170,9 +252,15 @@ const DeviceListView = ({navigation}) => {
                 {/*))}*/}
 
                 <VStack justifyContent={'space-between'} backgroundColor={'white'} padding={2}>
-                    <Paragraph>{device.name}</Paragraph>
-                    <Paragraph>등록날짜 | {momentDate.format('YYYY-MM-DD')}</Paragraph>
-                    {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}
+                    {device ? (
+                        <>
+                            <Paragraph>{device.name}</Paragraph>
+                            <Paragraph>등록날짜 | {momentDate.format('YYYY-MM-DD')}</Paragraph>
+                            {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}
+                        </>
+                    ) : (
+                        <Text>등록된 디바이스가 없습니다.</Text>
+                    )}
                 </VStack>
 
             </VStack>

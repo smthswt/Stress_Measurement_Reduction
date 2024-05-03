@@ -24,6 +24,8 @@ import {Easing} from "react-native-reanimated";
 import {UserContext} from "./module/UserProvider";
 import ECGIcon from "./icons/ECGIcon";
 import firestore from '@react-native-firebase/firestore';
+import {setConnectionStatus} from "../data/store";
+import {useSelector} from "react-redux";
 /**
  * Represents a component that displays a message when analysis data is not found.
  *
@@ -60,8 +62,18 @@ export const HomeView = ({navigation, route}) => {
      * @name handleAnalysisStart
      * @returns {void}
      */
+    // const connectStatus = useSelector(state => state.device.isConnected);
+    // console.log("connectStatus :", connectStatus)
+
     const handleAnalysisStart = () => {
+
+        if (!connectStatus) {
+            console.log("There are no devices connected.");
+            alert("There are no devices connected.")
+            return false;
+        } else {
         navigation.navigate("AnalysisStart", {params:{name:name}});
+        }
     };
 
     /**
@@ -185,6 +197,8 @@ export const HomeView = ({navigation, route}) => {
 
     const {userId} = useContext(UserContext)
     console.log("userId:", userId) //전역관리
+    const connectStatus = useSelector(state => state.device.isConnected);
+    console.log("isConnect :", connectStatus)
     const [name, setName] = useState(null)
 
     const getUserData = async () => {

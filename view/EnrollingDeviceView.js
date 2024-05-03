@@ -24,36 +24,30 @@ const EnrollingDeviceView = ({navigation}) => {
     const backgroundImage = require('./images/BackgroundofRenstDevice.png');
 
     //BLEProvider에서 필요한 메소드 불러와서 쓰기
-    const {scanAllDevices, connectAndSubscribe} = useBLE();
+    const {scanAllDevices} = useBLE();
 
     const handleSearch = async () => {
-        setState(RegistryState.Finding);
+        // setState(RegistryState.Finding);
 
         try {
             console.log("기기 검색 버튼 클릭")
+            //scanALlDevice는 BLEProvider.js에 있고 조건은 Device_ID="Renst" = devices.name하고 일치하는지 확인 (즉 해당 기기만 검색됌.)
             let devices = await scanAllDevices();
             setDevices(devices);
 
             // 검색이 완료되었을 때만 "Device Found" 로그를 출력하고 이동
-            setState(RegistryState.Found);
+            // setState(RegistryState.Found);
             console.log("state:", state)
             console.log("device:", devices)
             console.log("Device Found")
 
+            // 디바이스 검색 결과 페이지로 이동
+            await navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll", params: {devices: devices}});
 
         } catch (error) {
             // BLE 모듈이 없는 경우, 즉 테스트 시 BleError: Device is not authorized to use BluetoothLE 발생
             console.error("검색 중 오류 발생:", error);
         }
-        // // 검색이 완료되었을 때만 "Device Found" 로그를 출력하고 이동
-        // setState(RegistryState.Found);
-        // console.log("state:", state)
-        // console.log("device:", devices)
-        // console.log("Device Found")
-        //     // 디바이스 목록 페이지로 이동
-        //     // navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll"});
-        // 디바이스 검색 결과 페이지로 이동
-        navigation.navigate("DeviceSettingScreens", {screen: "CompleteEnroll", params: {devices: devices}});
     }
 
 

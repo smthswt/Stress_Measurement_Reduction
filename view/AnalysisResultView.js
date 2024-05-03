@@ -46,7 +46,8 @@ export const AnalysisResultView = ({route}) => {
    * @param {Object} data - The data to be sent to Arduino.
    * @returns {boolean} - True if the data was successfully sent to Arduino, false otherwise.
    */
-  const {sendData, receivedData} = useBLE();
+  // const {sendData, receivedData} = useBLE();
+  const {getAvgHR, getSDNN, getStressIndex, sendMotorStartPacket} = useBLE();
 
   /**
    * Represents the stress index of a given object.
@@ -76,52 +77,52 @@ export const AnalysisResultView = ({route}) => {
    * @function sendGetAnalysisData
    * @returns {void}
    */
-  const sendGetAnalysisData = () => {
-    const message = 'GetAnalysisData';
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
-  };
+  // const sendGetAnalysisData = () => {
+  //   const message = 'GetAnalysisData';
+  //   // sendData(
+  //   //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+  //   //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+  //   //   message,
+  //   // );
+  // };
 
-  useEffect(() => {
-    sendGetAnalysisData();
-  }, []);
+  // useEffect(() => {
+  //   sendGetAnalysisData();
+  // }, []);
 
-  useEffect(() => {
-    if (receivedData === null || receivedData === '') {
-      return;
-    }
+  // useEffect(() => {
+  //   if (receivedData === null || receivedData === '') {
+  //     return;
+  //   }
+  //
+  //   console.log('AnalysisResult Received Data: ' + receivedData);
 
-    console.log('AnalysisResult Received Data: ' + receivedData);
-
-    const handleData = data => {
-      const jsonObject = JSON.parse(data);
-
-      let message = jsonObject.message;
-      let stressIndex = jsonObject.StressIndex;
-      let sdnn = jsonObject.SDNN;
-      let hr = jsonObject.HR;
-
-      setStressIndex(stressIndex);
-      setSDNN(sdnn);
-      setHR(hr);
-
-      console.info(
-        'Message: ' +
-          message +
-          ', Stress Index: ' +
-          stressIndex +
-          ', SDNN: ' +
-          sdnn +
-          ', HR: ' +
-          hr,
-      );
-    };
-
-    handleData(receivedData);
-  }, [receivedData]);
+  //   const handleData = data => {
+  //     const jsonObject = JSON.parse(data);
+  //
+  //     let message = jsonObject.message;
+  //     let stressIndex = jsonObject.StressIndex;
+  //     let sdnn = jsonObject.SDNN;
+  //     let hr = jsonObject.HR;
+  //
+  //     setStressIndex(stressIndex);
+  //     setSDNN(sdnn);
+  //     setHR(hr);
+  //
+  //     console.info(
+  //       'Message: ' +
+  //         message +
+  //         ', Stress Index: ' +
+  //         stressIndex +
+  //         ', SDNN: ' +
+  //         sdnn +
+  //         ', HR: ' +
+  //         hr,
+  //     );
+  //   };
+  //
+  //   handleData(receivedData);
+  // }, [receivedData]);
 
   /**
    * Function to handle press event.
@@ -130,12 +131,14 @@ export const AnalysisResultView = ({route}) => {
    * @function handlePress
    * @returns {void}
    */
-  const handleHealingPress = () => {
-    navigation.navigate('Healing', {beforeEmotion:beforeEmotion.beforeEmotion});
+  const handleHealingPress = async () => {
+    await sendMotorStartPacket(1, 20);
+    navigation.navigate('Healing', {beforeEmotion: beforeEmotion.beforeEmotion});
   };
 
-  const handleManualPress = () => {
-    navigation.navigate('Manual',{beforeEmotion:beforeEmotion.beforeEmotion});
+  const handleManualPress = async () => {
+    await sendMotorStartPacket(1, 20);
+    navigation.navigate('Manual',{beforeEmotion: beforeEmotion.beforeEmotion});
   };
 
   const EmotionIcon = {
@@ -158,15 +161,18 @@ export const AnalysisResultView = ({route}) => {
             마지막으로 검사한 결과와 비교했을 때 {'\n'} 수치가 증가하였습니다.{' '}
           </Text>
         </Center>
-        {/*<ItemComponent stressIndex={stressIndex} sdnn={SDNN} hr={HR}/>*/}
+        {/*<ItemComponent stressIndex={getStressIndex()} sdnn={getSDNN()} hr={getAvgHR()}/>*/}
+
         <Center pt={5}>
           <SemiCircleProgress
-            percentage={80}
-            progressColor={'#2785F4'}
+              percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
+              progressColor={'#2785F4'}
             progressWidth={15}
+            //value={25}
          >
             <Text bold fontSize={'3xl'}>
-              4
+              {/*4*/}
+              {getStressIndex()}
             </Text>
             <Text fontSize={'xs'} color={'#ADADAD'}>
               Stress Index
@@ -174,6 +180,8 @@ export const AnalysisResultView = ({route}) => {
           </SemiCircleProgress>
         </Center>
       </VStack>
+
+
       <VStack space={1} justifyContent={'space-between'} p={5} height={'60%'}>
         <VStack space={5}>
           <VStack
@@ -193,10 +201,11 @@ export const AnalysisResultView = ({route}) => {
                 <Divider />
               </Box>
               <Text bold flex={1} textAlign={'right'}>
-                98
+                {getAvgHR()}
               </Text>
             </HStack>
           </VStack>
+
           <VStack
             bg={'white'}
             p={4}
@@ -219,6 +228,8 @@ export const AnalysisResultView = ({route}) => {
             </HStack>
           </VStack>
         </VStack>
+
+
         <HStack justifyContent={'space-between'} space={4}>
           <Button
             p={'5'}
