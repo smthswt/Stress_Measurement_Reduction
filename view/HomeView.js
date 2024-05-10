@@ -69,7 +69,7 @@ export const HomeView = ({navigation, route}) => {
 
         if (!connectStatus) {
             console.log("There are no devices connected.");
-            alert("There are no devices connected.")
+            alert("연결된 기기가 없습니다.")
             return false;
         } else {
         navigation.navigate("AnalysisStart", {params:{name:name}});
@@ -203,7 +203,7 @@ export const HomeView = ({navigation, route}) => {
 
     const getUserData = async () => {
         try {
-            const userRef = await firestore().collection("Users");
+            const userRef = firestore().collection("Users");
             const docRef = await userRef.doc(userId).get();
             const userData = docRef.data()
             console.log("userData :", userData)
@@ -236,7 +236,7 @@ export const HomeView = ({navigation, route}) => {
     return (
         <ScrollView style={{flex: 1}}>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
-                    <DeviceConnectState/>
+                    {/*<DeviceConnectState/>*/}
                     <VStack h={200} bgColor={"#2785F4"} justifyContent={'flex-start'} p={2}>
                         <HStack pl={5} pr={5} pt={2} justifyContent={'space-between'} alignItems={'flex-end'} >
                             <Box>

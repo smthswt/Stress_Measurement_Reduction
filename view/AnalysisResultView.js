@@ -77,52 +77,7 @@ export const AnalysisResultView = ({route}) => {
    * @function sendGetAnalysisData
    * @returns {void}
    */
-  // const sendGetAnalysisData = () => {
-  //   const message = 'GetAnalysisData';
-  //   // sendData(
-  //   //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-  //   //   'ed890871-07e9-4967-81b1-22ce3df7728e',
-  //   //   message,
-  //   // );
-  // };
 
-  // useEffect(() => {
-  //   sendGetAnalysisData();
-  // }, []);
-
-  // useEffect(() => {
-  //   if (receivedData === null || receivedData === '') {
-  //     return;
-  //   }
-  //
-  //   console.log('AnalysisResult Received Data: ' + receivedData);
-
-  //   const handleData = data => {
-  //     const jsonObject = JSON.parse(data);
-  //
-  //     let message = jsonObject.message;
-  //     let stressIndex = jsonObject.StressIndex;
-  //     let sdnn = jsonObject.SDNN;
-  //     let hr = jsonObject.HR;
-  //
-  //     setStressIndex(stressIndex);
-  //     setSDNN(sdnn);
-  //     setHR(hr);
-  //
-  //     console.info(
-  //       'Message: ' +
-  //         message +
-  //         ', Stress Index: ' +
-  //         stressIndex +
-  //         ', SDNN: ' +
-  //         sdnn +
-  //         ', HR: ' +
-  //         hr,
-  //     );
-  //   };
-  //
-  //   handleData(receivedData);
-  // }, [receivedData]);
 
   /**
    * Function to handle press event.
@@ -132,12 +87,10 @@ export const AnalysisResultView = ({route}) => {
    * @returns {void}
    */
   const handleHealingPress = async () => {
-    await sendMotorStartPacket(1, 20);
-    navigation.navigate('Healing', {beforeEmotion: beforeEmotion.beforeEmotion});
+    navigation.navigate('Healing', {beforeEmotion: beforeEmotion.beforeEmotion, stressLevel: stressLevel});
   };
 
   const handleManualPress = async () => {
-    await sendMotorStartPacket(1, 20);
     navigation.navigate('Manual',{beforeEmotion: beforeEmotion.beforeEmotion});
   };
 
@@ -149,6 +102,11 @@ export const AnalysisResultView = ({route}) => {
     emotion_sad: <EmotionSad width={40} height={40} />,
     emotion_angry: <EmotionAngry width={40} height={40} />,
   };
+
+  const stressLevel = getStressIndex()
+  const number = getSDNN()
+  const sdnnValue = Math.trunc(number)
+  console.log("sdnn value: ", sdnnValue)
 
   return (
     <VStack space={1} h={'100%'} justifyContent={'space-between'}>
@@ -165,17 +123,20 @@ export const AnalysisResultView = ({route}) => {
 
         <Center pt={5}>
           <SemiCircleProgress
-              percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
+              // percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
+              // percentage={sdnnValue}
               progressColor={'#2785F4'}
             progressWidth={15}
-            //value={25}
+              // initialPercentage={0}
+              minValue={0}
+              maxValue={1000}
+              currentValue={number}
          >
             <Text bold fontSize={'3xl'}>
-              {/*4*/}
-              {getStressIndex()}
+              {sdnnValue}
             </Text>
             <Text fontSize={'xs'} color={'#ADADAD'}>
-              Stress Index
+              Stress Index {getStressIndex()}
             </Text>
           </SemiCircleProgress>
         </Center>
@@ -201,7 +162,7 @@ export const AnalysisResultView = ({route}) => {
                 <Divider />
               </Box>
               <Text bold flex={1} textAlign={'right'}>
-                {getAvgHR()}
+                {getAvgHR() ? getAvgHR() : "다시 시도 해보세요."}
               </Text>
             </HStack>
           </VStack>

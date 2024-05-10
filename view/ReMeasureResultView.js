@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import {ItemComponent} from './ItemComponent';
+// import {ItemComponent} from './ItemComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SemiCircleProgress from './components/SemiCirle';
 import EmotionHappy from "./icons/EmotionHappy";
@@ -37,13 +37,14 @@ export const RemeasureResultView = ({route}) => {
    * @returns {object} - The navigation object.
    */
   const navigation = useNavigation();
+  const {getAvgHR, getSDNN, getStressIndex, sendMotorStartPacket} = useBLE();
 
   /**
    * Sends data to Arduino.
    * @param {Object} data - The data to be sent to Arduino.
    * @returns {boolean} - True if the data was successfully sent to Arduino, false otherwise.
    */
-  const {sendData, receivedData} = useBLE();
+  // const {sendData, receivedData} = useBLE();
 
   /**
    * Represents the stress index of a given object.
@@ -75,50 +76,50 @@ export const RemeasureResultView = ({route}) => {
    */
   const sendGetAnalysisData = () => {
     const message = 'GetAnalysisData';
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
+    // sendData(
+    //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+    //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+    //   message,
+    // );
   };
 
   useEffect(() => {
     sendGetAnalysisData();
   }, []);
 
-  useEffect(() => {
-    if (receivedData === null || receivedData === '') {
-      return;
-    }
+  // useEffect(() => {
+  //   if (receivedData === null || receivedData === '') {
+  //     return;
+  //   }
+  //
+  //   console.log('AnalysisResult Received Data: ' + receivedData);
 
-    console.log('AnalysisResult Received Data: ' + receivedData);
-
-    const handleData = data => {
-      const jsonObject = JSON.parse(data);
-
-      let message = jsonObject.message;
-      let stressIndex = jsonObject.StressIndex;
-      let sdnn = jsonObject.SDNN;
-      let hr = jsonObject.HR;
-
-      setStressIndex(stressIndex);
-      setSDNN(sdnn);
-      setHR(hr);
-
-      console.info(
-        'Message: ' +
-          message +
-          ', Stress Index: ' +
-          stressIndex +
-          ', SDNN: ' +
-          sdnn +
-          ', HR: ' +
-          hr,
-      );
-    };
-
-    handleData(receivedData);
-  }, [receivedData]);
+  //   const handleData = data => {
+  //     const jsonObject = JSON.parse(data);
+  //
+  //     let message = jsonObject.message;
+  //     let stressIndex = jsonObject.StressIndex;
+  //     let sdnn = jsonObject.SDNN;
+  //     let hr = jsonObject.HR;
+  //
+  //     setStressIndex(stressIndex);
+  //     setSDNN(sdnn);
+  //     setHR(hr);
+  //
+  //     console.info(
+  //       'Message: ' +
+  //         message +
+  //         ', Stress Index: ' +
+  //         stressIndex +
+  //         ', SDNN: ' +
+  //         sdnn +
+  //         ', HR: ' +
+  //         hr,
+  //     );
+  //   };
+  //
+  //   handleData(receivedData);
+  // }, [receivedData]);
 
   /**
    * Function to handle press event.
@@ -143,6 +144,11 @@ export const RemeasureResultView = ({route}) => {
     emotion_angry: <EmotionAngry width={40} height={40} />,
   };
 
+  const number = getSDNN()
+  const sdnnValue = Math.trunc(number)
+  console.log("sdnn value: ", sdnnValue)
+
+
   return (
     <VStack space={1} h={'100%'} justifyContent={'space-between'}>
       <VStack space={3} pt={10} bg={'#67ADFF'} height={'40%'}>
@@ -154,17 +160,20 @@ export const RemeasureResultView = ({route}) => {
         </Center>
         <Center pt={5}>
           <SemiCircleProgress
-            percentage={40}
+              // percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
+              currentValue={number}
+              minValue={0}
+              maxValue={1000}
             progressColor={'#2785F4'}
             progressWidth={15}
             interiorCircleColor={"#67ADFF"}
             progressShadowColor={'white'}
           >
             <Text bold fontSize={'3xl'}>
-              2
+              {sdnnValue}
             </Text>
             <Text fontSize={'xs'} color={'white'}>
-              Stress Index
+              Stress Index {getStressIndex()}
             </Text>
           </SemiCircleProgress>
         </Center>
@@ -188,7 +197,7 @@ export const RemeasureResultView = ({route}) => {
                 <Divider />
               </Box>
               <Text bold flex={1} textAlign={'right'}>
-                98
+                {getAvgHR() ? getAvgHR() : "다시 시도 해보세요."}
               </Text>
             </HStack>
           </VStack>

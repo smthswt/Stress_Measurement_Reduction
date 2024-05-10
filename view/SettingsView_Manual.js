@@ -9,6 +9,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import firestore from "@react-native-firebase/firestore";
 import {UserContext} from "./module/UserProvider";
 import {serverTimestamp} from "@react-native-firebase/firestore/lib/modular/FieldValue";
+import {useBLE} from "./module/BLEProvider";
 
 /**
  * React component for displaying a calendar view.
@@ -240,9 +241,11 @@ export const SettingsView_Manual = ({ navigation }) => {
         }
     };
 
+    const {sendMotorStopPacket} = useBLE()
 
     const handleMusicPause = async () => {
         await TrackPlayer.pause();
+        await sendMotorStopPacket();
         console.log("음악이 중지되었습니다.")
     };
 

@@ -24,6 +24,8 @@ import healingbackground from "./images/healingbackground.png";
 import {Alert, ImageBackground} from "react-native";
 import {UserContext} from "./module/UserProvider";
 import SQLite from "react-native-sqlite-storage";
+import firestore from "@react-native-firebase/firestore";
+import TrackPlayer from "react-native-track-player";
 
 /**
  * The HealingView component represents the view for a massage healing process.
@@ -42,16 +44,7 @@ import SQLite from "react-native-sqlite-storage";
  *
  * @returns {JSX.Element} The HealingView component.
  */
-const db = SQLite.openDatabase(
-    {
-      name: 'RENST.db',
-      location: 'default',
-    },
-    () => {},
-    error => {
-      console.error('Error opening database: ', error);
-    }
-)
+
 export const ManualView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
@@ -73,14 +66,14 @@ export const ManualView = ({route}) => {
    * @example
    * sendData('Hello Arduino');
    */
-  const {sendData} = useBLE();
+  const {sendMotorStartPacket, sendMotorStopPacket} = useBLE();
 
   /**
    * Represents the total time in seconds.
    *
    * @type {number}
    */
-  const totalTime = 10;
+  const totalTime = 30;
 
   /**
    * A React useRef hook for storing a reference to the cancel function.
@@ -99,29 +92,65 @@ export const ManualView = ({route}) => {
   const [seconds, setSeconds] = useState(totalTime);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMessageOpen, setIsMessageOpen] = React.useState(false);
+  const [songTitle, setSongTitle] = useState("")
 
-  useEffect(() => {
-    sendHealingStart();
-  }, [sendHealingStart]);
+  // useEffect(() => {
+  //   sendHealingStart();
+  // }, [sendHealingStart]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sendHealingStart = () => {
-    const message = 'HealingStart';
-    console.log(message);
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
+  // const MusicFilePath = require('android/app/src/main/res/morning-garden-acoustic-chill-15013.mp3');
+
+  const musicPlay = async () => {
+    const userRef = firestore().collection("Users").doc(userId);
+    const selectedMusicRef = userRef.collection("Manual_Music");
+    const musicSnapshot = await selectedMusicRef.where("itemId", '==', 1).get();
+
+    const promises = musicSnapshot.docs.map(async doc => {
+      // 문서의 데이터를 콘솔에 출력
+      console.log("data :", doc.data());
+
+      const song = doc.data().song;
+      setSongTitle(song)
+      const uri = doc.data().copyfilePath;
+      console.log("Song :", song);
+      console.log("Uri :", uri);
+
+      console.log("음원 재생 시작");
+      await TrackPlayer.reset();
+      await TrackPlayer.add({
+        title: song,
+        url: uri,
+      });
+      await TrackPlayer.play();
+      console.log("Music playing...");
+    })
   };
 
-  const sendHealingStop = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sendHealingStart = async () => {
+    const message = 'HealingStart';
+    console.log(message);
+    startAnimation();
+    await musicPlay();
+    await sendMotorStartPacket(1, 20);
+
+    // sendData(
+    //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+    //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+    //   message,
+    // );
+  };
+
+  const sendHealingStop = async () => {
     const message = 'HealingStop';
-    sendData(
-      'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-      'ed890871-07e9-4967-81b1-22ce3df7728e',
-      message,
-    );
+    console.log(message)
+    await TrackPlayer.pause();
+    await sendMotorStopPacket();
+    // sendData(
+    //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+    //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+    //   message,
+    // );
   };
 
   const [isRemeasureOpen, setIsRemeasureOpen] = useState(false);
@@ -134,14 +163,15 @@ export const ManualView = ({route}) => {
     setIsMessageOpen(false);
   };
 
-  const handleHealingStop = () => {
-    sendHealingStop();
+  const handleHealingStop = async () => {
+    await sendHealingStop();
     setIsMessageOpen(false);
     setIsCounting(false)
     const timer = setTimeout(() => {
-      //navigation.navigate('TabScreens', {screen: 'Home'});
+      navigation.navigate('TabScreens', {screen: 'Home'});
       clearTimeout(timer);
-      setIsRemeasureOpen(true);
+
+      // setIsRemeasureOpen(true);
     }, 500);
   };
 
@@ -183,12 +213,16 @@ export const ManualView = ({route}) => {
 
   const deviceImage = require('./images/Renst_ISO.png');
 
-  const MovetoRemeasure = () => {
+  const MovetoRemeasure = async () => {
+    await TrackPlayer.pause();
+    await sendMotorStopPacket();
+
     setIsRemeasureOpen(false)
     const timer = setTimeout(() => {
-      navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
+      //2차 재측정으로 이동
+      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion.beforeEmotion});
       clearTimeout(timer);
-    }, );
+    },);
   };
 
   const healingbackground = require("./images/healingbackground.png")
@@ -196,26 +230,26 @@ export const ManualView = ({route}) => {
   const {userId} = useContext(UserContext)
   const [name, setName] = useState(null)
 
-  const getUserInfo = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-          'SELECT * FROM users WHERE id = ?',
-          [userId],
-          (_, { rows }) => {
-            if (rows.length > 0) {
-              const user = rows.item(0);
-              setName(user.name)
-            } else {
-              Alert.alert('Login Failed', 'Invalid username or password');
-            }
-          },
-      );
-    });
+  const getUserData = async () => {
+    try {
+      const userRef = firestore().collection("Users");
+      const docRef = await userRef.doc(userId).get();
+      const userData = docRef.data()
+      console.log("userData :", userData)
+
+      setName(userData.name)
+
+    } catch (error) {
+      console.error("Error fetching data from Firestore:", error)
+    }
   }
 
+
   useEffect(() => {
-    getUserInfo()
+    getUserData()
   }, []);
+
+
 
   return (
     <>
@@ -238,7 +272,7 @@ export const ManualView = ({route}) => {
                 <Ionicons name={'musical-notes'} color={'#2785F4'} />
                 <Text>음원</Text>
               </HStack>
-              <Text>Richard Marx - Right Here Waiting</Text>
+              <Text>{songTitle}</Text>
             </HStack>
             <VStack space={1}>
               {healingStart && (
@@ -256,7 +290,7 @@ export const ManualView = ({route}) => {
             </VStack>
           </VStack>
           {!healingStart && (
-            <Button p={'5'} onPress={startAnimation} bgColor={'#2785F4'}>
+            <Button p={'5'} onPress={sendHealingStart} bgColor={'#2785F4'}>
               <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
                 Manual 모드 시작
               </Text>

@@ -42,16 +42,7 @@ import TrackPlayer from "react-native-track-player";
  *
  * @returns {JSX.Element} The HealingView component.
  */
-// const db = SQLite.openDatabase(
-//     {
-//       name: 'RENST.db',
-//       location: 'default',
-//     },
-//     () => {},
-//     error => {
-//       console.error('Error opening database: ', error);
-//     }
-// )
+
 export const HealingView = ({route}) => {
   /**
    * Retrieves the navigation object used for navigating within the application.
@@ -59,8 +50,10 @@ export const HealingView = ({route}) => {
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
-  const beforeEmotion = route.params;
-  //console.log(route.params);
+  const beforeEmotion = route.params.beforeEmotion;
+  const songNumber = route.params.stressLevel
+  // console.log("beforeEmotion :", beforeEmotion)
+  // console.log('stresslevel - song number :', songNumber)
 
   /**
    * Sends data.
@@ -82,7 +75,8 @@ export const HealingView = ({route}) => {
    *
    * @type {number}
    */
-  const totalTime = 10;
+      //30초
+  const totalTime = 30;
 
   /**
    * A React useRef hook for storing a reference to the cancel function.
@@ -98,6 +92,7 @@ export const HealingView = ({route}) => {
    */
   const messageRef = React.useRef(null);
   const [isMessageOpen, setIsMessageOpen] = React.useState(false);
+  const [songTitle, setSongTitle] = useState("")
 
   // useEffect(() => {
   //   sendHealingStart();
@@ -108,8 +103,8 @@ export const HealingView = ({route}) => {
     const message = 'HealingStart';
     console.log(message);
     startAnimation();
-    musicPlay();
-    await sendMotorStartPacket();
+    await musicPlay();
+    await sendMotorStartPacket(1, 20);
 
     // sendData(
     //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
@@ -121,13 +116,14 @@ export const HealingView = ({route}) => {
   const musicPlay = async () => {
     const userRef = firestore().collection("Users").doc(userId);
     const selectedMusicRef = userRef.collection("AI_Music");
-    const musicSnapshot = await selectedMusicRef.where("itemId", '==', "song number 1").get();
+    const musicSnapshot = await selectedMusicRef.where("itemId", '==', `song number ${songNumber}`).get();
 
     const promises = musicSnapshot.docs.map(async doc => {
       // 문서의 데이터를 콘솔에 출력
       console.log("data :", doc.data());
 
       const song = doc.data().song;
+      setSongTitle(song)
       const uri = doc.data().copyfilePath;
       console.log("Song :", song);
       console.log("Uri :", uri);
@@ -171,9 +167,9 @@ export const HealingView = ({route}) => {
     setIsMessageOpen(false);
     setIsCounting(false)
     const timer = setTimeout(() => {
-      //navigation.navigate('TabScreens', {screen: 'Home'});
+      navigation.navigate('TabScreens', {screen: 'Home'});
       clearTimeout(timer);
-      setIsRemeasureOpen(true);
+      // setIsRemeasureOpen(true);
     }, 500);
   };
 
@@ -181,7 +177,7 @@ export const HealingView = ({route}) => {
 
   const [healingStart, setHealingStart] = useState(false);
 
-
+//duration 30초로 나중에 늘려놓기. 음원 시간만큼으로 늘려야하나?
   const animationDuration = 30; // Duration in seconds (same as MusicCircleProgressAnimation)
   const [isCounting, setIsCounting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(animationDuration);
@@ -216,15 +212,17 @@ export const HealingView = ({route}) => {
 
   const deviceImage = require('./images/Renst_ISO.png');
 
-  const MovetoRemeasure = () => {
+  const MovetoRemeasure = async () => {
+    await TrackPlayer.pause();
+    await sendMotorStopPacket();
     setIsRemeasureOpen(false)
-    navigation.navigate("TabScreens",{screen:"Home"});
-
-    //나중에 다시 풀기 일단 임시로 홈으로 이동
-    // const timer = setTimeout(() => {
-    //   navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
-    //   clearTimeout(timer);
-    // }, );
+    // navigation.navigate("TabScreens",{screen:"Home"});
+    
+    //힐링 모드 재측정으로 이동
+    const timer = setTimeout(() => {
+      navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
+      clearTimeout(timer);
+    }, );
   };
 
   const healingbackground = require("./images/healingbackground.png")
@@ -232,26 +230,24 @@ export const HealingView = ({route}) => {
   const {userId} = useContext(UserContext)
   const [name, setName] = useState(null)
 
-  // const getUserInfo = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql(
-  //         'SELECT * FROM users WHERE id = ?',
-  //         [userId],
-  //         (_, { rows }) => {
-  //           if (rows.length > 0) {
-  //             const user = rows.item(0);
-  //             setName(user.name)
-  //           } else {
-  //             Alert.alert('Login Failed', 'Invalid username or password');
-  //           }
-  //         },
-  //     );
-  //   });
-  // }
+  const getUserData = async () => {
+    try {
+      const userRef = firestore().collection("Users");
+      const docRef = await userRef.doc(userId).get();
+      const userData = docRef.data()
+      console.log("userData :", userData)
 
-  // useEffect(() => {
-  //   getUserInfo()
-  // }, []);
+      setName(userData.name)
+
+    } catch (error) {
+      console.error("Error fetching data from Firestore:", error)
+    }
+  }
+
+
+  useEffect(() => {
+    getUserData()
+  }, []);
 
 
   return (
@@ -275,7 +271,7 @@ export const HealingView = ({route}) => {
                 <Ionicons name={'musical-notes'} color={'#2785F4'} />
                 <Text>음원</Text>
               </HStack>
-              <Text>Richard Marx - Right Here Waiting</Text>
+              <Text>{songTitle}</Text>
             </HStack>
             <VStack space={1}>
               {healingStart && (

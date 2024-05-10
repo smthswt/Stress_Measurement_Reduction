@@ -27,6 +27,7 @@ import {UserContext} from "./module/UserProvider";
 import firestore from "@react-native-firebase/firestore";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchReports} from "../data/store";
+import moment from "moment";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -34,7 +35,6 @@ import {fetchReports} from "../data/store";
  * @returns {JSX.Element} The Electrocardiogram Measurement view component.
  */
 export const ECGMeasurementView = ({route}) => {
-  const dispatch = useDispatch();
   // const reports = useSelector(state => state.report.reports);
   // console.log("reports :", reports)
   /**
@@ -58,8 +58,8 @@ export const ECGMeasurementView = ({route}) => {
    *
    * @type {number}
    */
-      //측정 분석 시간 60초, 테스트할땐 40초
-  const totalTime = 40;
+      //측정 분석 시간 50초, 테스트할땐 40초
+  const totalTime = 50;
 
   /**
    * Reference to a message element used in a React component.
@@ -144,42 +144,73 @@ export const ECGMeasurementView = ({route}) => {
    * @returns {void}
    */
 
-  const {userId} = useContext(UserContext)
+  const {userId} = useContext(UserContext) //전역관리
+  const dispatch = useDispatch();
+
+  const [name, setName] = useState(null)
+
+  const getUserData = async () => {
+    try {
+      const userRef = firestore().collection("Users");
+      const docRef = await userRef.doc(userId).get();
+      const userData = docRef.data()
+      console.log("userData :", userData)
+
+      setName(userData.name)
+
+    } catch (error) {
+      console.error("Error fetching data from Firestore:", error)
+    }
+  }
+
+  useEffect(() => {
+    getUserData()
+  }, []);
 
   const endAnalysis = async () => {
-    const message = 'AnalysisEnd';
-    console.log(message);
+    console.log("전역 userId:", userId)
+    try {
+      const message = 'AnalysisEnd';
+      console.log(message);
 
-    const userRef = firestore().collection("Users").doc(userId);
-    const reportRef = userRef.collection("Report");
+      const userRef = firestore().collection("Users").doc(userId);
+      const reportRef = userRef.collection("1st_Report");
 
-    await analysisFinish();
+      await analysisFinish();
 
-    let rrList = getRRList();
-    let hrList = getHRList();
+      let rrList = getRRList();
+      let hrList = getHRList();
 
-    console.log(`HR: ${hrList}, Length: ${hrList.length}`);
-    console.log(`RR: ${rrList}, Length: ${rrList.length}`);
+      console.log(`HR: ${hrList}, Length: ${hrList.length}`);
+      console.log(`RR: ${rrList}, Length: ${rrList.length}`);
 
-    let now = moment();
-    // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
-    await reportRef.add({
-      name : userId,
-      avgHr : getAvgHR(),
-      sdnn : getSDNN(),
-      stressIndex : getStressIndex(),
-      hrList : hrList,
-      rrList : rrList,
-      createAt : now.toDate(),
-    })
+      let now = moment();
+      // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
+      await reportRef.add({
+        name : name,
+        avgHr : getAvgHR(),
+        sdnn : getSDNN(),
+        stressIndex : getStressIndex(),
+        hrList : hrList,
+        rrList : rrList,
+        createAt : now.toDate(),
+      });
 
-    dispatch(fetchReports());
-    // sendData(
-    //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
-    //   'ed890871-07e9-4967-81b1-22ce3df7728e',
-    //   message,
-    // );
+      dispatch(fetchReports());
+      console.log("측정 종료. 데이터 저장.");
+      // sendData(
+      //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
+      //   'ed890871-07e9-4967-81b1-22ce3df7728e',
+      //   message,
+      // );
+    } catch (error) {
+      // 오류 발생 시 처리
+      console.error("데이터 저장 중 오류 발생:", error);
+      navigation.navigate("TabScreens",{screen:"Home"});
+      alert("데이터 저장 중 오류 발생");
+    }
   };
+
 
   /**
    * Event called when the page is activated
@@ -207,16 +238,26 @@ export const ECGMeasurementView = ({route}) => {
       setShowModal(true);
     }
 
-    if (isEmotionSelected && seconds <= 0) {
+    // seconds가 0이 되면 clearInterval 호출
+    if (seconds <= 0) {
       clearInterval(interval.current);
-      setIsOpen(true);
-      endAnalysis();
-    }
-    if (!isEmotionSelected && seconds <= 0) {
-      endAnalysis()
-    }
+      // if (!hasEndedAnalysis.current) { // 이전에 종료된 적이 없을 때만 실행
+      //   hasEndedAnalysis.current = true; // 종료 처리를 했음을 표시
+        endAnalysis().then(() => {
+        }).catch(error => {
+          console.error("endAnalysis 오류:", error);
+        });
+        
+        if (isEmotionSelected) { // 감정이 선택되었는지 확인
+          setIsOpen(true);
+        } else {
+          console.log("기분 이모티콘을 선택해주세요.")
+        }
+      }
 
   }, [seconds]);
+
+
 
   /**
    * Data processing received from BLE
@@ -337,14 +378,20 @@ export const ECGMeasurementView = ({route}) => {
     ));
   };
   const [isEmotionSelected, setEmotionSelected] = useState(false)
+  
+  //감정 선택 확인
   const handleSubmit = () => {
     if (selectedEmotion) {
       console.log('Selected emotion:', selectedEmotion);
       setShowModal(false);
+      if (seconds <= 0) {
+        setIsOpen(true);
+      }
       setEmotionSelected(true)
     }
   };
 
+  //측정 완료 확인
   const handleSummit = () => {
     setIsOpen(false);
     const timer = setTimeout(() => {
@@ -354,6 +401,26 @@ export const ECGMeasurementView = ({route}) => {
           params: {beforeEmotion: selectedEmotion},
         });
         clearTimeout(timer);
+        // 업데이트할 문서의 참조를 가져옵니다.
+        const userRef = firestore().collection("Users").doc(userId);
+        const reportRef = userRef.collection("1st_Report");
+
+        // 업데이트할 문서를 쿼리합니다. (여기서는 예시로 마지막에 추가된 문서를 가져오도록 했습니다.)
+        reportRef.orderBy('createAt', 'desc').limit(1).get()
+            .then(snapshot => {
+              if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                // 문서의 참조에서 업데이트를 수행합니다.
+                doc.ref.update({
+                  emotion: selectedEmotion
+                })
+                    .then(() => console.log('emotion 값이 성공적으로 업데이트되었습니다.'))
+                    .catch(error => console.error('새로운 키값 업데이트 중 오류 발생:', error));
+              } else {
+                console.log("업데이트할 문서를 찾을 수 없습니다.");
+              }
+            })
+            .catch(error => console.error('문서 쿼리 중 오류 발생:', error));
       }
     }, 500);
   };

@@ -58,18 +58,32 @@ export default class SemiCircleProgress extends React.PureComponent {
         }).start();
     }
 
+    // getPercentage = () => {
+    //     const { percentage, minValue, maxValue, currentValue } = this.props
+    //     if (percentage)
+    //         return Math.max(Math.min(percentage, 100), 0)
+    //
+    //     if (currentValue && minValue && maxValue) {
+    //         const newPercent = (currentValue - minValue) / (maxValue - minValue) * 100
+    //         return Math.max(Math.min(newPercent, 100), 0)
+    //     }
+    //
+    //     return 0
+    // }
+
     getPercentage = () => {
         const { percentage, minValue, maxValue, currentValue } = this.props
-        if (percentage)
+        if (percentage !== undefined)
             return Math.max(Math.min(percentage, 100), 0)
 
-        if (currentValue && minValue && maxValue) {
+        if (currentValue !== undefined && minValue !== undefined && maxValue !== undefined) {
             const newPercent = (currentValue - minValue) / (maxValue - minValue) * 100
             return Math.max(Math.min(newPercent, 100), 0)
         }
 
         return 0
     }
+
 
     getStyles = () => {
         const { circleRadius, progressShadowColor, progressColor, progressWidth, interiorCircleColor } = this.props
