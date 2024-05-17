@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useBLE} from './module/BLEProvider';
 import {
   Box,
@@ -30,8 +30,13 @@ import EmotionAngry from "./icons/EmotionAngry";
  * @class
  */
 export const AnalysisResultView = ({route}) => {
-  const beforeEmotion = route.params;
-  console.log(beforeEmotion)
+  const {beforeEmotion, reportDocId} = route.params;
+  console.log("beforeEmotion :", beforeEmotion)
+  console.log("reportDocId :", reportDocId)
+
+  // const test = useRoute();
+  // console.log("bb :", test)
+
   /**
    * UseNavigation function
    *
@@ -87,11 +92,11 @@ export const AnalysisResultView = ({route}) => {
    * @returns {void}
    */
   const handleHealingPress = async () => {
-    navigation.navigate('Healing', {beforeEmotion: beforeEmotion.beforeEmotion, stressLevel: stressLevel});
+    navigation.navigate('Healing', {beforeEmotion: beforeEmotion, stressLevel: stressLevel, reportDocId: reportDocId});
   };
 
   const handleManualPress = async () => {
-    navigation.navigate('Manual',{beforeEmotion: beforeEmotion.beforeEmotion});
+    navigation.navigate('Manual',{beforeEmotion: beforeEmotion, reportDocId: reportDocId});
   };
 
   const EmotionIcon = {
@@ -184,7 +189,7 @@ export const AnalysisResultView = ({route}) => {
                 <Divider />
               </Box>
               <Box flex={1} alignItems={'flex-end'}>
-                {EmotionIcon[beforeEmotion.beforeEmotion]}
+                {EmotionIcon[beforeEmotion]}
               </Box>
             </HStack>
           </VStack>

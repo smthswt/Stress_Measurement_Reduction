@@ -27,8 +27,11 @@ import EmotionAngry from "./icons/EmotionAngry";
  * @class
  */
 export const RemeasureResultView = ({route}) => {
-  const Emotions = route.params;
-  console.log(Emotions)
+  // const Emotions = route.params;
+  // console.log(Emotions)
+  const {beforeEmotion, reportDocId, afterEmotion } = route.params
+  console.log(route.params)
+  console.log("beforeEmotion :", beforeEmotion)
   /**
    * UseNavigation function
    *
@@ -87,39 +90,6 @@ export const RemeasureResultView = ({route}) => {
     sendGetAnalysisData();
   }, []);
 
-  // useEffect(() => {
-  //   if (receivedData === null || receivedData === '') {
-  //     return;
-  //   }
-  //
-  //   console.log('AnalysisResult Received Data: ' + receivedData);
-
-  //   const handleData = data => {
-  //     const jsonObject = JSON.parse(data);
-  //
-  //     let message = jsonObject.message;
-  //     let stressIndex = jsonObject.StressIndex;
-  //     let sdnn = jsonObject.SDNN;
-  //     let hr = jsonObject.HR;
-  //
-  //     setStressIndex(stressIndex);
-  //     setSDNN(sdnn);
-  //     setHR(hr);
-  //
-  //     console.info(
-  //       'Message: ' +
-  //         message +
-  //         ', Stress Index: ' +
-  //         stressIndex +
-  //         ', SDNN: ' +
-  //         sdnn +
-  //         ', HR: ' +
-  //         hr,
-  //     );
-  //   };
-  //
-  //   handleData(receivedData);
-  // }, [receivedData]);
 
   /**
    * Function to handle press event.
@@ -131,7 +101,7 @@ export const RemeasureResultView = ({route}) => {
   const handleBeforeAfterClick = () => {
     navigation.navigate('RemeasureResultsViewScreens', {
       screen: '힐링 모드 전 후 비교하기',
-      params: {beforeEmotion:Emotions.beforeEmotion, afterEmotion: Emotions.afterEmotion},
+      params: {beforeEmotion: beforeEmotion, afterEmotion: afterEmotion, reportDocId: reportDocId},
     });
   };
 
@@ -218,7 +188,7 @@ export const RemeasureResultView = ({route}) => {
                 <Divider />
               </Box>
               <Box flex={1} alignItems={'flex-end'}>
-                {EmotionIcon[Emotions.afterEmotion]}
+                {EmotionIcon[afterEmotion]}
               </Box>
             </HStack>
           </VStack>

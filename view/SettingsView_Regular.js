@@ -1,11 +1,13 @@
 import {BackHandler, Touchable, TouchableOpacity, View} from "react-native";
-import {Button, HStack, Slider, Text, VStack} from "native-base";
-import React, {useEffect} from "react";
+import {Button, HStack, ScrollView, Slider, Text, VStack} from "native-base";
+import React, {useContext, useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {handlePress} from "react-native-paper/lib/typescript/components/RadioButton/utils";
 import {useNavigation} from "@react-navigation/native";
+import {UserContext} from "./module/UserProvider";
+import firestore from "@react-native-firebase/firestore";
 
 /**
  * React component for displaying a calendar view.
@@ -15,24 +17,71 @@ import {useNavigation} from "@react-navigation/native";
  * @returns {ReactElement} - The rendered component.
  */
 
-// const navigation = useNavigation()
-//
-// const backButton = () => {
-//     return canGoBacck
-// };
-// console.log("back button is pressed")
 
-// useEffect(() => {
-//     BackHandler.addEventListener("hardwareBackPress", backButton)
-//     return () => {
-//         BackHandler.removeEventListener("hardwareBackPress", backButton)
-//     }
-// }, [backButton]);
 
 export const SettingsView_Regular = ({ navigation }) => {
 
-return(
+    const [measurementTime, setMeasurementTime] = useState(0);
+    const [stimulationTime, setStimulationTime] = useState(0);
+    const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+    const {userId} = useContext(UserContext)
+
+    // 데이터베이스에서 값을 가져와서 상태 변수에 할당
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userDoc = await firestore()
+                    .collection("Users")
+                    .doc(userId)
+                    .get();
+                const userData = userDoc.data();
+                if (userData) {
+                    setMeasurementTime(userData.AI_settings?.measurementTime || 1);  // 기본값 설정
+                    setStimulationTime(userData.AI_settings?.stimulationTime || 30);  // 기본값 설정
+                    setInitialFetchDone(true);
+                    console.log(userData.measurementTime)
+                    console.log(userData.stimulationTime)
+                    console.log("User data fetched");
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+            }
+        };
+
+        fetchUserData();
+    }, [userId]);
+
+
+    useEffect(() => {
+        const updateUserData = async () => {
+            try {
+                const AI_settings = {
+                    measurementTime: measurementTime,
+                    stimulationTime: stimulationTime,
+                };
+                await firestore()
+                    .collection("Users")
+                    .doc(userId)
+                    .update({
+                        AI_settings
+                    });
+                console.log("User data updated");
+            } catch (error) {
+                console.error("Error updating user data: ", error);
+            }
+        };
+
+        if (initialFetchDone) {
+            updateUserData();
+        }
+    }, [measurementTime, stimulationTime,]);
+
+
+
+    return(
     <VStack flex={1}>
+        <ScrollView>
         <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
             <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.goBack()}}>
             <Ionicons name={"arrow-back"} color={'#222222'} size={25} />
@@ -46,7 +95,7 @@ return(
                 <Text bold>음악 소리</Text>
                 <HStack justifyContent={"space-between"} alignItems={"center"} >
                     <MaterialCommunityIcons name={"volume-high"} color={"#2785F4"} size={25}/>
-                    <Slider width={"88%"} defaultValue={30} minValue={0} maxValue={100} step={2} colorScheme={"light"}>
+                    <Slider width={"88%"} defaultValue={30} minValue={0} maxValue={100} step={1} colorScheme={"light"}>
                         <Slider.Track>
                             <Slider.FilledTrack bgColor={'#2785F4'} />
                         </Slider.Track>
@@ -58,7 +107,7 @@ return(
                 <Text bold>진동 세기</Text>
                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                     <MaterialCommunityIcons name={"volume-vibrate"} color={"#2785F4"} size={25}/>
-                    <Slider width={"88%"} defaultValue={60} minValue={0} maxValue={100} step={2} colorScheme={"light"}>
+                    <Slider width={"88%"} defaultValue={20} minValue={0} maxValue={100} step={1} colorScheme={"light"}>
                         <Slider.Track>
                             <Slider.FilledTrack bg={"#2785F4"}/>
                         </Slider.Track>
@@ -73,7 +122,10 @@ return(
                 <Text bold>측정 시간</Text>
                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                     <MaterialIcons name={"access-time-filled"} color={"#2785F4"} size={25}/>
-                    <Slider width={"88%"} defaultValue={3} minValue={1} maxValue={5} step={2} colorScheme={"light"}>
+                    <Text>{measurementTime ? measurementTime + '분' : "1분"}</Text>
+                    <Slider width={"88%"} value={measurementTime} minValue={1} maxValue={5} step={2} colorScheme={"light"}
+                            onChange={v => setMeasurementTime(Math.floor(v))}
+                    >
                         <Slider.Track>
                             <Slider.FilledTrack bg={"#2785F4"}/>
                         </Slider.Track>
@@ -86,7 +138,10 @@ return(
                 <Text bold>자극 시간</Text>
                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                     <MaterialIcons name={"access-time-filled"} color={"#2785F4"} size={25}/>
-                    <Slider width={"88%"} defaultValue={15} minValue={10} maxValue={20} step={5} colorScheme={"light"}>
+                    <Text>{stimulationTime ? stimulationTime + '초' : "30초"}</Text>
+                    <Slider width={"88%"} value={stimulationTime} minValue={30} maxValue={90} step={30} colorScheme={"light"}
+                            onChange={v => setStimulationTime(Math.floor(v))}
+                    >
                         <Slider.Track>
                             <Slider.FilledTrack bg={"#2785F4"}/>
                         </Slider.Track>
@@ -96,6 +151,7 @@ return(
             </VStack>
         </VStack>
     </VStack>
+        </ScrollView>
     </VStack>
 
     );

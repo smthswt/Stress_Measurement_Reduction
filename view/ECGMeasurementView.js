@@ -174,7 +174,7 @@ export const ECGMeasurementView = ({route}) => {
       console.log(message);
 
       const userRef = firestore().collection("Users").doc(userId);
-      const reportRef = userRef.collection("1st_Report");
+      const reportRef = userRef.collection("Report");
 
       await analysisFinish();
 
@@ -186,18 +186,21 @@ export const ECGMeasurementView = ({route}) => {
 
       let now = moment();
       // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
-      await reportRef.add({
+      const reportDoc = await reportRef.add({
         name : name,
+        createAt : now.toDate(),
+        "1st_Report" : {
         avgHr : getAvgHR(),
         sdnn : getSDNN(),
         stressIndex : getStressIndex(),
         hrList : hrList,
         rrList : rrList,
-        createAt : now.toDate(),
+        }
       });
 
       dispatch(fetchReports());
-      console.log("측정 종료. 데이터 저장.");
+      console.log("측정 종료. 데이터 저장.", reportDoc.id);
+      setReportDocId(reportDoc.id)
       // sendData(
       //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
       //   'ed890871-07e9-4967-81b1-22ce3df7728e',
@@ -341,6 +344,7 @@ export const ECGMeasurementView = ({route}) => {
     {name: 'emotion_angry', title: '화나요'},
   ];
   const [selectedEmotion, setSelectedEmotion] = useState(null);
+  const [reportDocId, setReportDocId] = useState();
   const handleEmotionSelect = emotionName => {
     if (selectedEmotion === emotionName) {
       setSelectedEmotion(null);
@@ -398,24 +402,33 @@ export const ECGMeasurementView = ({route}) => {
       if (selectedEmotion) {
         navigation.navigate('AnalysisViewScreens', {
           screen: 'AnalysisEnd',
-          params: {beforeEmotion: selectedEmotion},
+          params: {
+            beforeEmotion: selectedEmotion,
+          reportDocId: reportDocId,
+          }
         });
         clearTimeout(timer);
         // 업데이트할 문서의 참조를 가져옵니다.
         const userRef = firestore().collection("Users").doc(userId);
-        const reportRef = userRef.collection("1st_Report");
+        const reportRef = userRef.collection("Report").doc(reportDocId);
 
-        // 업데이트할 문서를 쿼리합니다. (여기서는 예시로 마지막에 추가된 문서를 가져오도록 했습니다.)
-        reportRef.orderBy('createAt', 'desc').limit(1).get()
-            .then(snapshot => {
-              if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
+        // 기존 문서 데이터 가져오기
+        reportRef.get()
+            .then(doc => {
+              if (doc.exists) {
+                const reportData = doc.data();
+                // 기존 데이터와 새로운 감정을 합쳐서 업데이트합니다.
+                const updatedReportData = {
+                  ...reportData,
+                  "1st_Report": {
+                    ...reportData["1st_Report"],
+                    emotion: selectedEmotion
+                  }
+                };
                 // 문서의 참조에서 업데이트를 수행합니다.
-                doc.ref.update({
-                  emotion: selectedEmotion
-                })
+                doc.ref.update(updatedReportData)
                     .then(() => console.log('emotion 값이 성공적으로 업데이트되었습니다.'))
-                    .catch(error => console.error('새로운 키값 업데이트 중 오류 발생:', error));
+                    .catch(error => console.error('emotion 값 업데이트 중 오류 발생:', error));
               } else {
                 console.log("업데이트할 문서를 찾을 수 없습니다.");
               }

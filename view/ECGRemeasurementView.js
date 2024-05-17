@@ -41,8 +41,10 @@ export const ECGRemeasurementView = ({route}) => {
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
-  const beforeEmotion = route.params;
-  //console.log(beforeEmotion);
+  const {beforeEmotion, reportDocId } = route.params
+  // const beforeEmotion = route.params.beforeEmotion;
+  // console.log(route.params)
+  // console.log("beforeEmotion :", beforeEmotion)
 
   /**
    * Sends data to an Arduino device.
@@ -184,19 +186,23 @@ export const ECGRemeasurementView = ({route}) => {
       console.log(`RR: ${rrList}, Length: ${rrList.length}`);
 
       const userRef = firestore().collection("Users").doc(userId);
-      const reportRef = userRef.collection("2nd_Report");
+      const reportRef = userRef.collection("Report").doc(reportDocId)
 
       let now = moment();
       // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
-      await reportRef.add({
-        name : name,
-        avgHr : getAvgHR(),
-        sdnn : getSDNN(),
-        stressIndex : getStressIndex(),
-        hrList : hrList,
-        rrList : rrList,
-        createAt : now.toDate(),
-      });
+      // 업데이트할 데이터 생성
+      const newData = {
+        "2nd_Report": {
+          avgHr: getAvgHR(),
+          sdnn: getSDNN(),
+          stressIndex: getStressIndex(),
+          hrList: hrList,
+          rrList: rrList,
+        }
+      };
+
+      // 문서 업데이트
+      await reportRef.update(newData);
 
       dispatch(fetchReports());
       console.log("측정 종료. 데이터 저장.");
@@ -298,18 +304,52 @@ export const ECGRemeasurementView = ({route}) => {
    * @function handleAnalysisStop
    * @returns {void}
    */
-  const handleAnalysisStop = () => {
+  const handleAnalysisStop = async () => {
     setIsMessageOpen(false);
     // setShowModal(false)
-    clearInterval(interval.current)
-    const timer = setTimeout(() => {
+    clearInterval(interval.current);
+    const timer = setTimeout(async () => {
+      const message = 'AnalysisStop';
+      console.log(message);
+
+      await analysisFinish();
+
+      let rrList = getRRList();
+      let hrList = getHRList();
+
+      console.log(`HR: ${hrList}, Length: ${hrList.length}`);
+      console.log(`RR: ${rrList}, Length: ${rrList.length}`);
+
+      const userRef = firestore().collection("Users").doc(userId);
+      const reportRef = userRef.collection("Report").doc(reportDocId);
+
+      let now = moment();
+      // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
+      // 업데이트할 데이터 생성
+      const newData = {
+        "2nd_Report": {
+          avgHr: getAvgHR(),
+          sdnn: getSDNN(),
+          stressIndex: getStressIndex(),
+          hrList: hrList,
+          rrList: rrList,
+        }
+      };
+
+      // 문서 업데이트
+      await reportRef.update(newData);
+
+      dispatch(fetchReports());
+      console.log("측정 종료. 2차 데이터 저장.");
+
       navigation.navigate('RemeasureResultsViewScreens', {
-        screen: '힐링 모드 전 후 비교하기',
-        params: {beforeEmotion: beforeEmotion, afterEmotion: selectedEmotion},
-      })
+        screen: 'RemeasureEnd',
+        params: {beforeEmotion: beforeEmotion, afterEmotion: selectedEmotion, reportDocId : reportDocId},
+      });
       clearTimeout(timer);
     }, 500);
   };
+
 
   const handleAnalysisStopCancel = () => {
     setIsMessageOpen(false);
@@ -400,25 +440,31 @@ export const ECGRemeasurementView = ({route}) => {
       if (selectedEmotion) {
         navigation.navigate('RemeasureResultsViewScreens', {
           screen: 'RemeasureEnd',
-          params: { beforeEmotion: beforeEmotion.beforeEmotion, afterEmotion: selectedEmotion },
+          params: {beforeEmotion: beforeEmotion, afterEmotion: selectedEmotion, reportDocId : reportDocId},
         });
         clearTimeout(timer);
 
         // 업데이트할 문서의 참조를 가져옵니다.
         const userRef = firestore().collection("Users").doc(userId);
-        const reportRef = userRef.collection("2nd_Report");
+        const reportRef = userRef.collection("Report").doc(reportDocId)
 
-        // 업데이트할 문서를 쿼리합니다. (여기서는 예시로 마지막에 추가된 문서를 가져오도록 했습니다.)
-        reportRef.orderBy('createAt', 'desc').limit(1).get()
-            .then(snapshot => {
-              if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
+        // 기존 문서 데이터 가져오기
+        reportRef.get()
+            .then(doc => {
+              if (doc.exists) {
+                const reportData = doc.data();
+                // 기존 데이터와 새로운 감정을 합쳐서 업데이트합니다.
+                const updatedReportData = {
+                  ...reportData,
+                  "2nd_Report": {
+                    ...reportData["2nd_Report"],
+                    emotion: selectedEmotion
+                  }
+                };
                 // 문서의 참조에서 업데이트를 수행합니다.
-                doc.ref.update({
-                  emotion: selectedEmotion,
-                })
-                    .then(() => console.log('새로운 키값이 성공적으로 업데이트되었습니다.'))
-                    .catch(error => console.error('새로운 키값 업데이트 중 오류 발생:', error));
+                doc.ref.update(updatedReportData)
+                    .then(() => console.log('emotion 값이 성공적으로 업데이트되었습니다.'))
+                    .catch(error => console.error('emotion 값 업데이트 중 오류 발생:', error));
               } else {
                 console.log("업데이트할 문서를 찾을 수 없습니다.");
               }

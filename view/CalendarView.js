@@ -190,7 +190,7 @@ return (
     </VStack>
 
         <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
-            <VStack space={5}>
+            <VStack width={"100%"} space={5}>
 
             <BPM></BPM>
             <StressLevel></StressLevel>

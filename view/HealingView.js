@@ -49,10 +49,13 @@ export const HealingView = ({route}) => {
    *
    * @returns {object} The navigation object.
    */
+  const {beforeEmotion, reportDocId, stressLevel} = route.params
   const navigation = useNavigation();
-  const beforeEmotion = route.params.beforeEmotion;
-  const songNumber = route.params.stressLevel
+  // const beforeEmotion = route.params.beforeEmotion;
+  const songNumber = stressLevel
+  // console.log(route.params)
   // console.log("beforeEmotion :", beforeEmotion)
+  // console.log("reportDocId :", reportDocId)
   // console.log('stresslevel - song number :', songNumber)
 
   /**
@@ -220,7 +223,7 @@ export const HealingView = ({route}) => {
     
     //힐링 모드 재측정으로 이동
     const timer = setTimeout(() => {
-      navigation.navigate('RemeasureStart', {beforeEmotion:beforeEmotion.beforeEmotion});
+      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId});
       clearTimeout(timer);
     }, );
   };

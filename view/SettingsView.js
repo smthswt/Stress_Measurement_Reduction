@@ -1,5 +1,5 @@
 import {Alert, View} from "react-native";
-import {AlertDialog, Box, Button, Center, Divider, HStack, Pressable, Text, VStack} from "native-base";
+import {AlertDialog, Box, Button, Center, Divider, HStack, Pressable, ScrollView, Text, VStack} from "native-base";
 import React, {useEffect, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import {useDispatch, useSelector} from "react-redux";
@@ -81,6 +81,7 @@ export const SettingsView = ({navigation}) => {
 
     return (
         <VStack style={{flex: 1}}>
+            <ScrollView>
             <VStack alignitems={"flex-start"} bgColor={"white"} padding={5}>
                 <Text bold fontSize={18}>설정</Text>
             </VStack>
@@ -166,6 +167,7 @@ export const SettingsView = ({navigation}) => {
             </AlertDialog>
 
         </View>
+            </ScrollView>
         </VStack>
     );
 }

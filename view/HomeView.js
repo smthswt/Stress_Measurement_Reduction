@@ -2,12 +2,12 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import {
     Box,
     Button,
-    Center,
+    Center, Heading,
     HStack,
     Image,
     NativeBaseProvider,
     Pressable,
-    ScrollView,
+    ScrollView, Spinner,
     Text,
     VStack
 } from "native-base";
@@ -233,8 +233,11 @@ export const HomeView = ({navigation, route}) => {
         ).start();
     }, [ECGwidth]);
 
+
+
+
     return (
-        <ScrollView style={{flex: 1}}>
+        <ScrollView>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
                     {/*<DeviceConnectState/>*/}
                     <VStack h={200} bgColor={"#2785F4"} justifyContent={'flex-start'} p={2}>

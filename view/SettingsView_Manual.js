@@ -20,8 +20,7 @@ import {useBLE} from "./module/BLEProvider";
  */
 export const SettingsView_Manual = ({ navigation }) => {
     const { isOpen, onOpen, onClose } = useDisclose();
-    const [move, setMove] = React.useState("move_two");
-    const [time, setTime] = React.useState("time_one");
+    // const [move, setMove] = React.useState("move_two");
     const [options, setOptions] = useState([]);
     const [musicItemId, setMusicItemId] = React.useState("");
     const [isPlaying, setIsPlaying] = useState(false);
@@ -30,27 +29,63 @@ export const SettingsView_Manual = ({ navigation }) => {
     const {userId} = useContext(UserContext)
     // console.log("전역 userId:", userId) //전역관리
 
-    // useEffect(() => {
-    //     // AsyncStorage에서 음악 옵션들을 가져와 설정합니다.
-    //     const fetchOptions = async () => {
-    //         try {
-    //             const storedOptions = await AsyncStorage.getItem('options');
-    //             // const selectedMusicName = await AsyncStorage.getItem('selectedMusicName');
-    //             if (storedOptions !== null) {
-    //                 setOptions(JSON.parse(storedOptions));
-    //                 console.log(storedOptions)
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching options:', error);
-    //         }
-    //     };
-    //
-    //     fetchOptions().then(() => {
-    //         console.log("Options fetched successfully!");
-    //     }).catch(error => {
-    //         console.error("Error fetching options:", error);
-    //     });
-    // }, []);
+    // const [measurementTime, setMeasurementTime] = useState(30);
+    const [time, setTime] = React.useState(null);
+    const [stimulation, setStimulation] = useState(null);
+    const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+
+    // 데이터베이스에서 값을 가져와서 상태 변수에 할당
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userDoc = await firestore()
+                    .collection("Users")
+                    .doc(userId)
+                    .get();
+                const userData = userDoc.data();
+                if (userData) {
+                    setTime(userData.Manual_settings?.stimulationTime || 30);  // 기본값 설정, 진동 시간
+                    setStimulation(userData.Manual_settings?.stimulationLvl || 20);  // 기본값 설정, 진동 강도
+                    setInitialFetchDone(true);
+                    console.log(userData.measurementTime)
+                    console.log(userData.stimulationTime)
+                    console.log("User data fetched");
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+            }
+        };
+
+        fetchUserData();
+    }, [userId]);
+
+
+    //실시간 업데이트된 값 저장
+    useEffect(() => {
+        const updateUserData = async () => {
+            try {
+                const Manual_settings = {
+                    stimulationTime: time,
+                    stimulationLvl: stimulation,
+                };
+                await firestore()
+                    .collection("Users")
+                    .doc(userId)
+                    .update({
+                        Manual_settings
+                    });
+                console.log("User data updated", {time});
+            } catch (error) {
+                console.error("Error updating user data: ", error);
+            }
+        };
+
+        if (initialFetchDone) {
+            updateUserData();
+        }
+    }, [time, stimulation,]);
+
 
 
     const getManualMusic = () => {
@@ -252,8 +287,10 @@ export const SettingsView_Manual = ({ navigation }) => {
     const optionsLength = options.length;
 
 
+
     return (
         <VStack flex={1}>
+            <ScrollView>
             <HStack alignitems={"center"} justifyContent={"flex-start"} bgColor={"white"} padding={5}>
                 <TouchableOpacity activeOpacity={0.8} onPress={() => {navigation.goBack()}}>
                     <Ionicons name={"arrow-back"} color={'#222222'} size={25} />
@@ -291,14 +328,20 @@ export const SettingsView_Manual = ({ navigation }) => {
             </VStack>
             <VStack bg={"white"} p={5} space={2} shadow={2}>
                 <Text bold>진동 선택</Text>
-                <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={move} onChange={nextValue => {
-                    setMove(nextValue);
+                <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={stimulation} onChange={nextValue => {
+                    setStimulation(nextValue);
                 }}>
-                    <Radio value="move_one" my={1} size={"sm"}>60 Hz</Radio>
-                    <Radio value="move_two" my={1} size={"sm"}>70 Hz</Radio>
-                    <Radio value="move_three" my={1} size={"sm"}>80 Hz</Radio>
-                    <Radio value="move_four" my={1} size={"sm"}>90 Hz</Radio>
-                    <Radio value="move_five" my={1} size={"sm"}>100 Hz</Radio>
+                    {/*//임의로 수정한 선택지*/}
+                    <Radio value={20} my={1} size={"sm"}>20 Hz</Radio>
+                    <Radio value={25} my={1} size={"sm"}>25 Hz</Radio>
+                    <Radio value={30} my={1} size={"sm"}>30 Hz</Radio>
+
+                    {/*//기존 선택지*/}
+                    {/*<Radio value="move_one" my={1} size={"sm"}>60 Hz</Radio>*/}
+                    {/*<Radio value="move_two" my={1} size={"sm"}>70 Hz</Radio>*/}
+                    {/*<Radio value="move_three" my={1} size={"sm"}>80 Hz</Radio>*/}
+                    {/*<Radio value="move_four" my={1} size={"sm"}>90 Hz</Radio>*/}
+                    {/*<Radio value="move_five" my={1} size={"sm"}>100 Hz</Radio>*/}
 
                 </Radio.Group>
             </VStack>
@@ -307,14 +350,19 @@ export const SettingsView_Manual = ({ navigation }) => {
                 <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={time} onChange={nextValue => {
                     setTime(nextValue);
                 }}>
-                    <Radio value="time_one" my={1} size={"sm"}>10 분</Radio>
-                    <Radio value="time_two" my={1} size={"sm"}>20 분</Radio>
-                    <Radio value="time_three" my={1} size={"sm"}>30 분</Radio>
+                    <Radio value={30} my={1} size={"sm"}>30 초</Radio>
+                    <Radio value={60} my={1} size={"sm"}>60 초</Radio>
+                    <Radio value={90} my={1} size={"sm"}>90 초</Radio>
+
+                    {/*//기존 선택지*/}
+                    {/*<Radio value="time_one" my={1} size={"sm"}>10 분</Radio>*/}
+                    {/*<Radio value="time_two" my={1} size={"sm"}>20 분</Radio>*/}
+                    {/*<Radio value="time_three" my={1} size={"sm"}>30 분</Radio>*/}
                 </Radio.Group>
             </VStack>
         </VStack>
 
-
+            </ScrollView>
         </VStack>
     )
 }

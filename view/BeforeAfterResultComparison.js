@@ -10,9 +10,10 @@ import {
   HStack,
   Image,
   Link,
-  ScrollView,
+  ScrollView, Spinner,
   Text,
   VStack,
+    View,
 } from 'native-base';
 import {ItemComponent} from './ItemComponent';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -38,7 +39,9 @@ import moment from "moment";
    */
 
   const BeforeAfterResultComparison = ({route}) => {
-    const Emotions = route.params;
+    const {beforeEmotion, reportDocId, afterEmotion } = route.params
+    // console.log(route.params)
+    // console.log("beforeEmotion :", beforeEmotion)
     /**
      * UseNavigation function
      *
@@ -77,6 +80,7 @@ import moment from "moment";
     let now = moment();
     const [momentDate, setMomentDate] = useState(moment(createAt));
 
+    const [isLoading, setIsLoading] = useState(true);
     const [createAt, setCreateAt] = useState(moment())
     const [createAt2, setCreateAt2] = useState(moment())
     const [hrList, setHrList] = useState([])
@@ -191,55 +195,95 @@ import moment from "moment";
     const [emotion, setEmotion] = useState("")
     const [emotion2, setEmotion2] = useState("")
 
-    const getReportData = async () => {
-      const userRef = firestore().collection("Users").doc(userId);
-
-      // 힐링 전 데이터 가져오기
-      const firstReportSnapshot = await userRef.collection("1st_Report").orderBy('createAt', 'desc').limit(1).get();
-      if (!firstReportSnapshot.empty) {
-        const firstReportData = firstReportSnapshot.docs[0].data();
-        setEmotion(firstReportData.emotion)
-        setHrList(firstReportData.hrList)
-        setRrList(firstReportData.rrList)
-        setBpm(firstReportData.avgHr);
-        setSdnn(firstReportData.sdnn);
-        setStressLevel(firstReportData.stressIndex);
-        setCreateAt(moment(firstReportData.createAt));
-      } else {
-        console.log("힐링 전 데이터 없음");
-      }
-
-      // 힐링 후 데이터 가져오기
-      const secondReportSnapshot = await userRef.collection("2nd_Report").orderBy('createAt', 'desc').limit(1).get();
-      if (!secondReportSnapshot.empty) {
-        const secondReportData = secondReportSnapshot.docs[0].data();
-        setEmotion2(secondReportData.emotion)
-        setHrList2(secondReportData.hrList)
-        setRrList2(secondReportData.rrList)
-        setBpm2(secondReportData.avgHr);
-        setSdnn2(secondReportData.sdnn);
-        setStressLevel2(secondReportData.stressIndex);
-        setCreateAt2(moment(secondReportData.createAt));
-      } else {
-        console.log("힐링 후 데이터 없음");
-      }
-      console.log("bpm :", bpm, bpm2)
-      console.log("sdnn :", sdnn, sdnn2)
-      console.log("stresslevel :", stressLevel, stressLevel2)
-      console.log("createAt :", createAt, createAt2)
-    };
+    // const getReportData = async () => {
+    //   const userRef = firestore().collection("Users").doc(userId);
+    //
+    //   // 힐링 전 데이터 가져오기
+    //   const firstReportSnapshot = await userRef.collection("1st_Report").orderBy('createAt', 'desc').limit(1).get();
+    //   if (!firstReportSnapshot.empty) {
+    //     const firstReportData = firstReportSnapshot.docs[0].data();
+    //     setEmotion(firstReportData.emotion)
+    //     setHrList(firstReportData.hrList)
+    //     setRrList(firstReportData.rrList)
+    //     setBpm(firstReportData.avgHr);
+    //     setSdnn(firstReportData.sdnn);
+    //     setStressLevel(firstReportData.stressIndex);
+    //     setCreateAt(moment(firstReportData.createAt));
+    //   } else {
+    //     console.log("힐링 전 데이터 없음");
+    //   }
+    //
+    //   // 힐링 후 데이터 가져오기
+    //   const secondReportSnapshot = await userRef.collection("2nd_Report").orderBy('createAt', 'desc').limit(1).get();
+    //   if (!secondReportSnapshot.empty) {
+    //     const secondReportData = secondReportSnapshot.docs[0].data();
+    //     setEmotion2(secondReportData.emotion)
+    //     setHrList2(secondReportData.hrList)
+    //     setRrList2(secondReportData.rrList)
+    //     setBpm2(secondReportData.avgHr);
+    //     setSdnn2(secondReportData.sdnn);
+    //     setStressLevel2(secondReportData.stressIndex);
+    //     setCreateAt2(moment(secondReportData.createAt));
+    //   } else {
+    //     console.log("힐링 후 데이터 없음");
+    //   }
+    //   console.log("bpm :", bpm, bpm2)
+    //   console.log("sdnn :", sdnn, sdnn2)
+    //   console.log("stresslevel :", stressLevel, stressLevel2)
+    //   console.log("createAt :", createAt, createAt2)
+    // };
+    //
+    // useEffect(() => {
+    //   console.log("hrlist: ", hrList, hrList2);
+    //   console.log("rrlist :", rrList, rrList2);
+    //   console.log("hrlist2: ", hrList2);
+    //   console.log("rrlist2 :", rrList2);
+    // }, [hrList, hrList2, rrList, rrList2]);
 
     useEffect(() => {
-      console.log("hrlist: ", hrList, hrList2);
-      console.log("rrlist :", rrList, rrList2);
-      console.log("hrlist2: ", hrList2);
-      console.log("rrlist2 :", rrList2);
-    }, [hrList, hrList2, rrList, rrList2]);
+      const fetchData = async () => {
+        try {
+          const userRef = firestore().collection("Users").doc(userId);
+          const reportSnapshot = await userRef.collection("Report").doc(reportDocId).get();
+          console.log(reportDocId)
+          console.log("reportData :", reportSnapshot);
+          // const secondReportSnapshot = await userRef.collection("2nd_Report").orderBy('createAt', 'desc').limit(1).get();
 
-        useEffect(() => {
-          // console.log(Emotions);
-          getReportData()
-        }, []);
+          if (reportSnapshot.exists) {
+            const reportData = reportSnapshot.data();
+            console.log("report Data :", reportData)
+
+            setEmotion(beforeEmotion);
+            setEmotion2(afterEmotion);
+            setBpm(reportData["1st_Report"].avgHr);
+            setBpm2(reportData["2nd_Report"].avgHr);
+            setSdnn(reportData["1st_Report"].sdnn);
+            setSdnn2(reportData["2nd_Report"].sdnn);
+            setStressLevel(reportData["1st_Report"].stressIndex);
+            setStressLevel2(reportData["2nd_Report"].stressIndex);
+            setCreateAt(moment(reportData.createAt));
+            setCreateAt2(moment(reportData.createAt));
+            setHrList(reportData["1st_Report"].hrList);
+            setHrList2(reportData["2nd_Report"].hrList);
+            setRrList(reportData["1st_Report"].rrList);
+            setRrList2(reportData["2nd_Report"].rrList);
+          } else {
+            console.log("힐링 전 또는 후 데이터가 없습니다.");
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchData();
+    }, []);
+
+        // useEffect(() => {
+        //   // console.log(Emotions);
+        //   getReportData()
+        // }, []);
 
     useEffect(() => {
       console.log("emotion :", emotion,"-", emotion2);
@@ -264,8 +308,25 @@ import moment from "moment";
       navigation.navigate('TabScreens', { screen: 'Home' });
     }
 
+    const LoadingSpinner = () => {
+      return (
+          <Center flex={1}>
+            <Spinner color={"blue.500"} accessibilityLabel="Loading posts" size='lg'/>
+            <Heading color="blue.500" fontSize="md" mt={2}> {/* mt를 사용하여 위쪽 여백 추가 */}
+              Loading...
+            </Heading>
+          </Center>
+      );
+    };
+
     return (
-      <ScrollView>
+      <View flex={1}>
+
+        {isLoading ? (
+            <LoadingSpinner />
+        ) : (
+
+            <ScrollView>
         <VStack space={5} h={'100%'} m={5}>
           <VStack
             space={1}
@@ -398,7 +459,9 @@ import moment from "moment";
             </Text>
           </Button>
         </VStack>
-      </ScrollView>
+            </ScrollView>
+        )}
+      </View>
     );
   };
 

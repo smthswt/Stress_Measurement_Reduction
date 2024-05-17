@@ -21,7 +21,7 @@ export const ItemComponent = ({stressIndex, sdnn, hr, createAt}) => {
     const now = new Date();
 
     // console.log(createAt);
-    const [momentDate, setMomentDate] = useState(moment(createAt));
+    const momentDate = moment(createAt.toDate());
 
 
     /**

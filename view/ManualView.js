@@ -52,7 +52,10 @@ export const ManualView = ({route}) => {
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
-  const beforeEmotion = route.params;
+  const {beforeEmotion, reportDocId } = route.params
+  // const beforeEmotion = route.params.beforeEmotion;
+  // console.log(route.params)
+  // console.log("beforeEmotion :", beforeEmotion)
 
   /**
    * Sends data.
@@ -220,7 +223,7 @@ export const ManualView = ({route}) => {
     setIsRemeasureOpen(false)
     const timer = setTimeout(() => {
       //2차 재측정으로 이동
-      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion.beforeEmotion});
+      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId});
       clearTimeout(timer);
     },);
   };
