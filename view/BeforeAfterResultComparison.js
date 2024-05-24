@@ -195,50 +195,7 @@ import moment from "moment";
     const [emotion, setEmotion] = useState("")
     const [emotion2, setEmotion2] = useState("")
 
-    // const getReportData = async () => {
-    //   const userRef = firestore().collection("Users").doc(userId);
-    //
-    //   // 힐링 전 데이터 가져오기
-    //   const firstReportSnapshot = await userRef.collection("1st_Report").orderBy('createAt', 'desc').limit(1).get();
-    //   if (!firstReportSnapshot.empty) {
-    //     const firstReportData = firstReportSnapshot.docs[0].data();
-    //     setEmotion(firstReportData.emotion)
-    //     setHrList(firstReportData.hrList)
-    //     setRrList(firstReportData.rrList)
-    //     setBpm(firstReportData.avgHr);
-    //     setSdnn(firstReportData.sdnn);
-    //     setStressLevel(firstReportData.stressIndex);
-    //     setCreateAt(moment(firstReportData.createAt));
-    //   } else {
-    //     console.log("힐링 전 데이터 없음");
-    //   }
-    //
-    //   // 힐링 후 데이터 가져오기
-    //   const secondReportSnapshot = await userRef.collection("2nd_Report").orderBy('createAt', 'desc').limit(1).get();
-    //   if (!secondReportSnapshot.empty) {
-    //     const secondReportData = secondReportSnapshot.docs[0].data();
-    //     setEmotion2(secondReportData.emotion)
-    //     setHrList2(secondReportData.hrList)
-    //     setRrList2(secondReportData.rrList)
-    //     setBpm2(secondReportData.avgHr);
-    //     setSdnn2(secondReportData.sdnn);
-    //     setStressLevel2(secondReportData.stressIndex);
-    //     setCreateAt2(moment(secondReportData.createAt));
-    //   } else {
-    //     console.log("힐링 후 데이터 없음");
-    //   }
-    //   console.log("bpm :", bpm, bpm2)
-    //   console.log("sdnn :", sdnn, sdnn2)
-    //   console.log("stresslevel :", stressLevel, stressLevel2)
-    //   console.log("createAt :", createAt, createAt2)
-    // };
-    //
-    // useEffect(() => {
-    //   console.log("hrlist: ", hrList, hrList2);
-    //   console.log("rrlist :", rrList, rrList2);
-    //   console.log("hrlist2: ", hrList2);
-    //   console.log("rrlist2 :", rrList2);
-    // }, [hrList, hrList2, rrList, rrList2]);
+
 
     useEffect(() => {
       const fetchData = async () => {

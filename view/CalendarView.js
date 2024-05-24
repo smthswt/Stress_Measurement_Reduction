@@ -12,13 +12,18 @@ import {
     useDisclose,
     VStack
 } from "native-base";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {BPM} from "./components/BPM";
 import {StressLevel} from "./components/StressLevel";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import CalendarList_Actionsheet from "./components/CalendarList_Actionsheet";
 import SemiCircleProgress from "./components/SemiCirle";
+import {StressSemiCircle} from "./components/StressSemiCircle";
+import {CalendarBPM} from "./components/CalendarBPM";
+import {CalendarStressLevel} from "./components/CalendarStressLevel";
+import firestore from "@react-native-firebase/firestore";
+import {UserContext} from "./module/UserProvider";
 
 /**
  * React component for displaying a calendar view.
@@ -44,6 +49,13 @@ export const CalendarView = ({ navigation,}) => {
     const [dateRange, setDateRange] = useState([todayDate()]);
     const [selected, setSelected] = useState();
     const [clickCount, setClickCount] = useState(0);
+    const [bpm, setbpm] = useState(0)
+    const [bpm2, setbpm2] = useState(0)
+    const [bpm3, setbpm3] = useState(0)
+    const [bpm4, setbpm4] = useState(0)
+    const [createAt1, setCreateAt1] = useState("");
+    const [createAt2, setCreateAt2] = useState("");
+    const {userId} = useContext(UserContext)
 
     const getDayOfWeek = (dateString) => {
         const week = ["일", '월', '화', '수', '목', '금', '토'];
@@ -96,8 +108,53 @@ export const CalendarView = ({ navigation,}) => {
         );
     };
 
+
+    // createTimestampFromDate 함수 수정
+    const createTimestampFromDate = (dateString) => {
+        const [year, month, day] = dateString.split('-'); // 날짜 형식에서 연도, 월, 일 추출
+        return new Date(year, month - 1, day).getTime(); // 해당 날짜의 타임스탬프 생성
+    };
+
+
+    // CalendarView 컴포넌트의 useEffect 내부
+    useEffect(() => {
+        getBPMData();
+    }, [dateRange]); // dateRange가 변경될 때마다 호출하도록 변경
+
+// CalendarView 컴포넌트의 getBPMData 함수 내부
+    const getBPMData = async () => {
+        const userRef = firestore().collection("Users").doc(userId);
+        const reportRef = userRef.collection("Report");
+
+        console.log("selected dateRange :", dateRange)
+        // 사용자가 선택한 날짜의 타임스탬프 생성
+        const selectedTimestamp = createTimestampFromDate(dateRange[0]);
+        console.log("selected dateRange :", selectedTimestamp)
+
+        // Firestore 쿼리
+        const querySnapshot = await reportRef
+            .where('createAt', '==', selectedTimestamp)
+            .limit(1)
+            .get();
+
+        if (!querySnapshot.empty) {
+            const recentReport = querySnapshot.docs[0].data();
+            console.log("Recent Report1:", recentReport["1st_Report"].sdnn);
+            console.log("Recent Report2:", recentReport["2nd_Report"].sdnn);
+            setbpm(recentReport["1st_Report"].sdnn);
+            setbpm2(recentReport["2nd_Report"].sdnn);
+
+            console.log("create at:", recentReport.createAt);
+            // moment 객체로 변환하여 상태로 설정
+            setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+        } else {
+            console.log("No reports found");
+        }
+    };
+
     const AllResultsImage = require('../view/images/AllResults.png')
     const StressResultsImage = require('../view/images/AllStress.png')
+
     const StressResults = () => {
         return (
             <HStack>
@@ -114,8 +171,8 @@ export const CalendarView = ({ navigation,}) => {
                                            }]
                                        }} shadow={2} pt={5}
                                        pb={5} >
-                            <Box h={100} alignContent={"center"}><Image source={StressResultsImage}
-                                                                        alt={"view-all-stress"}></Image></Box>
+                            <Box h={100} alignContent={"center"}>
+                                <Image source={StressResultsImage} alt={"view-all-stress"}></Image></Box>
                             <Text bold fontSize={"lg"}>스트레스 정보</Text>
                             <Text fontSize={'xs'} textAlign={"center"}>최근 검사한 스트레스{"\n"}수치를 한눈에 볼 수 있어요.</Text>
                         </VStack>
@@ -162,6 +219,7 @@ export const CalendarView = ({ navigation,}) => {
         onClose();
     };
 
+
 return (
     <VStack style={{flex: 1}}>
     <VStack space={2} bgColor={"white"} padding={5}>
@@ -192,9 +250,9 @@ return (
         <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
             <VStack width={"100%"} space={5}>
 
-            <BPM></BPM>
-            <StressLevel></StressLevel>
-                <StressResults/>
+            <CalendarBPM date={createAt1} bpmm={bpm} bpmm2={bpm2}/>
+            <CalendarStressLevel />
+                <StressSemiCircle />
 
                 <EmotionComponent></EmotionComponent>
 

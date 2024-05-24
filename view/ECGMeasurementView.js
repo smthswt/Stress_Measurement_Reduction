@@ -8,7 +8,7 @@ import {
   VStack,
   Image,
   Modal,
-  HStack,
+  HStack, Actionsheet, Box, useDisclose,
 } from 'native-base';
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -28,6 +28,7 @@ import firestore from "@react-native-firebase/firestore";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchReports} from "../data/store";
 import moment from "moment";
+import DeviceFirstImage from "./images/deviceConnectFirst.png";
 
 /**
  * A React component that displays the Electrocardiogram Measurement view.
@@ -108,7 +109,7 @@ export const ECGMeasurementView = ({route}) => {
    * @param {boolean} isOpen - The variable indicating if something is open or not.
    * @returns {boolean} - Returns true if the variable is open, otherwise returns false.
    */
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpens, setIsOpens] = React.useState(false);
 
   /**
    * Represents whether a message is open or not.
@@ -252,7 +253,7 @@ export const ECGMeasurementView = ({route}) => {
         });
         
         if (isEmotionSelected) { // 감정이 선택되었는지 확인
-          setIsOpen(true);
+          setIsOpens(true);
         } else {
           console.log("기분 이모티콘을 선택해주세요.")
         }
@@ -282,9 +283,11 @@ export const ECGMeasurementView = ({route}) => {
    * @function onOpenAnalysisStopMessageBox
    * @returns {void}
    */
+  console.log("mess:", isMessageOpen)
   const onOpenAnalysisStopMessageBox = () => {
     setIsPaused(true);
     setIsMessageOpen(true);
+    console.log("측정 중지 버튼 클릭됌.")
   };
 
   /**
@@ -389,7 +392,7 @@ export const ECGMeasurementView = ({route}) => {
       console.log('Selected emotion:', selectedEmotion);
       setShowModal(false);
       if (seconds <= 0) {
-        setIsOpen(true);
+        setIsOpens(true);
       }
       setEmotionSelected(true)
     }
@@ -397,7 +400,7 @@ export const ECGMeasurementView = ({route}) => {
 
   //측정 완료 확인
   const handleSummit = () => {
-    setIsOpen(false);
+    setIsOpens(false);
     const timer = setTimeout(() => {
       if (selectedEmotion) {
         navigation.navigate('AnalysisViewScreens', {
@@ -439,6 +442,45 @@ export const ECGMeasurementView = ({route}) => {
   };
 
   const background = require('./images/measurebackground.png')
+
+  const { isOpen , onOpen, onClose } = useDisclose();
+
+  // actionsheet 코드 수정
+  // const ActionsheetComponent = () => {
+  //   const { isOpen , onOpen, onClose } = useDisclose();
+  //
+  //   return (
+  //       <Actionsheet isOpen={isOpen} onClose={onClose} hideDragIndicator>
+  //         <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"} alignItems={"center"}>
+  //           <>
+  //             <Box w="100%" h={60} marginTop={0.5} marginBottom={5} justifyContent="center" alignItems={"center"}>
+  //               <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
+  //                 현재 측정을
+  //               </Text>
+  //               <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
+  //                 중지하시겠어요?
+  //               </Text>
+  //             </Box>
+  //
+  //             <Text fontSize={14} color="#EB5147">
+  //               측정 중인 정보는 기록되지 않아요.
+  //             </Text>
+  //
+  //             <Center width={"100%"} mb={2} mt={4}>
+  //               <HStack width={"92%"} space={4} justifyContent={"center"}>
+  //                 <Button bg={"white"} borderColor={"#2785F4"} onPress={handleAnalysisStopCancel} width={"45%"} variant={"outline"}>
+  //                   <Text fontWeight={600} fontSize={18} color={"#2785F4"}>취소</Text>
+  //                 </Button>
+  //                 <Button bg={"#2785F4"} onPress={handleAnalysisStop} width={"45%"}>
+  //                   <Text fontWeight={600} fontSize={18} color={"white"}>중지하기</Text>
+  //                 </Button>
+  //               </HStack>
+  //             </Center>
+  //           </>
+  //         </Actionsheet.Content>
+  //       </Actionsheet>
+  //   );
+  // };
 
   return (
     <>
@@ -524,7 +566,7 @@ export const ECGMeasurementView = ({route}) => {
       </Modal>
 
       {/*측정 완료 다이얼로그*/}
-      <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpen}>
+      <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpens}>
         <AlertDialog.Content p={'2%'}>
           <VStack space={3} p={3}>
             <Center>
@@ -549,36 +591,39 @@ export const ECGMeasurementView = ({route}) => {
       </AlertDialog>
 
       {/*측정 중지 확인 다이얼로그*/}
-      <AlertDialog
-        leastDestructiveRef={messageRef}
-        isOpen={isMessageOpen}
-        onClose={onCloseAnalysisStopMessageBox}>
-        <AlertDialog.Content p={'2%'}>
-          <AlertDialog.CloseButton />
-          <AlertDialog.Header>
-            <Center><Text bold>현재 측정을 중지하시겠습니까?</Text></Center>
-          </AlertDialog.Header>
-          <AlertDialog.Body>
-            <Center><Text color={"#EB5147"}>측정 중인 정보는 기록되지 않아요.</Text></Center>
-          </AlertDialog.Body>
-          <HStack width={"100%"} p={3} space={5}>
-              <Button
-                flex={1}
-                colorScheme="danger"
-                variant={"outline"}
-                onPress={handleAnalysisStopCancel}
-                >
-                취소
-              </Button>
-              <Button
-                flex={1}
-                colorScheme="danger"
-                onPress={handleAnalysisStop}>
-                확인
-              </Button>
-          </HStack>
-        </AlertDialog.Content>
-      </AlertDialog>
+      {isMessageOpen ? (
+          <Actionsheet isOpen={isOpen} onClose={onClose} hideDragIndicator>
+            <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"} alignItems={"center"}>
+              <>
+                <Box w="100%" h={60} marginTop={0.5} marginBottom={5} justifyContent="center" alignItems={"center"}>
+                  <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
+                    현재 측정을
+                  </Text>
+                  <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
+                    중지하시겠어요?
+                  </Text>
+                </Box>
+
+                <Text fontSize={14} color="#EB5147">
+                  측정 중인 정보는 기록되지 않아요.
+                </Text>
+
+                <Center width={"100%"} mb={2} mt={4}>
+                  <HStack width={"92%"} space={4} justifyContent={"center"}>
+                    <Button bg={"white"} borderColor={"#2785F4"} onPress={handleAnalysisStopCancel} width={"45%"} variant={"outline"}>
+                      <Text fontWeight={600} fontSize={18} color={"#2785F4"}>취소</Text>
+                    </Button>
+                    <Button bg={"#2785F4"} onPress={handleAnalysisStop} width={"45%"}>
+                      <Text fontWeight={600} fontSize={18} color={"white"}>중지하기</Text>
+                    </Button>
+                  </HStack>
+                </Center>
+              </>
+            </Actionsheet.Content>
+          </Actionsheet>
+          ) : (
+              <></>
+      )}
     </>
   );
 };

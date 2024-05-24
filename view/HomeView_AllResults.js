@@ -1,11 +1,12 @@
 import {
+  Center, Heading,
   HStack,
   Progress,
-  ScrollView,
+  ScrollView, Spinner,
   Text,
-  VStack,
+  VStack, View
 } from 'native-base';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   VictoryAxis,
@@ -22,6 +23,9 @@ import EmotionSoso from "./icons/EmotionSoso";
 import EmotionTired from "./icons/EmotionTired";
 import EmotionSad from "./icons/EmotionSad";
 import EmotionAngry from "./icons/EmotionAngry";
+import {UserContext} from "./module/UserProvider";
+import moment from "moment";
+import firestore from "@react-native-firebase/firestore";
 
 /**
  * Component for displaying settings view.
@@ -33,58 +37,198 @@ export const HomeView_AllResults = ({navigation}) => {
   const [finalStartDate, setFinalStartDate] = useState('');
   const [finalEndDate, setFinalEndDate] = useState('');
   const [bpmData, setBpmData] = useState(null);
+  const {userId} = useContext(UserContext)
+  let now = moment();
+  const [bpm, setbpm] = useState(0)
+  const [bpm2, setbpm2] = useState(0)
+  const [bpm3, setbpm3] = useState(0)
+  const [bpm4, setbpm4] = useState(0)
+  const [bpm5, setbpm5] = useState(0)
+  const [bpm6, setbpm6] = useState(0)
+  const [bpm7, setbpm7] = useState(0)
+  const [bpm8, setbpm8] = useState(0)
+  const [bpm9, setbpm9] = useState(0)
+  const [bpm10, setbpm10] = useState(0)
+  const [createAt1, setCreateAt1] = useState("");
+  const [createAt2, setCreateAt2] = useState("");
+  const [createAt3, setCreateAt3] = useState("");
+  const [createAt4, setCreateAt4] = useState("");
+  const [createAt5, setCreateAt5] = useState("");
+  const [emotion, setemotion] = useState("")
+  const [emotion2, setemotion2] = useState("")
+  const [emotion3, setemotion3] = useState("")
+  const [emotion4, setemotion4] = useState("")
+  const [emotion5, setemotion5] = useState("")
+  const [emotion6, setemotion6] = useState("")
+  const [emotion7, setemotion7] = useState("")
+  const [emotion8, setemotion8] = useState("")
+  const [emotion9, setemotion9] = useState("")
+  const [emotion10, setemotion10] = useState("")
+  const [sdnn, setsdnn] = useState(0)
+  const [sdnn2, setsdnn2] = useState(0)
+  const [sdnn3, setsdnn3] = useState(0)
+  const [sdnn4, setsdnn4] = useState(0)
+  const [sdnn5, setsdnn5] = useState(0)
+  const [sdnn6, setsdnn6] = useState(0)
+  const [sdnn7, setsdnn7] = useState(0)
+  const [sdnn8, setsdnn8] = useState(0)
+  const [sdnn9, setsdnn9] = useState(0)
+  const [sdnn10, setsdnn10] = useState(0)
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mockBpmData = [
-    {date: '2023-12-09', bpm: 80},
-    {date: '2023-12-10', bpm: 85},
-    {date: '2023-12-11', bpm: 78},
-    {date: '2023-12-12', bpm: 79},
-    {date: '2023-12-13', bpm: 90},
-    {date: '2023-12-14', bpm: 88},
-    {date: '2023-12-15', bpm: 110},
-    {date: '2023-12-16', bpm: 115},
-    {date: '2023-12-17', bpm: 92},
-    {date: '2023-12-18', bpm: 84},
-    {date: '2023-12-19', bpm: 86},
-  ];
 
-  const mockData = {
+
+// bpm 데이터 호출
+  const getReportData = async () => {
+    const userRef = firestore().collection("Users").doc(userId);
+    const reportRef = userRef.collection("Report");
+
+    // 실시간 업데이트
+    reportRef
+        .orderBy('createAt', 'desc')
+        .limit(5)
+        .onSnapshot((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            const recentReport = querySnapshot.docs[0].data();
+            const secondRecentReport = querySnapshot.docs[1].data();
+            const thirdRecentReport = querySnapshot.docs[2].data();
+            const fourthRecentReport = querySnapshot.docs[3].data();
+            const fifthRecentReport = querySnapshot.docs[4].data();
+            // console.log("Recent Report1:", parseFloat(recentReport["1st_Report"].sdnn).toFixed(2));
+            console.log("Recent Report1:", recentReport["1st_Report"]);
+            console.log("Recent Report2:", recentReport["2nd_Report"]);
+            console.log("Recent Report3:", secondRecentReport["1st_Report"]);
+            console.log("Recent Report4:", secondRecentReport["2nd_Report"]);
+            console.log("Recent Report5:", thirdRecentReport["1st_Report"]);
+            console.log("Recent Report6:", thirdRecentReport["2nd_Report"]);
+            console.log("Recent Report7:", fourthRecentReport["1st_Report"]);
+            console.log("Recent Report8:", fourthRecentReport["2nd_Report"]);
+            console.log("Recent Report9:", fifthRecentReport["1st_Report"]);
+            console.log("Recent Report10:", fifthRecentReport["2nd_Report"]);
+            
+            //5일치 레포트 bpm 수치
+            setbpm(recentReport["1st_Report"].avgHr);
+            setbpm2(recentReport["2nd_Report"].avgHr);
+            setbpm3(secondRecentReport["1st_Report"].avgHr);
+            setbpm4(secondRecentReport["2nd_Report"].avgHr);
+            setbpm5(thirdRecentReport["1st_Report"].avgHr);
+            setbpm6(thirdRecentReport["2nd_Report"].avgHr);
+            setbpm7(fourthRecentReport["1st_Report"].avgHr);
+            setbpm8(fourthRecentReport["2nd_Report"].avgHr);
+            setbpm9(fifthRecentReport["1st_Report"].avgHr);
+            setbpm10(fifthRecentReport["2nd_Report"].avgHr);
+
+            //5일치 감정 이모지
+            setemotion(recentReport["1st_Report"].emotion);
+            setemotion2(recentReport["2nd_Report"].emotion);
+            setemotion3(secondRecentReport["1st_Report"].emotion);
+            setemotion4(secondRecentReport["2nd_Report"].emotion);
+            setemotion5(thirdRecentReport["1st_Report"].emotion);
+            setemotion6(thirdRecentReport["2nd_Report"].emotion);
+            setemotion7(fourthRecentReport["1st_Report"].emotion);
+            setemotion8(fourthRecentReport["2nd_Report"].emotion);
+            setemotion9(fifthRecentReport["1st_Report"].emotion);
+            setemotion10(fifthRecentReport["2nd_Report"].emotion);
+
+            //5일치 sdnn
+            setsdnn(parseFloat(recentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn(parseFloat(recentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn2(parseFloat(recentReport["2nd_Report"].sdnn).toFixed(2));
+            setsdnn3(parseFloat(secondRecentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn4(parseFloat(secondRecentReport["2nd_Report"].sdnn).toFixed(2));
+            setsdnn5(parseFloat(thirdRecentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn6(parseFloat(thirdRecentReport["2nd_Report"].sdnn).toFixed(2));
+            setsdnn7(parseFloat(fourthRecentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn8(parseFloat(fourthRecentReport["2nd_Report"].sdnn).toFixed(2));
+            setsdnn9(parseFloat(fifthRecentReport["1st_Report"].sdnn).toFixed(2));
+            setsdnn10(parseFloat(fifthRecentReport["2nd_Report"].sdnn).toFixed(2));
+
+
+            console.log("create at:", recentReport.createAt, secondRecentReport.createAt);
+            // moment 객체로 변환하여 상태로 설정
+            setCreateAt1(moment(recentReport.createAt.toDate()).format("MM.DD"));
+            setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("MM.DD"));
+            setCreateAt3(moment(thirdRecentReport.createAt.toDate()).format("MM.DD"));
+            setCreateAt4(moment(fourthRecentReport.createAt.toDate()).format("MM.DD"));
+            setCreateAt5(moment(fifthRecentReport.createAt.toDate()).format("MM.DD"));
+
+            setIsLoading(false);
+          } else {
+            console.log("No reports found");
+          }
+        }, (error) => {
+          console.error("Error fetching data from Firestore:", error);
+        });
+  };
+
+  useEffect(() => {
+    getReportData();
+  }, []);
+
+  const LoadingSpinner = () => {
+    return (
+        <Center flex={1} marginTop={10}>
+          <Spinner color={"blue.500"} accessibilityLabel="Loading posts" size='lg'/>
+          <Heading color="blue.500" fontSize="md" mt={2}> {/* mt를 사용하여 위쪽 여백 추가 */}
+            Loading...
+          </Heading>
+        </Center>
+    );
+  };
+
+
+  // const mockBpmData = [
+  //   {date: '2023-12-09', bpm: 80},
+  //   {date: '2023-12-10', bpm: 85},
+  //   {date: '2023-12-11', bpm: 78},
+  //   {date: '2023-12-12', bpm: 79},
+  //   {date: '2023-12-13', bpm: 90},
+  //   {date: '2023-12-14', bpm: 88},
+  //   {date: '2023-12-15', bpm: 110},
+  //   {date: '2023-12-16', bpm: 115},
+  //   {date: '2023-12-17', bpm: 92},
+  //   {date: '2023-12-18', bpm: 84},
+  //   {date: '2023-12-19', bpm: 86},
+  // ];
+
+  //bpm 데이터 max = 1st Report Data / min = 2nd Report Data
+  const Data = {
     max: [
-      {date: '01.11', bpm: 110},
-      {date: '01.12', bpm: 115},
-      {date: '01.13', bpm: 92},
-      {date: '01.14', bpm: 84},
-      {date: '01.15', bpm: 86},
+      {date: " " + createAt1, bpm: bpm},
+      {date: " " + createAt2 + " ", bpm: bpm3},
+      {date: createAt3 + " ", bpm: bpm5},
+      {date: createAt4, bpm: bpm7},
+      {date: createAt5 + "  " , bpm: bpm9},
     ],
     min: [
-      {date: '01.11', bpm: 98},
-      {date: '01.12', bpm: 105},
-      {date: '01.13', bpm: 81},
-      {date: '01.14', bpm: 82},
-      {date: '01.15', bpm: 83},
+      {date: " " + createAt1, bpm: bpm2},
+      {date: " " + createAt2 + " ", bpm: bpm4},
+      {date: createAt3 + " ", bpm: bpm6},
+      {date: createAt4, bpm: bpm8},
+      {date: createAt5 + "  ", bpm: bpm10},
     ],
   };
 
   const emotionData = {
-    '01.11': {
-      before: 'emotion_tired',
-      after: 'emotion_soso',
+    [createAt5 + "  "] : {
+      before: emotion9,
+      after: emotion10,
     },
-    '01.12': {
-      before: 'emotion_tired',
-      after: 'emotion_happy',
+    [createAt4 + " "] : {
+      before: emotion7,
+      after: emotion8,
     },
-    '01.13' : {
-      before: 'emotion_normal',
-      after: 'emotion_happy',
+    [" " + createAt3 + " "] : {
+      before: emotion5,
+      after: emotion6,
     },
-    '01.14': {
-      before: 'emotion_sad',
-      after: 'emotion_normal',
+    [" " + createAt2] : {
+      before: emotion3,
+      after: emotion4,
     },
-    '01.15': {
-      before: 'emotion_angry',
-      after: 'emotion_soso',
+    ["  " + createAt1] : {
+      before: emotion,
+      after: emotion2,
     },
   };
 
@@ -126,15 +270,39 @@ export const HomeView_AllResults = ({navigation}) => {
     );
   };
 
-  const stressData = [
-    {date: '2024.01.11', stressIndex: 45},
-    {date: '2024.01.12', stressIndex: 50},
-    {date: '2024.01.13', stressIndex: 80},
-    {date: '2024.01.14', stressIndex: 75},
-    {date: '2024.01.15', stressIndex: 95},
-  ];
+  const stressData = {
+    before: [
+      { date: createAt5 + "  ", stressIndex: sdnn9 },
+      { date: createAt4 + " ", stressIndex: sdnn7 },
+      { date: " " + createAt3 + " ", stressIndex: sdnn5 },
+      { date: " " + createAt2, stressIndex: sdnn3 },
+      { date: "  " + createAt1, stressIndex: sdnn }
+    ],
+    after: [
+      { date: createAt5 + "  ", stressIndex: sdnn10 },
+      { date: createAt4 + " ", stressIndex: sdnn8 },
+      { date: " " + createAt3 + " ", stressIndex: sdnn6 },
+      { date: " " + createAt2, stressIndex: sdnn4 },
+      { date: "  " + createAt1, stressIndex: sdnn2 }
+    ]
+  };
 
-  const StressComponent = ({date, stressIndex}) => {
+  const combinedStressData = [];
+
+// 날짜를 기준으로 before와 after를 매핑하여 combinedStressData에 추가
+  stressData.before.forEach(beforeItem => {
+    const afterItem = stressData.after.find(item => item.date === beforeItem.date);
+    if (afterItem) {
+      combinedStressData.push({
+        date: beforeItem.date,
+        before: beforeItem.stressIndex,
+        after: afterItem.stressIndex
+      });
+    }
+  });
+
+
+  const StressComponent = ({date, before, after}) => {
     return (
       <VStack space={2}>
         <Text>{date}</Text>
@@ -145,12 +313,12 @@ export const HomeView_AllResults = ({navigation}) => {
           <Progress
             flex={1}
             shadow={0}
-            value={stressIndex}
+            value={before}
             min={0}
-            max={200}
+            max={1000}
             _filledTrack={{bg: "#2785F4"}}
           />
-          <Text>{stressIndex}</Text>
+          <Text>{before}</Text>
         </HStack>
         <HStack
           justifyContent={'space-between'}
@@ -159,49 +327,36 @@ export const HomeView_AllResults = ({navigation}) => {
           <Progress
             flex={1}
             shadow={0}
-            value={stressIndex}
+            value={after}
             min={0}
-            max={200}
+            max={1000}
             _filledTrack={{bg: "#FF4370"}}
           />
-          <Text>{stressIndex}</Text>
+          <Text>{after}</Text>
         </HStack>
       </VStack>
     );
   };
 
-  const fetchDataFromMock = (startDate, endDate) => {
-    const filteredData = mockBpmData.filter(
-      data => data.date >= startDate && data.date <= endDate,
-    );
-    setBpmData(filteredData);
-    //console.log(bpmData)
-  };
 
-  useEffect(() => {
-    const today = new Date();
-    const endDate = today.toISOString().split('T')[0]; // Today's date in 'YYYY-MM-DD' format
-    today.setDate(today.getDate() - 4); // Subtract 4 days to get 5 days ago
-    const startDate = today.toISOString().split('T')[0];
-
-    setFinalStartDate(startDate);
-    setFinalEndDate(endDate);
-
-    fetchDataFromMock(startDate, endDate);
-    //console.log(startDate)
-  }, []);
 
   return (
+      <View flex={1}>
+
+        {isLoading ? (
+            <LoadingSpinner />
+        ) : (
+
     <ScrollView>
       <VStack p={3} space={3}>
         <VStack space={5}>
-          {bpmData && (
+
             <VStack bg={'white'} shadow={2}>
               <Text bold pl={3} pt={3}>
                 BPM
               </Text>
               <VictoryChart
-                maxDomain={{y: 120}}
+                maxDomain={{y: 160}}
                 height={300}
                 domainPadding={10}
                 theme={VictoryTheme.material}>
@@ -219,7 +374,7 @@ export const HomeView_AllResults = ({navigation}) => {
                     barWidth={8}
                     labels={({datum}) => datum.y}
                     style={{data: {fill: '#2785F4'}, labels: {fill: 'white'}}}
-                    data={mockData.max}
+                    data={Data.max}
                     x={'date'}
                     y={'bpm'}
                     labelComponent={<VictoryLabel dy={30} />}
@@ -228,7 +383,7 @@ export const HomeView_AllResults = ({navigation}) => {
                     barWidth={8}
                     labels={({datum}) => datum.y}
                     style={{data: {fill: '#FF4370'}, labels: {fill: 'white'}}}
-                    data={mockData.min}
+                    data={Data.min}
                     x={'date'}
                     y={'bpm'}
                     labelComponent={<VictoryLabel dy={30} />}
@@ -236,7 +391,7 @@ export const HomeView_AllResults = ({navigation}) => {
                 </VictoryGroup>
               </VictoryChart>
             </VStack>
-          )}
+
           <VStack bg={'white'} shadow={2} p={3}>
             <Text bold>감정</Text>
 
@@ -271,17 +426,21 @@ export const HomeView_AllResults = ({navigation}) => {
               </VStack>
             </HStack>
             <VStack space={3} mt={3}>
-              {stressData.map(item => (
-                <StressComponent
-                    key={item.date}
-                  date={item.date}
-                  stressIndex={item.stressIndex}
-                />
+              {/* combinedStressData를 매핑하여 StressComponent 렌더링 */}
+              {combinedStressData.map((item, index) => (
+                  <StressComponent
+                      key={index}
+                      date={item.date}
+                      before={item.before}
+                      after={item.after}
+                  />
               ))}
             </VStack>
           </VStack>
         </VStack>
       </VStack>
     </ScrollView>
+        )}
+          </View>
   );
 };

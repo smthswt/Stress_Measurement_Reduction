@@ -179,7 +179,7 @@ const CalendarList_Actionsheet = ({isOpen, onClose, onOpen, dateRanges,}) => {
                         <Center mb={4} mt={2}>
                         <Box width={"92%"}>
                             <Button bg={"#2785F4"} onPress={handleSubmitDateRange}>
-                                <Text fontWeight={800} fontSize={'18px'} color={"white"}>확인</Text>
+                                <Text fontWeight={600} fontSize={'18px'} color={"white"}>확인</Text>
                             </Button>
                         </Box>
                         </Center>

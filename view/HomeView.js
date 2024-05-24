@@ -26,6 +26,7 @@ import ECGIcon from "./icons/ECGIcon";
 import firestore from '@react-native-firebase/firestore';
 import {setConnectionStatus} from "../data/store";
 import {useSelector} from "react-redux";
+import StressResultsImage from "./images/AllStress.png";
 /**
  * Represents a component that displays a message when analysis data is not found.
  *
@@ -106,6 +107,8 @@ export const HomeView = ({navigation, route}) => {
         navigation.navigate("스트레스 정보")
     }
 
+    const StressResultsImage = require('../view/images/AllStress.png')
+
     const AllResults = () => {
         return (
             <HStack space={2} justifyContent={"space-between"}>
@@ -144,7 +147,8 @@ export const HomeView = ({navigation, route}) => {
                                        }} shadow={2} pt={5}
                                        pb={5} >
                             <Box h={100} alignContent={"center"}>
-                                <AllStressIcon width={118} height={"100%"}/>
+                                {/*<AllStressIcon width={118} height={"100%"}/>*/}
+                                <Image source={StressResultsImage} alt={"view-all-stress"}></Image>
                             </Box>
                             <Text bold fontSize={"lg"}>스트레스 정보</Text>
                             <Text fontSize={'xs'} textAlign={"center"}>최근 검사한 스트레스{"\n"}수치를 한눈에 볼 수 있어요.</Text>
@@ -239,7 +243,9 @@ export const HomeView = ({navigation, route}) => {
     return (
         <ScrollView>
                 <VStack space={1} h={'100%'} justifyContent={'space-between'}>
-                    {/*<DeviceConnectState/>*/}
+
+                    <DeviceConnectState/>
+
                     <VStack h={200} bgColor={"#2785F4"} justifyContent={'flex-start'} p={2}>
                         <HStack pl={5} pr={5} pt={2} justifyContent={'space-between'} alignItems={'flex-end'} >
                             <Box>

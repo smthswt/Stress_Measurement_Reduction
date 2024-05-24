@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Box, Divider, HStack, Text, VStack} from 'native-base';
 import {BarChart, LineChart} from 'react-native-chart-kit';
 import {View} from 'react-native';
@@ -12,19 +12,72 @@ import {
   VictoryLegend,
 } from 'victory-native';
 import {VictoryTheme} from 'victory';
+import firestore from "@react-native-firebase/firestore";
+import {UserContext} from "../module/UserProvider";
+import moment from "moment/moment";
 
-const mockData = {
-  before: [
-    {date: '2023.11.09', bpm: 64},
-    {date: '2023.11.11', bpm: 89},
-  ],
-  after: [
-    {date: '2023.11.09', bpm: 119},
-    {date: '2023.11.11', bpm: 64},
-  ],
-};
 
 export const BPM = () => {
+  const {userId} = useContext(UserContext)
+  let now = moment();
+  const [bpm, setbpm] = useState(0)
+  const [bpm2, setbpm2] = useState(0)
+  const [bpm3, setbpm3] = useState(0)
+  const [bpm4, setbpm4] = useState(0)
+  const [createAt1, setCreateAt1] = useState("");
+  const [createAt2, setCreateAt2] = useState("");
+
+
+
+// bpm 데이터 호출
+  const getBPMData = async () => {
+      const userRef = firestore().collection("Users").doc(userId);
+      const reportRef = userRef.collection("Report");
+
+      // 실시간 업데이트
+      reportRef
+          .orderBy('createAt', 'desc')
+          .limit(2)
+          .onSnapshot((querySnapshot) => {
+            if (!querySnapshot.empty) {
+              const recentReport = querySnapshot.docs[0].data();
+              const secondRecentReport = querySnapshot.docs[1].data();
+              console.log("Recent Report1:", recentReport["1st_Report"].avgHr);
+              console.log("Recent Report2:", recentReport["2nd_Report"].avgHr);
+              console.log("Recent Report3:", secondRecentReport["1st_Report"].avgHr);
+              console.log("Recent Report4:", secondRecentReport["2nd_Report"].avgHr);
+              setbpm(recentReport["1st_Report"].avgHr);
+              setbpm2(recentReport["2nd_Report"].avgHr);
+              setbpm3(secondRecentReport["1st_Report"].avgHr);
+              setbpm4(secondRecentReport["2nd_Report"].avgHr);
+              console.log("create at:", recentReport.createAt, secondRecentReport.createAt);
+              // moment 객체로 변환하여 상태로 설정
+              setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+              setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+            } else {
+              console.log("No reports found");
+            }
+          }, (error) => {
+            console.error("Error fetching data from Firestore:", error);
+          });
+    };
+
+  useEffect(() => {
+    getBPMData();
+  }, []);
+
+  const Data = {
+    before: [
+      {date: createAt1, bpm: bpm},
+      {date: createAt2 + " ", bpm: bpm3},
+    ],
+    after: [
+      {date: createAt1, bpm: bpm2},
+      {date: createAt2 + " ", bpm: bpm4},
+    ],
+  };
+
+
   return (
     <VStack bgColor={'white'} shadow={2}>
       <HStack justifyContent={'space-between'} p={3}>
@@ -99,7 +152,7 @@ export const BPM = () => {
         <VictoryChart
           width={350}
           height={250}
-          maxDomain={{y: 120}}
+          maxDomain={{y: 160}}
           theme={VictoryTheme.material}>
           <VictoryGroup offset={35} width={250} height={200}>
             <VictoryBar
@@ -109,7 +162,7 @@ export const BPM = () => {
                 data: {fill: '#2785F4'},
                 labels: {fill: 'black', fontWeight: 'bold'},
               }}
-              data={mockData.before}
+              data={Data.before}
               x={'date'}
               y={'bpm'}
               cornerRadius={5}
@@ -121,7 +174,7 @@ export const BPM = () => {
                 data: {fill: '#FF4370'},
                 labels: {fill: 'black', fontWeight: 'bold'},
               }}
-              data={mockData.after}
+              data={Data.after}
               x={'date'}
               y={'bpm'}
               cornerRadius={5}

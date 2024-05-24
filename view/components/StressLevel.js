@@ -1,22 +1,76 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {HStack, Text, VStack} from 'native-base';
 import {LineChart} from 'react-native-chart-kit';
 import {View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {VictoryBar, VictoryChart, VictoryGroup} from 'victory-native';
 import {VictoryTheme} from 'victory';
+import {UserContext} from "../module/UserProvider";
+import moment from "moment";
+import firestore from "@react-native-firebase/firestore";
 
-const mockData = {
-  before: [
-    {date: '2023.11.09', stressLevel: 3},
-    {date: '2023.11.11', stressLevel: 4},
-  ],
-  after: [
-    {date: '2023.11.09', stressLevel: 5},
-    {date: '2023.11.11', stressLevel: 3},
-  ],
-};
+
 export const StressLevel = () => {
+  const {userId} = useContext(UserContext)
+  let now = moment();
+  const [stressIndex, setStressIndex] = useState(0)
+  const [stressIndex2, setStressIndex2] = useState(0)
+  const [stressIndex3, setStressIndex3] = useState(0)
+  const [stressIndex4, setStressIndex4] = useState(0)
+  const [createAt1, setCreateAt1] = useState("");
+  const [createAt2, setCreateAt2] = useState("");
+
+
+
+// stress index 데이터 호출
+  const getStressIndexData = async () => {
+    const userRef = firestore().collection("Users").doc(userId);
+    const reportRef = userRef.collection("Report");
+
+    // 실시간 업데이트
+    reportRef
+        .orderBy('createAt', 'desc')
+        .limit(2)
+        .onSnapshot((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            const recentReport = querySnapshot.docs[0].data();
+            const secondRecentReport = querySnapshot.docs[1].data();
+            console.log("Recent Report1:", recentReport["1st_Report"].stressIndex);
+            console.log("Recent Report2:", recentReport["2nd_Report"].stressIndex);
+            console.log("Recent Report3:", secondRecentReport["1st_Report"].stressIndex);
+            console.log("Recent Report4:", secondRecentReport["2nd_Report"].stressIndex);
+            setStressIndex(recentReport["1st_Report"].stressIndex);
+            setStressIndex2(recentReport["2nd_Report"].stressIndex);
+            setStressIndex3(secondRecentReport["1st_Report"].stressIndex);
+            setStressIndex4(secondRecentReport["2nd_Report"].stressIndex);
+            console.log("create at:", recentReport.createAt, secondRecentReport.createAt);
+            // moment 객체로 변환하여 상태로 설정
+            setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+            setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+          } else {
+            console.log("No reports found");
+          }
+        }, (error) => {
+          console.error("Error fetching data from Firestore:", error);
+        });
+  };
+
+  useEffect(() => {
+    getStressIndexData();
+  }, []);
+
+
+  const Data = {
+    before: [
+      {date: createAt1, stressLevel: stressIndex},
+      {date: createAt2 + " ", stressLevel: stressIndex3},
+    ],
+    after: [
+      {date: createAt1, stressLevel: stressIndex2},
+      {date: createAt2 + " ", stressLevel: stressIndex4},
+    ],
+  };
+
   return (
     <VStack bgColor={'white'} p={3} shadow={2}>
       <HStack justifyContent={'space-between'}>
@@ -101,7 +155,7 @@ export const StressLevel = () => {
                 data: {fill: '#2785F4'},
                 labels: {fill: 'black', fontWeight: 'bold'},
               }}
-              data={mockData.before}
+              data={Data.before}
               x={'date'}
               y={'stressLevel'}
               cornerRadius={5}
@@ -113,7 +167,7 @@ export const StressLevel = () => {
                 data: {fill: '#FF4370'},
                 labels: {fill: 'black', fontWeight: 'bold'},
               }}
-              data={mockData.after}
+              data={Data.after}
               x={'date'}
               y={'stressLevel'}
               cornerRadius={5}
