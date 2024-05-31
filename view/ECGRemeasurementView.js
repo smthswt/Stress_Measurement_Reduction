@@ -41,7 +41,7 @@ export const ECGRemeasurementView = ({route}) => {
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
-  const {beforeEmotion, reportDocId } = route.params
+  const {beforeEmotion, reportDocId, measurementTime } = route.params
   // const beforeEmotion = route.params.beforeEmotion;
   // console.log(route.params)
   // console.log("beforeEmotion :", beforeEmotion)
@@ -62,7 +62,7 @@ export const ECGRemeasurementView = ({route}) => {
    * @type {number}
    */
   // 50초
-  const totalTime = 50;
+  const totalTime = measurementTime ? measurementTime : 60 ;
 
   /**
    * Reference to a message element used in a React component.
@@ -586,31 +586,34 @@ export const ECGRemeasurementView = ({route}) => {
 
       {/*측정 중지 확인 다이얼로그*/}
       <AlertDialog
-        leastDestructiveRef={messageRef}
-        isOpen={isMessageOpen}
-        onClose={onCloseAnalysisStopMessageBox}>
+          leastDestructiveRef={messageRef}
+          isOpen={isMessageOpen}
+          onClose={onCloseAnalysisStopMessageBox}>
         <AlertDialog.Content p={'2%'}>
-          <AlertDialog.CloseButton />
-          <AlertDialog.Header>
-            <Center>
-              <Text bold>현재 측정을 중지하시겠습니까?</Text>
-            </Center>
-          </AlertDialog.Header>
-          <AlertDialog.Body>
-            <Center>
-              <Text color={'#EB5147'}>측정 중인 정보는 기록되지 않아요.</Text>
-            </Center>
-          </AlertDialog.Body>
-          <HStack width={'100%'} p={3} space={5}>
+
+          <Center>
+            <VStack space={2} py={3}>
+              <Text fontSize={'xl'} fontWeight={'bold'}>
+                현재 측정을 중지하시겠습니까?</Text>
+
+              <Text color={"#EB5147"}>측정 중인 정보는 기록되지 않아요.</Text>
+            </VStack>
+          </Center>
+
+          <HStack width={"100%"} p={3} space={5}>
             <Button
-              flex={1}
-              colorScheme="danger"
-              variant={'outline'}
-              onPress={handleAnalysisStopCancel}>
-              취소
+                flex={1}
+                borderColor={"#2785F4"}
+                variant={"outline"}
+                onPress={handleAnalysisStopCancel}
+            >
+              <Text color={"#2785F4"}>취소</Text>
             </Button>
-            <Button flex={1} colorScheme="danger" onPress={handleAnalysisStop}>
-              확인
+            <Button
+                flex={1}
+                borderColor={"#2785F4"} backgroundColor={"#2785F4"}
+                onPress={handleAnalysisStop}>
+              <Text color={"white"}>중지하기</Text>
             </Button>
           </HStack>
         </AlertDialog.Content>

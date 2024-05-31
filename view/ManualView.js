@@ -46,13 +46,16 @@ import TrackPlayer from "react-native-track-player";
  */
 
 export const ManualView = ({route}) => {
+  // const [songNum, setSongNum] = useState()
+  // const [stimulationTime, setStimulationTime] = useState()
+  // const [stimulationLvl, setStimulationLvl] = useState()
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
    * @returns {object} The navigation object.
    */
   const navigation = useNavigation();
-  const {beforeEmotion, reportDocId } = route.params
+  const {beforeEmotion, reportDocId, ManualSongNum, ManualTime, ManualVibrate} = route.params
   // const beforeEmotion = route.params.beforeEmotion;
   // console.log(route.params)
   // console.log("beforeEmotion :", beforeEmotion)
@@ -76,7 +79,8 @@ export const ManualView = ({route}) => {
    *
    * @type {number}
    */
-  const totalTime = 30;
+
+  const totalTime = ManualTime;
 
   /**
    * A React useRef hook for storing a reference to the cancel function.
@@ -106,7 +110,7 @@ export const ManualView = ({route}) => {
   const musicPlay = async () => {
     const userRef = firestore().collection("Users").doc(userId);
     const selectedMusicRef = userRef.collection("Manual_Music");
-    const musicSnapshot = await selectedMusicRef.where("itemId", '==', 1).get();
+    const musicSnapshot = await selectedMusicRef.where("itemId", '==', ManualSongNum).get();
 
     const promises = musicSnapshot.docs.map(async doc => {
       // 문서의 데이터를 콘솔에 출력
@@ -135,7 +139,7 @@ export const ManualView = ({route}) => {
     console.log(message);
     startAnimation();
     await musicPlay();
-    await sendMotorStartPacket(1, 20);
+    await sendMotorStartPacket(1, ManualVibrate);
 
     // sendData(
     //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
@@ -190,7 +194,7 @@ export const ManualView = ({route}) => {
     setIsCounting(true);
   };
 
-  const animationDuration = 30; // Duration in seconds (same as MusicCircleProgressAnimation)
+  const animationDuration = ManualTime; // Duration in seconds (same as MusicCircleProgressAnimation)
   const [isCounting, setIsCounting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(animationDuration);
 
@@ -223,7 +227,7 @@ export const ManualView = ({route}) => {
     setIsRemeasureOpen(false)
     const timer = setTimeout(() => {
       //2차 재측정으로 이동
-      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId});
+      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId, measurementTime: measurementTime});
       clearTimeout(timer);
     },);
   };
@@ -232,6 +236,7 @@ export const ManualView = ({route}) => {
 
   const {userId} = useContext(UserContext)
   const [name, setName] = useState(null)
+  const [measurementTime, setMeasurementTime] = useState()
 
   const getUserData = async () => {
     try {
@@ -240,6 +245,7 @@ export const ManualView = ({route}) => {
       const userData = docRef.data()
       console.log("userData :", userData)
 
+      setMeasurementTime(userData.Regular_settings?.measurementTime || 30)
       setName(userData.name)
 
     } catch (error) {
@@ -251,6 +257,7 @@ export const ManualView = ({route}) => {
   useEffect(() => {
     getUserData()
   }, []);
+
 
 
 

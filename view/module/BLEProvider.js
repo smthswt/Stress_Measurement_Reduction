@@ -450,18 +450,29 @@ export const BLEProvider = ({children}) => {
 
     const calculateStressIndex = (value) => {
         let stressIndex = 0;
+
         if (value <= 0) {
             return 0;
         }
 
-        if (value < 20) {
+        if (value <= 20) {
+            stressIndex = 5;
+        } else if (value <= 30) {
             stressIndex = 4;
-        } else if (value < 30) {
+        } else if (value <= 40) {
             stressIndex = 3;
-        } else if (value < 50) {
+        } else if (value <= 80) {
             stressIndex = 2;
-        } else if (value > 50) {
+        } else if (value <= 150) {
             stressIndex = 1;
+        } else if (value <= 250) {
+            stressIndex = 2;
+        } else if (value <= 350) {
+            stressIndex = 3;
+        } else if (value <= 450) {
+            stressIndex = 4;
+        } else if (value > 450) {
+            stressIndex = 5;
         }
 
         return stressIndex;

@@ -287,6 +287,7 @@ const App = () => {
     }, []);
 
 
+
     const LoginScreens = () => {
         return (
             <StackNative.Navigator initialRouteName={onboarded ? 'Login' : 'Onboarding1'}>

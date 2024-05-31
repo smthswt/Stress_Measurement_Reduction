@@ -17,12 +17,15 @@ import {UserContext} from "../module/UserProvider";
 import moment from "moment/moment";
 
 
-export const CalendarBPM = ({date, bpmm, bpmm2, dateSelected}) => {
+export const CalendarBPM = ({selectedDate}) => {
     const {userId} = useContext(UserContext)
     let now = moment();
     const [bpm, setbpm] = useState(0)
     const [bpm2, setbpm2] = useState(0)
+    const [bpm3, setbpm3] = useState(0)
+    const [bpm4, setbpm4] = useState(0)
     const [createAt1, setCreateAt1] = useState("");
+    const [createAt2, setCreateAt2] = useState("");
     const [datesSelected, setDatesSelected] = useState(false)
 
 
@@ -31,39 +34,92 @@ export const CalendarBPM = ({date, bpmm, bpmm2, dateSelected}) => {
         const userRef = firestore().collection("Users").doc(userId);
         const reportRef = userRef.collection("Report");
 
-        // 실시간 업데이트
-        reportRef
-            .orderBy('createAt', 'desc')
-            .limit(1)
-            .onSnapshot((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const recentReport = querySnapshot.docs[0].data();
-                    console.log("Recent Report1:", recentReport["1st_Report"].avgHr);
-                    console.log("Recent Report2:", recentReport["2nd_Report"].avgHr);
-                    setbpm(recentReport["1st_Report"].avgHr);
-                    setbpm2(recentReport["2nd_Report"].avgHr);
 
-                    console.log("create at:", recentReport.createAt);
-                    // moment 객체로 변환하여 상태로 설정
+        // 현재 날짜를 UTC+9 기준으로 변환하여 생성
+        let Date = moment().format("YYYY-MM-DD");
+        console.log("date:", Date)
+
+        if (selectedDate) {
+            // 선택한 날짜가 있을 경우에만 해당 날짜로 설정
+            const selectedDateString = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+            Date = moment(selectedDateString, "YYYY-MM-DD").format("YYYY-MM-DD");
+        }
+
+        // 현재 날짜를 기준으로 조회
+        const querySnapshot = await reportRef
+            .where('createAt', '>=', moment(Date).toDate())
+            .where('createAt', '<', moment(Date).add(1, 'day').toDate())
+            .orderBy('createAt', 'asc')
+            .limit(2)
+            .get();
+
+        try {
+            if (!querySnapshot.empty) {
+                const docs = querySnapshot.docs;
+                const recentReport = docs[0].data();
+
+                // 데이터가 있는 경우
+                if (recentReport["1st_Report"] && recentReport["2nd_Report"]) {
+                    setbpm(recentReport["1st_Report"].avgHr || 0);
+                    setbpm2(recentReport["2nd_Report"].avgHr || 0);
                     setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
                 } else {
-                    console.log("No reports found");
+                    // 데이터가 없는 경우
+                    setbpm(0);
+                    setbpm2(0);
+                    setCreateAt1("");
+                    setbpm3(0);
+                    setbpm4(0);
+                    setCreateAt2("");
                 }
-            }, (error) => {
-                console.error("Error fetching data from Firestore:", error);
-            });
+
+                // 데이터가 하나 이상 있는 경우
+                if (docs.length > 1) {
+                    const secondRecentReport = docs[1].data();
+                    if (secondRecentReport["1st_Report"] && secondRecentReport["2nd_Report"]) {
+                        setbpm3(secondRecentReport["1st_Report"].avgHr || 0);
+                        setbpm4(secondRecentReport["2nd_Report"].avgHr || 0);
+                        setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+                    } else {
+                        // 두 번째 데이터가 없는 경우
+                        setbpm3(0);
+                        setbpm4(0);
+                        setCreateAt2("");
+                    }
+                } else {
+                    // 데이터가 하나만 있는 경우
+                    setbpm3(0);
+                    setbpm4(0);
+                    setCreateAt2("");
+                }
+            } else {
+                // 데이터가 없는 경우
+                console.log("No reports found");
+                setbpm(0);
+                setbpm2(0);
+                setbpm3(0);
+                setbpm4(0);
+                setCreateAt1("");
+                setCreateAt2("");
+            }
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+        }
     };
+
 
     useEffect(() => {
         getBPMData();
-    }, []);
+    }, [selectedDate]);
 
     const Data = {
         before: [
             {date: createAt1, bpm: bpm},
+            {date: createAt2 + " ", bpm: bpm3},
         ],
         after: [
             {date: createAt1, bpm: bpm2},
+            {date: createAt2 + " ", bpm: bpm4},
         ],
     };
 

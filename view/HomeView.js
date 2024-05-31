@@ -24,9 +24,10 @@ import {Easing} from "react-native-reanimated";
 import {UserContext} from "./module/UserProvider";
 import ECGIcon from "./icons/ECGIcon";
 import firestore from '@react-native-firebase/firestore';
-import {setConnectionStatus} from "../data/store";
-import {useSelector} from "react-redux";
+import {setConnectDevice, setConnectionStatus} from "../data/store";
+import {useDispatch, useSelector} from "react-redux";
 import StressResultsImage from "./images/AllStress.png";
+import moment from "moment/moment";
 /**
  * Represents a component that displays a message when analysis data is not found.
  *
@@ -54,7 +55,7 @@ export const HomeView = ({navigation, route}) => {
      *
      * @type {boolean}
      */
-    const {isConnected} = useBLE();
+    const {isConnected, connectAndSubscribe} = useBLE();
 
     /**
      * This function handles the analysis start event by navigating to the "AnalysisStart" screen.
@@ -66,6 +67,66 @@ export const HomeView = ({navigation, route}) => {
     // const connectStatus = useSelector(state => state.device.isConnected);
     // console.log("connectStatus :", connectStatus)
 
+    const [device, setDevice] = useState(null);
+    const dispatch = useDispatch();
+
+
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         const userRef = firestore().collection("Users").doc(userId);
+    //         const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(async snapshot => {
+    //             const devicesData = snapshot.docs.map(doc => doc.data());
+    //             console.log("Device list:", devicesData);
+    //
+    //             const deviceList = devicesData.map(device => ({
+    //                 id: device.id,
+    //                 name: device.name,
+    //                 date: moment(device.registrationDate.toDate()),
+    //             }));
+    //
+    //             const subscribeDevice = deviceList.length > 0 ? deviceList[0] : null;
+    //             setDevice(subscribeDevice);
+    //
+    //             if (!subscribeDevice) return; // device가 null인 경우 처리
+    //
+    //             console.log("Device Connect", subscribeDevice.id);
+    //
+    //             const deviceRef = userRef.collection("Ble_Devices").where("id", "==", subscribeDevice.id);
+    //             const deviceSnapshot = await deviceRef.get();
+    //
+    //             try {
+    //                 if (await connectAndSubscribe(subscribeDevice.id)) {
+    //                     // updateDevice(device.id, true);
+    //                     deviceSnapshot.forEach(async (doc) => {
+    //                         await doc.ref.update({
+    //                             isConnect: true,
+    //                         });
+    //                     });
+    //                     dispatch(setConnectDevice(subscribeDevice.id));
+    //                     dispatch(setConnectionStatus(true));
+    //                 }
+    //             } catch (e) {
+    //                 console.log("catch error :", e);
+    //             }
+    //         });
+    //
+    //         return unsubscribe; // Return unsubscribe function for cleanup
+    //     };
+    //
+    //     fetchData();
+    //     console.log("장치 목록:", device);
+    //     console.log("isConnect 1: ", isConnected);
+    //     console.log("connect status 1: ", connectStatus);
+    //
+    //     return () => {
+    //         if (unsubscribe) unsubscribe(); // Cleanup function to unsubscribe
+    //     };
+    // }, []);
+
+
+
+
     const handleAnalysisStart = () => {
 
         if (!connectStatus) {
@@ -73,7 +134,7 @@ export const HomeView = ({navigation, route}) => {
             alert("연결된 기기가 없습니다.")
             return false;
         } else {
-        navigation.navigate("AnalysisStart", {params:{name:name}});
+        navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: measurementTime }});
         }
     };
 
@@ -204,6 +265,7 @@ export const HomeView = ({navigation, route}) => {
     const connectStatus = useSelector(state => state.device.isConnected);
     console.log("isConnect :", connectStatus)
     const [name, setName] = useState(null)
+    const [measurementTime, setMeasurementTime] = useState()
 
     const getUserData = async () => {
         try {
@@ -212,7 +274,9 @@ export const HomeView = ({navigation, route}) => {
             const userData = docRef.data()
             console.log("userData :", userData)
 
+            setMeasurementTime(userData.Regular_settings?.measurementTime || 60)
             setName(userData.name)
+            console.log("measurement Time:", measurementTime)
 
         } catch (error) {
             console.error("Error fetching data from Firestore:", error)

@@ -24,6 +24,7 @@ import {CalendarBPM} from "./components/CalendarBPM";
 import {CalendarStressLevel} from "./components/CalendarStressLevel";
 import firestore from "@react-native-firebase/firestore";
 import {UserContext} from "./module/UserProvider";
+import {EmotionComponent} from "./components/CalendarEmotion";
 
 /**
  * React component for displaying a calendar view.
@@ -47,7 +48,8 @@ console.log("오늘 날짜", todayDate())
 export const CalendarView = ({ navigation,}) => {
     const {isOpen, onOpen, onClose } = useDisclose();
     const [dateRange, setDateRange] = useState([todayDate()]);
-    const [selected, setSelected] = useState();
+    const [selected, setSelected] = useState(todayDate()); // 기본값으로 오늘 날짜 설정
+    const [selectedDate, setSelectedDate] = useState();
     const [clickCount, setClickCount] = useState(0);
     const [bpm, setbpm] = useState(0)
     const [bpm2, setbpm2] = useState(0)
@@ -87,70 +89,70 @@ export const CalendarView = ({ navigation,}) => {
         emotion_angry: require('../view/images/emotion_angry.png'),
     };
 
-    const EmotionComponent = () => {
-        return(
-            <VStack bg={"white"} p={4} style={{
-                elevation: 2, // For Android
-            }}>
-                <HStack justifyContent={"space-between"} alignItems={"center"}>
-                    <VStack space={0.5}>
-                        <HStack alignItems={"center"} space={2}>
-                            <Ionicons name={'happy'} color={"#F2B95A"} size={20}></Ionicons>
-                            <Text bold>행복해요!</Text>
-                        </HStack>
-                        <Text>그 날 느꼇던 감정이에요!</Text>
-                    </VStack>
-                    <View width={49} height={49} borderWidth={2} borderColor={"#2785F4"} borderRadius={25} style={{justifyContent: 'center', alignItems: 'center', paddingRight: 2}}>
-                        <Image source={emotions["emotion_happy"]} alt={"happy"}></Image>
-                    </View>
-                </HStack>
-            </VStack>
-        );
-    };
+    // const EmotionComponent = () => {
+    //     return(
+    //         <VStack bg={"white"} p={4} style={{
+    //             elevation: 2, // For Android
+    //         }}>
+    //             <HStack justifyContent={"space-between"} alignItems={"center"}>
+    //                 <VStack space={0.5}>
+    //                     <HStack alignItems={"center"} space={2}>
+    //                         <Ionicons name={'happy'} color={"#F2B95A"} size={20}></Ionicons>
+    //                         <Text bold>행복해요!</Text>
+    //                     </HStack>
+    //                     <Text>그 날 느꼇던 감정이에요!</Text>
+    //                 </VStack>
+    //                 <View width={49} height={49} borderWidth={2} borderColor={"#2785F4"} borderRadius={25} style={{justifyContent: 'center', alignItems: 'center', paddingRight: 2}}>
+    //                     <Image source={emotions["emotion_happy"]} alt={"happy"}></Image>
+    //                 </View>
+    //             </HStack>
+    //         </VStack>
+    //     );
+    // };
 
 
-    // createTimestampFromDate 함수 수정
-    const createTimestampFromDate = (dateString) => {
-        const [year, month, day] = dateString.split('-'); // 날짜 형식에서 연도, 월, 일 추출
-        return new Date(year, month - 1, day).getTime(); // 해당 날짜의 타임스탬프 생성
-    };
+    // // createTimestampFromDate 함수 수정
+    // const createTimestampFromDate = (dateString) => {
+    //     const [year, month, day] = dateString.split('-'); // 날짜 형식에서 연도, 월, 일 추출
+    //     return new Date(year, month - 1, day).getTime(); // 해당 날짜의 타임스탬프 생성
+    // };
 
 
-    // CalendarView 컴포넌트의 useEffect 내부
-    useEffect(() => {
-        getBPMData();
-    }, [dateRange]); // dateRange가 변경될 때마다 호출하도록 변경
-
-// CalendarView 컴포넌트의 getBPMData 함수 내부
-    const getBPMData = async () => {
-        const userRef = firestore().collection("Users").doc(userId);
-        const reportRef = userRef.collection("Report");
-
-        console.log("selected dateRange :", dateRange)
-        // 사용자가 선택한 날짜의 타임스탬프 생성
-        const selectedTimestamp = createTimestampFromDate(dateRange[0]);
-        console.log("selected dateRange :", selectedTimestamp)
-
-        // Firestore 쿼리
-        const querySnapshot = await reportRef
-            .where('createAt', '==', selectedTimestamp)
-            .limit(1)
-            .get();
-
-        if (!querySnapshot.empty) {
-            const recentReport = querySnapshot.docs[0].data();
-            console.log("Recent Report1:", recentReport["1st_Report"].sdnn);
-            console.log("Recent Report2:", recentReport["2nd_Report"].sdnn);
-            setbpm(recentReport["1st_Report"].sdnn);
-            setbpm2(recentReport["2nd_Report"].sdnn);
-
-            console.log("create at:", recentReport.createAt);
-            // moment 객체로 변환하여 상태로 설정
-            setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
-        } else {
-            console.log("No reports found");
-        }
-    };
+//     // CalendarView 컴포넌트의 useEffect 내부
+//     useEffect(() => {
+//         getBPMData();
+//     }, [dateRange]); // dateRange가 변경될 때마다 호출하도록 변경
+//
+// // CalendarView 컴포넌트의 getBPMData 함수 내부
+//     const getBPMData = async () => {
+//         const userRef = firestore().collection("Users").doc(userId);
+//         const reportRef = userRef.collection("Report");
+//
+//         console.log("selected dateRange :", dateRange)
+//         // 사용자가 선택한 날짜의 타임스탬프 생성
+//         const selectedTimestamp = createTimestampFromDate(dateRange[0]);
+//         console.log("selected dateRange :", selectedTimestamp)
+//
+//         // Firestore 쿼리
+//         const querySnapshot = await reportRef
+//             .where('createAt', '==', selectedTimestamp)
+//             .limit(1)
+//             .get();
+//
+//         if (!querySnapshot.empty) {
+//             const recentReport = querySnapshot.docs[0].data();
+//             console.log("Recent Report1:", recentReport["1st_Report"].sdnn);
+//             console.log("Recent Report2:", recentReport["2nd_Report"].sdnn);
+//             setbpm(recentReport["1st_Report"].sdnn);
+//             setbpm2(recentReport["2nd_Report"].sdnn);
+//
+//             console.log("create at:", recentReport.createAt);
+//             // moment 객체로 변환하여 상태로 설정
+//             setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+//         } else {
+//             console.log("No reports found");
+//         }
+//     };
 
     const AllResultsImage = require('../view/images/AllResults.png')
     const StressResultsImage = require('../view/images/AllStress.png')
@@ -199,13 +201,15 @@ export const CalendarView = ({ navigation,}) => {
         console.log("측정 날짜가 선택됌.")
         console.log("index :", index)
         if (selected === index) {
+            // 꼭 날짜 하나 선택하는걸로 변경
             // If the selected item is clicked again, deselect it
-            setSelected(undefined);
-            setClickCount(0);
+            // setSelected(undefined);
+            // setClickCount(0);
         } else {
             // If a different item is clicked, select it
             setSelected(index);
-            setClickCount(1);
+            // setClickCount(1);
+            setSelectedDate(dateRange[index]);
         }
     };
 
@@ -250,11 +254,11 @@ return (
         <ScrollView contentContainerStyle={{justifyContent: "center", alignItems: 'center', padding: 20}}>
             <VStack width={"100%"} space={5}>
 
-            <CalendarBPM date={createAt1} bpmm={bpm} bpmm2={bpm2}/>
-            <CalendarStressLevel />
-                <StressSemiCircle />
+            <CalendarBPM selectedDate={selectedDate} />
+            <CalendarStressLevel selectedDate={selectedDate}/>
+                <StressSemiCircle selectedDate={selectedDate}/>
 
-                <EmotionComponent></EmotionComponent>
+                <EmotionComponent selectedDate={selectedDate} />
 
             </VStack>
         </ScrollView>

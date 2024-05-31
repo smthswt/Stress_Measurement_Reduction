@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useBLE} from './module/BLEProvider';
 import {
@@ -23,6 +23,8 @@ import EmotionSoso from "./icons/EmotionSoso";
 import EmotionTired from "./icons/EmotionTired";
 import EmotionSad from "./icons/EmotionSad";
 import EmotionAngry from "./icons/EmotionAngry";
+import firestore from "@react-native-firebase/firestore";
+import {UserContext} from "./module/UserProvider";
 
 /**
  * Represents the analysis result of a measurement.
@@ -83,6 +85,36 @@ export const AnalysisResultView = ({route}) => {
    * @returns {void}
    */
 
+  const [stimulationTime, setStimulationTime] = useState()
+  const [vibrate, setVibrate] = useState()
+  const {userId} = useContext(UserContext)
+  const [songNum, setSongNum] = useState()
+  const [stimulationTime2, setStimulationTime2] = useState()
+  const [stimulationLvl, setStimulationLvl] = useState()
+
+  const getUserData = async () => {
+    try {
+      const userRef = firestore().collection("Users");
+      const docRef = await userRef.doc(userId).get();
+      const userData = docRef.data()
+      console.log("userData :", userData)
+
+      // setMeasurementTime(userData.Regular_settings?.measurementTime || 1)
+      setStimulationTime(userData.Regular_settings?.stimulationTime || 30)
+      setVibrate(userData.Regular_settings?.stimulationLvl || 15)
+      setSongNum(userData.Manual_settings?.userManualSong || 1)
+      setStimulationTime2(userData.Manual_settings?.stimulationTime || 30)
+      setStimulationLvl(userData.Manual_settings?.stimulationLvl || 15)
+
+    } catch (error) {
+      console.error("Error fetching data from Firestore:", error)
+    }
+  }
+
+  useEffect(() => {
+    getUserData()
+  }, []);
+
 
   /**
    * Function to handle press event.
@@ -92,11 +124,11 @@ export const AnalysisResultView = ({route}) => {
    * @returns {void}
    */
   const handleHealingPress = async () => {
-    navigation.navigate('Healing', {beforeEmotion: beforeEmotion, stressLevel: stressLevel, reportDocId: reportDocId});
+    navigation.navigate('Healing', {beforeEmotion: beforeEmotion, stressLevel: stressLevel, reportDocId: reportDocId, stimulationTime: stimulationTime, vibrate: vibrate, });
   };
 
   const handleManualPress = async () => {
-    navigation.navigate('Manual',{beforeEmotion: beforeEmotion, reportDocId: reportDocId});
+    navigation.navigate('Manual',{beforeEmotion: beforeEmotion, reportDocId: reportDocId, ManualSongNum: songNum, ManualTime: stimulationTime2, ManualVibrate: stimulationLvl});
   };
 
   const EmotionIcon = {
@@ -112,6 +144,26 @@ export const AnalysisResultView = ({route}) => {
   const number = getSDNN()
   const sdnnValue = Math.trunc(number)
   console.log("sdnn value: ", sdnnValue)
+  console.log("스트레스 레벨 :", getStressIndex())
+
+  // sdnn 값에 따라 progressColor 설정
+  const getProgressColor = (sdnn) => {
+    if (sdnn <= 20 || sdnn >= 450) {
+      return '#EB5147'; // sdnn값이 450이상 또는 20이하인 경우
+    } else if (sdnn >= 80 && sdnn <= 150) {
+      return '#2785F4'; // sdnn값이 80~150인 경우
+    } else if (sdnn > 20 && sdnn < 450) {
+      return '#FF6B18'; // sdnn값이 20초과 450미만인 경우
+    } else {
+      return '#2785F4'; // 기본값 또는 처리되지 않은 값에 대한 기본 색상
+    }
+  };
+
+
+
+// progressColor를 동적으로 설정
+  const progressColor = getProgressColor(number);
+
 
   return (
     <VStack space={1} h={'100%'} justifyContent={'space-between'}>
@@ -130,11 +182,11 @@ export const AnalysisResultView = ({route}) => {
           <SemiCircleProgress
               // percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
               // percentage={sdnnValue}
-              progressColor={'#2785F4'}
+              progressColor={progressColor}
             progressWidth={15}
               // initialPercentage={0}
               minValue={0}
-              maxValue={1000}
+              maxValue={450}
               currentValue={number}
          >
             <Text bold fontSize={'3xl'}>

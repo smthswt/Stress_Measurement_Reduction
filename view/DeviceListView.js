@@ -18,6 +18,14 @@ const DeviceListView = ({navigation}) => {
     const {isOpen, onOpen, onClose} = useDisclose();
     const [device, setDevice] = useState(null);
     const [deviceData, setDeviceData] = useState([])
+    const [deviceConnection, setDeviceConnection] = useState(true);
+
+    // Redux store에서 디바이스 정보 가져오기
+    const connectDevice = useSelector(state => state.device.connectDevice);
+    const dispatch = useDispatch();
+    const {connectAndSubscribe, disconnect} = useBLE();
+    console.log("connectDevice info :", connectDevice);
+    console.log("device info id :", device?.id)
 
     const deviceImageBlueBack = require('./images/DevaiceImagewithBlue.png')
 
@@ -28,18 +36,20 @@ const DeviceListView = ({navigation}) => {
         const userRef = firestore().collection("Users").doc(userId);
         const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(snapshot => {
             const devicesData = snapshot.docs.map(doc => doc.data());
-            console.log("devicelist :", devicesData);
+            console.log("Device list:", devicesData);
             setDeviceData(devicesData);
 
             // 데이터를 가져온 후에 device 변수 설정
             const deviceList = devicesData.map(device => ({
                 id: device.id,
-                name: device.name
+                name: device.name,
+                date: moment(device.registrationDate.toDate()),
             }));
 
             const selectedDevice = deviceList.length > 0 ? deviceList[0] : null;
             setDevice(selectedDevice);
         });
+        console.log("장치 목록:", device);
 
         return () => {
             unsubscribe(); // Cleanup 함수로 사용자 구독 해제
@@ -48,20 +58,12 @@ const DeviceListView = ({navigation}) => {
 
 
 
-
-    console.log("deviceData :", device)
+    //
+    // console.log("deviceData :", device)
 
 
     // const devices = getDevices();
 
-
-
-    // Redux store에서 디바이스 정보 가져오기
-    const connectDevice = useSelector(state => state.device.connectDevice);
-    const dispatch = useDispatch();
-    const {connectAndSubscribe, disconnect} = useBLE();
-    console.log("connectDevice info :", connectDevice);
-    console.log("device info id :", device?.id)
 
     const handleDeviceConnect = async () => {
         if (!device) return; // device가 null인 경우 처리
@@ -82,6 +84,7 @@ const DeviceListView = ({navigation}) => {
                 });
                 dispatch(setConnectDevice(device.id));
                 dispatch(setConnectionStatus(true));
+                // setDeviceConnection(false)
             }
         } catch (e) {
             // TODO: 상용화에서는 에러 처리를 구현해야 함.
@@ -111,6 +114,7 @@ const DeviceListView = ({navigation}) => {
             });
             dispatch(setConnectDevice(""));
             dispatch(setConnectionStatus(false));
+            // setDeviceConnection(true)
             return;
         }
 
@@ -121,40 +125,29 @@ const DeviceListView = ({navigation}) => {
                 });
             });
 
-        // // 모든 문서 업데이트 작업을 위한 Promise 배열 생성
-        // const updatePromises = [];
-        // deviceSnapshot.forEach((doc) => {
-        //     const updatePromise = doc.ref.update({
-        //         isConnect: false,
-        //     });
-        //     updatePromises.push(updatePromise);
-        // });
-        //
-        // // 모든 업데이트 작업이 완료될 때까지 기다림
-        // await Promise.all(updatePromises);
-
             dispatch(setConnectDevice(""));
             dispatch(setConnectionStatus(false));
         }
     };
 
-    const handleDeviceDelete = async (dev) => {
-        //선택에 따른 기기만 삭제하게 세부 구현 필요
-        if (!device) return; // device가 null인 경우 처리
-
-        console.log("블루투스 기기 등록 삭제중...");
-        const userRef = firestore().collection("Users").doc(userId);
-        const devicesSnapshot = userRef.collection("Ble_Devices");
-        const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
-
-        querySnapshot.forEach(doc => {
-            doc.ref.delete();
-            console.log("선택된 기기 등록 삭제");
-
-            //redux 최신 상태로 업데이트
-            dispatch(fetchDevices());
-        });
-    };
+    // const handleDeviceDelete = async (dev) => {
+    //     //선택에 따른 기기만 삭제하게 세부 구현 필요
+    //     if (!device) return; // device가 null인 경우 처리
+    //
+    //     console.log("블루투스 기기 등록 삭제중...");
+    //     const userRef = firestore().collection("Users").doc(userId);
+    //     const devicesSnapshot = userRef.collection("Ble_Devices");
+    //     const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
+    //
+    //     querySnapshot.forEach(doc => {
+    //         doc.ref.delete();
+    //         console.log("선택된 기기 등록 삭제");
+    //
+    //         //redux 최신 상태로 업데이트
+    //         deleteDevice(device.id);
+    //         dispatch(fetchDevices());
+    //     });
+    // };
 
 
     const handleOnOpen = (device) => {
@@ -166,52 +159,47 @@ const DeviceListView = ({navigation}) => {
     const ConnectedDevice = () => {
         if (!device) return null; // device가 null인 경우 처리
 
-        console.log("등록된 블루투스 기기 목록");
+        console.log("등록된 블루투스 기기 목록 상태");
         return connectDevice === device.id ? (
-            <VStack space={2}>
-                <Paragraph>연결된 디바이스</Paragraph>
-                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                    <Button flex={1} disabled backgroundColor={"black"}>
-                        연결됨
-                    </Button>
-                    <Button onPress={handleDeviceDisconnect} backgroundColor={"red.800"}>
-                        연결해제
-                    </Button>
-                </HStack>
-            </VStack>
+            <Pressable onPress={handleDeviceDisconnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
+                       borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
+                <Text color={"#2785F4"} fontSize={12}>연결 해제</Text>
+                <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+            </Pressable>
         ) : (
-            <VStack space={2}>
-                <Paragraph>연결되지 않은 디바이스</Paragraph>
-                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                    <Button flex={1} disabled backgroundColor={"gray.100"}></Button>
-                    <Button onPress={handleDeviceDelete}>삭제하기</Button>
-                </HStack>
-            </VStack>
+            // <VStack space={2}>
+            //     <Paragraph>연결되지 않은 디바이스</Paragraph>
+            //     <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
+            //         <Button flex={1} disabled backgroundColor={"gray.100"}></Button>
+            //         <Button onPress={handleDeviceDelete}>삭제하기</Button>
+            //     </HStack>
+            // </VStack>
+            <></>
         );
     };
 
     const DisconnectedDevice = () => {
         if (!device) return null; // device가 null인 경우 처리
 
-        console.log("등록된 블루투스 기기 연결해제");
+        console.log("등록된 블루투스 기기 연결해제 상태");
         return (
-            <VStack space={2}>
-                <Paragraph>연결되지 않은 디바이스</Paragraph>
-                <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-                    <Button flex={1} onPress={handleDeviceConnect}>
-                        연결하기
-                    </Button>
-                    <Button onPress={handleDeviceDelete} backgroundColor={"red.800"}>
-                        삭제하기
-                    </Button>
-                </HStack>
-            </VStack>
+            <HStack space={2}>
+                <Pressable onPress={handleDeviceConnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
+                           borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
+                    <Text color={"#2785F4"} fontSize={12}>연결 하기</Text>
+                    <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+                </Pressable>
+                <Pressable onPress={handleOnOpen} borderWidth={1} alignItems={"center"} justifyContent={"center"}
+                           borderRadius={3} width={81} borderColor={"red.700"} backgroundColor={"red.700"} py={1.5}>
+                    <Text color={"white"} fontSize={12}>삭제하기</Text>
+                    <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+                </Pressable>
+            </HStack>
         );
     };
 
     // let momentDate = moment(device.createdAt);
-    let momentDate = device ? moment(device?.createdAt) : moment();
-
+    let momentDate = device ? moment(device?.date) : moment();
 
 
     return(
@@ -224,44 +212,47 @@ const DeviceListView = ({navigation}) => {
             </HStack>
 
             <VStack flex={1} margin={5} space={4}>
-                {/*{deviceData.map((device, index) => (*/}
-                {/*<HStack backgroundColor={"white"} p={4} shadow={2} justifyContent={"space-between"} alignItems={"center"}>*/}
-                {/*    <VStack space={6} justifyContent={"space-between"} pb={1}>*/}
-                {/*        <VStack space={1.5} pt={1}>*/}
-                {/*        <Text fontSize={16} fontWeight={"bold"}>{device.name}</Text>*/}
-                {/*        <HStack space={2} alignItems={"center"}>*/}
-                {/*            <Text color={"#ADADAD"} fontSize={12}>등록 날짜</Text>*/}
-                {/*            <Box borderWidth={0.5} height={2} borderColor={"#ADADAD"} />*/}
-                {/*            <Text color={'#ADADAD'} fontSize={12}>{device.date}</Text>*/}
-                {/*        </HStack>*/}
-                {/*        <HStack space={2} alignItems={"center"}>*/}
-                {/*            <AntDesign name={device.connectState ? "checkcircle" : "exclamationcircle"} size={13} color={device.connectState ? "#3DC061" : "#EB5147"} />*/}
-                {/*            <Text color={device.connectState ? "#3DC061" : "#EB5147"} fontSize={12}>{device.connectState ? "연결" : "연결 오류"}</Text>*/}
-                {/*        </HStack>*/}
-                {/*        </VStack>*/}
-                {/*        <Pressable onPress={handleOnOpen} borderWidth={1} alignItems={"center"} justifyContent={"center"}*/}
-                {/*                   borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>*/}
-                {/*            <Text color={"#2785F4"} fontSize={12}>연결 해제</Text>*/}
-                {/*            <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose} />*/}
-                {/*        </Pressable>*/}
-                {/*    </VStack>*/}
-                {/*    <Box>*/}
-                {/*        <Image source={deviceImageBlueBack} alt={"Device Image"}></Image>*/}
-                {/*    </Box>*/}
-                {/*</HStack>*/}
-                {/*))}*/}
+                {deviceData.map((device, index) => (
+                <HStack backgroundColor={"white"} p={4} shadow={2} justifyContent={"space-between"} alignItems={"center"}>
+                    <VStack space={6} justifyContent={"space-between"} pb={1}>
+                        <VStack space={1.5} pt={1}>
+                        <Text fontSize={16} fontWeight={"bold"}>{device.name}</Text>
+                        <HStack space={2} alignItems={"center"}>
+                            <Text color={"#ADADAD"} fontSize={12}>등록 날짜</Text>
+                            <Box borderWidth={0.5} height={2} borderColor={"#ADADAD"} />
+                            <Text color={'#ADADAD'} fontSize={12}>{momentDate.format('YYYY/MM/DD')}</Text>
+                        </HStack>
+                        {/*<HStack space={2} alignItems={"center"}>*/}
+                        {/*    <AntDesign name={device.connectState ? "checkcircle" : "exclamationcircle"} size={13} color={device.connectState ? "#3DC061" : "#EB5147"} />*/}
+                        {/*    <Text color={device.connectState ? "#3DC061" : "#EB5147"} fontSize={12}>{device.connectState ? "연결" : "연결 오류"}</Text>*/}
+                        {/*</HStack>*/}
+                            <HStack space={2} alignItems={"center"}>
+                                <AntDesign name={"checkcircle"} size={13} color={"#3DC061"} />
+                                <Text color={"#3DC061"} fontSize={12}>{"연결"}</Text>
+                            </HStack>
+                        </VStack>
 
-                <VStack justifyContent={'space-between'} backgroundColor={'white'} padding={2}>
-                    {device ? (
-                        <>
-                            <Paragraph>{device.name}</Paragraph>
-                            <Paragraph>등록날짜 | {momentDate.format('YYYY-MM-DD')}</Paragraph>
-                            {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}
-                        </>
-                    ) : (
-                        <Text>등록된 디바이스가 없습니다.</Text>
-                    )}
-                </VStack>
+                        {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}
+                        
+                    </VStack>
+                    <Box>
+                        <Image source={deviceImageBlueBack} alt={"Device Image"}></Image>
+                    </Box>
+                </HStack>
+                ))}
+
+                {/*// 테스트 용 */}
+                {/*<VStack justifyContent={'space-between'} backgroundColor={'white'} padding={2}>*/}
+                {/*    {device ? (*/}
+                {/*        <>*/}
+                {/*            <Paragraph>{device.name}</Paragraph>*/}
+                {/*            <Paragraph>등록날짜 | {momentDate.format('YYYY-MM-DD')}</Paragraph>*/}
+                {/*            {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}*/}
+                {/*        </>*/}
+                {/*    ) : (*/}
+                {/*        <Text>등록된 디바이스가 없습니다.</Text>*/}
+                {/*    )}*/}
+                {/*</VStack>*/}
 
             </VStack>
         </View>

@@ -17,7 +17,9 @@ import {useNavigation} from "@react-navigation/native";
  */
 export const DeviceConnectState = () => {
     const {isOpen, onOpen, onClose} = useDisclose();
-    const [reportExist, setReportExist] = useState(false)
+    const [reportExist, setReportExist] = useState(true)
+    const [shouldOpenActionsheet, setShouldOpenActionsheet] = useState(false);
+    const [bleConnectState, setBleConnectState] = useState(true);
 
     /**
      * Represents the connected device.
@@ -25,51 +27,45 @@ export const DeviceConnectState = () => {
     const {connectedDevice, disconnectFromDevice, findDevice, connectAndSubscribe, isConnected} = useBLE();
     const {userId} = useContext(UserContext)
     const connectStatus = useSelector(state => state.device.isConnected);
-    console.log("connectState :", connectStatus)
+    console.log("deviceconnectState :", connectStatus)
     const navigation = useNavigation()
-
-    // const getBleData = async () => {
-    //     try {
-    //         const userRef = firestore().collection("Users").doc(userId);
-    //         const bleDeviceSnapshot = await userRef.collection("Ble_Devices").get();
-    //
-    //         if (!bleDeviceSnapshot.empty) {
-    //             bleDeviceSnapshot.forEach(doc => {
-    //                 const bleDeviceData = doc.data();
-    //                 console.log("fetch: ", bleDeviceData.isConnect);
-    //             });
-    //         } else {
-    //             console.log("No documents found in Ble_Devices collection");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error fetching data from Firestore:", error);
-    //     }
-    // };
-    //
-    // useEffect(() => {
-    //     getBleData();
-    // }, []);
 
     const getReportData = async () => {
         try {
             const userRef = firestore().collection("Users").doc(userId);
+            const bleRef = userRef.collection("Ble_Device");
             const reportRef = userRef.collection("Report");
 
-            if (isConnected === false && reportRef.empty) {
-                setReportExist(false)
-                console.log("reportexist: ", reportExist);
-            } else {
-                console.log("Report document exist");
+            const bleSnapshot = await bleRef.get();
+            const reportSnapshot = await reportRef.get();
+            console.log("test")
+            setBleConnectState(connectStatus)
+
+            if (!connectStatus && bleSnapshot.empty) {
+                setShouldOpenActionsheet(true);
+                console.log("BLE device not found, opening actionsheet");
+            } else if (reportSnapshot.empty && bleSnapshot.empty) {
+                setReportExist(false);
+                setShouldOpenActionsheet(true);
+                console.log("Report and BLE device not found, opening actionsheet");
+            } else if (!reportSnapshot.empty && !bleSnapshot.empty) {
+                console.log("Report and BLE device found");
             }
         } catch (error) {
             console.error("Error fetching data from Firestore:", error);
         }
     };
 
+
     useEffect(() => {
         getReportData();
-        onOpen();
     }, []);
+
+    useEffect(() => {
+        if (shouldOpenActionsheet && !isConnected) {
+            onOpen();
+        }
+    }, [shouldOpenActionsheet]);
 
 
     const DeviceFirstImage = require('../images/deviceConnectFirst.png')
@@ -82,7 +78,7 @@ export const DeviceConnectState = () => {
 
     return (
         <>
-            {reportExist ? (
+            {!reportExist ? (
                 <Actionsheet onClose={onClose} isOpen={isOpen} hideDragIndicator>
                     <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"}
                                          alignItems={"center"}>

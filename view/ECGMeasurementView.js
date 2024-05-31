@@ -30,14 +30,16 @@ import {fetchReports} from "../data/store";
 import moment from "moment";
 import DeviceFirstImage from "./images/deviceConnectFirst.png";
 
+// @ts-ignore
+// @ts-ignore
 /**
  * A React component that displays the Electrocardiogram Measurement view.
  *
  * @returns {JSX.Element} The Electrocardiogram Measurement view component.
  */
 export const ECGMeasurementView = ({route}) => {
-  // const reports = useSelector(state => state.report.reports);
-  // console.log("reports :", reports)
+  const {measurementTime} = route.params;
+
   /**
    * Retrieves the navigation object used for navigating within the application.
    *
@@ -51,7 +53,7 @@ export const ECGMeasurementView = ({route}) => {
    * @throws {Error} If connection to the Arduino device fails.
    * @returns {boolean} True if the data was successfully sent, false otherwise.
    */
-  // const {sendData, receivedData} = useBLE();
+      // const {sendData, receivedData} = useBLE();
   const {analysisStart, analysisFinish, getRRList, getHRList, getAvgHR, getSDNN, getStressIndex} = useBLE();
 
   /**
@@ -60,7 +62,7 @@ export const ECGMeasurementView = ({route}) => {
    * @type {number}
    */
       //측정 분석 시간 50초, 테스트할땐 40초
-  const totalTime = 50;
+  const totalTime = measurementTime ? measurementTime : 60 ;
 
   /**
    * Reference to a message element used in a React component.
@@ -132,9 +134,9 @@ export const ECGMeasurementView = ({route}) => {
   const {isConnected} = useBLE();
 
   const startAnalysis = async () => {
-      const message = 'AnalysisStart';
-      console.log(message);
-      await analysisStart();
+    const message = 'AnalysisStart';
+    console.log(message);
+    await analysisStart();
 
   };
 
@@ -149,6 +151,8 @@ export const ECGMeasurementView = ({route}) => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState(null)
+  // const [stimulationTime, setStimulationTime] = useState()
+  // const [vibrate, setVibrate] = useState()
 
   const getUserData = async () => {
     try {
@@ -157,6 +161,9 @@ export const ECGMeasurementView = ({route}) => {
       const userData = docRef.data()
       console.log("userData :", userData)
 
+      // setMeasurementTime(userData.Regular_settings?.measurementTime || 1)
+      // setStimulationTime(userData.Regular_settings?.stimulationTime || 30)
+      // setVibrate(userData.Regular_settings?.stimulationLvl || 15)
       setName(userData.name)
 
     } catch (error) {
@@ -167,6 +174,7 @@ export const ECGMeasurementView = ({route}) => {
   useEffect(() => {
     getUserData()
   }, []);
+
 
   const endAnalysis = async () => {
     console.log("전역 userId:", userId)
@@ -188,14 +196,14 @@ export const ECGMeasurementView = ({route}) => {
       let now = moment();
       // createReport(userId, getAvgHR(), getSDNN(), getStressIndex(), hrList, rrList, now.toDate());
       const reportDoc = await reportRef.add({
-        name : name,
-        createAt : now.toDate(),
-        "1st_Report" : {
-        avgHr : getAvgHR(),
-        sdnn : getSDNN(),
-        stressIndex : getStressIndex(),
-        hrList : hrList,
-        rrList : rrList,
+        name: name,
+        createAt: now.toDate(),
+        "1st_Report": {
+          avgHr: getAvgHR(),
+          sdnn: getSDNN(),
+          stressIndex: getStressIndex(),
+          hrList: hrList,
+          rrList: rrList,
         }
       });
 
@@ -210,7 +218,7 @@ export const ECGMeasurementView = ({route}) => {
     } catch (error) {
       // 오류 발생 시 처리
       console.error("데이터 저장 중 오류 발생:", error);
-      navigation.navigate("TabScreens",{screen:"Home"});
+      navigation.navigate("TabScreens", {screen: "Home"});
       alert("데이터 저장 중 오류 발생");
     }
   };
@@ -247,20 +255,19 @@ export const ECGMeasurementView = ({route}) => {
       clearInterval(interval.current);
       // if (!hasEndedAnalysis.current) { // 이전에 종료된 적이 없을 때만 실행
       //   hasEndedAnalysis.current = true; // 종료 처리를 했음을 표시
-        endAnalysis().then(() => {
-        }).catch(error => {
-          console.error("endAnalysis 오류:", error);
-        });
-        
-        if (isEmotionSelected) { // 감정이 선택되었는지 확인
-          setIsOpens(true);
-        } else {
-          console.log("기분 이모티콘을 선택해주세요.")
-        }
+      endAnalysis().then(() => {
+      }).catch(error => {
+        console.error("endAnalysis 오류:", error);
+      });
+
+      if (isEmotionSelected) { // 감정이 선택되었는지 확인
+        setIsOpens(true);
+      } else {
+        console.log("기분 이모티콘을 선택해주세요.")
       }
+    }
 
   }, [seconds]);
-
 
 
   /**
@@ -283,12 +290,12 @@ export const ECGMeasurementView = ({route}) => {
    * @function onOpenAnalysisStopMessageBox
    * @returns {void}
    */
-  console.log("mess:", isMessageOpen)
+      // console.log("mess:", isMessageOpen)
   const onOpenAnalysisStopMessageBox = () => {
-    setIsPaused(true);
-    setIsMessageOpen(true);
-    console.log("측정 중지 버튼 클릭됌.")
-  };
+        setIsPaused(true);
+        setIsMessageOpen(true);
+        console.log("측정 중지 버튼 클릭됌.")
+      };
 
   /**
    * Closes the analysis stop message box.
@@ -311,8 +318,8 @@ export const ECGMeasurementView = ({route}) => {
   const handleAnalysisStop = () => {
     setIsMessageOpen(false);
     const timer = setTimeout(() => {
-    navigation.navigate("TabScreens",{screen:"Home"});
-    clearTimeout(timer);
+      navigation.navigate("TabScreens", {screen: "Home"});
+      clearTimeout(timer);
     }, 500);
   };
 
@@ -330,19 +337,19 @@ export const ECGMeasurementView = ({route}) => {
   const progressValue = ((totalTime - seconds) / totalTime) * 100;
 
   const EmotionIcon = {
-    emotion_happy: <EmotionHappy width={40} height={40} />,
-    emotion_normal: <EmotionNormal width={40} height={40} />,
-    emotion_soso: <EmotionSoso width={40} height={40} />,
-    emotion_tired: <EmotionTired width={40} height={40} />,
-    emotion_sad: <EmotionSad width={40} height={40} />,
-    emotion_angry: <EmotionAngry width={40} height={40} />,
+    emotion_happy: <EmotionHappy width={40} height={40}/>,
+    emotion_normal: <EmotionNormal width={40} height={40}/>,
+    emotion_soso: <EmotionSoso width={40} height={40}/>,
+    emotion_tired: <EmotionTired width={40} height={40}/>,
+    emotion_sad: <EmotionSad width={40} height={40}/>,
+    emotion_angry: <EmotionAngry width={40} height={40}/>,
   };
 
   const emotions = [
-    {name: 'emotion_happy', title:'행복해요'},
-    {name: 'emotion_tired', title:'피곤해요'},
-    {name: 'emotion_normal', title:' 보통이에요'},
-    {name: 'emotion_sad', title:'슬퍼요'},
+    {name: 'emotion_happy', title: '행복해요'},
+    {name: 'emotion_tired', title: '피곤해요'},
+    {name: 'emotion_normal', title: ' 보통이에요'},
+    {name: 'emotion_sad', title: '슬퍼요'},
     {name: 'emotion_soso', title: '그저그래요'},
     {name: 'emotion_angry', title: '화나요'},
   ];
@@ -360,32 +367,32 @@ export const ECGMeasurementView = ({route}) => {
       const columnIndex = Math.floor(index / 2); // Split into columns with 2 rows each
       acc[columnIndex] = acc[columnIndex] || [];
       acc[columnIndex].push(
-        <VStack key={index} flex={1}>
-          <Center>
-            <Button
-              onPress={() => handleEmotionSelect(emotion.name)}
-              style={{
-                backgroundColor:
-                  selectedEmotion === emotion.name ? '#F5F5F6' : 'transparent',
-                borderRadius: 50,
-              }}>
-              {EmotionIcon[emotion.name]}
-            </Button>
-            <Text fontSize={'xs'}>{emotion.title}</Text>
-          </Center>
-        </VStack>,
+          <VStack key={index} flex={1}>
+            <Center>
+              <Button
+                  onPress={() => handleEmotionSelect(emotion.name)}
+                  style={{
+                    backgroundColor:
+                        selectedEmotion === emotion.name ? '#F5F5F6' : 'transparent',
+                    borderRadius: 50,
+                  }}>
+                {EmotionIcon[emotion.name]}
+              </Button>
+              <Text fontSize={'xs'}>{emotion.title}</Text>
+            </Center>
+          </VStack>,
       );
       return acc;
     }, []);
 
     return columns.map((column, index) => (
-      <VStack key={index} space={5} flex={1}>
-        {column}
-      </VStack>
+        <VStack key={index} space={5} flex={1}>
+          {column}
+        </VStack>
     ));
   };
   const [isEmotionSelected, setEmotionSelected] = useState(false)
-  
+
   //감정 선택 확인
   const handleSubmit = () => {
     if (selectedEmotion) {
@@ -407,7 +414,7 @@ export const ECGMeasurementView = ({route}) => {
           screen: 'AnalysisEnd',
           params: {
             beforeEmotion: selectedEmotion,
-          reportDocId: reportDocId,
+            reportDocId: reportDocId,
           }
         });
         clearTimeout(timer);
@@ -443,7 +450,7 @@ export const ECGMeasurementView = ({route}) => {
 
   const background = require('./images/measurebackground.png')
 
-  const { isOpen , onOpen, onClose } = useDisclose();
+  const {isOpen, onOpen, onClose} = useDisclose();
 
   // actionsheet 코드 수정
   // const ActionsheetComponent = () => {
@@ -483,147 +490,148 @@ export const ECGMeasurementView = ({route}) => {
   // };
 
   return (
-    <>
-      <ImageBackground source={background} style={{height:"100%", width:"100%"}}>
-      <VStack
-        space={3}
-        h={'100%'}
-        justifyContent={'space-between'}
-       >
-        <Center p={5}><Heading color={'#FFFFFF'}>심전도 측정 중입니다...</Heading></Center>
-        <CircleProgressAnimation />
-        <HStack
-          space={1}
-          bg={'#FFFFFF'}
-          m={5}
-          p={5}
-          shadow={2}
-          justifyContent={'space-between'}>
-          <Text>
-            심전도 측정 시 몸을 움직이거나 말하면 {'\n'} 정확한 검사를 할 수
-            없습니다.
-          </Text>
-          <HStack>
-            <WalkingPeopleIcon width={41} height={'100%'} />
-            <Ionicons name={'close-circle'} color={'#EB5147'} />
-          </HStack>
-        </HStack>
-        <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2} m={5} mt={0}>
-          {seconds >= 0 &&
-          <Center>
-            <Text>{seconds}초 남았습니다.</Text>
-          </Center>
-          }
-          {seconds < 0 &&
-              <Center>
-                <Text>0초 남았습니다.</Text>
-              </Center>
-          }
-          <Progress value={progressValue} colorScheme={'blue'} />
-          <Button
-            onPress={onOpenAnalysisStopMessageBox}
-            bgColor={'#2785F4'}
-            mt={2}>
-            <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
-              측정중지
-            </Text>
-          </Button>
-        </VStack>
-      </VStack>
-      </ImageBackground>
-
-      {/*Popup select emotion when time reaches 20s, consider using ActionSheet instead*/}
-      <Modal isOpen={showModal} size="full">
-        <Modal.Content
-          borderTopLeftRadius={20}
-          borderTopRightRadius={20}
-          bg="white"
-          p={4}
-          style={{position: 'absolute', bottom: 0, borderRadius: 0}}>
-          <Modal.Body>
-            <Center mb={5}>
-              <Text textAlign="center" bold fontSize="2xl">
-                현재 기분이 어떠신가요?
+      <>
+        <ImageBackground source={background} style={{height: "100%", width: "100%"}}>
+          <VStack
+              space={3}
+              h={'100%'}
+              justifyContent={'space-between'}
+          >
+            <Center p={5}><Heading color={'#FFFFFF'}>심전도 측정 중입니다...</Heading></Center>
+            <CircleProgressAnimation/>
+            <HStack
+                space={1}
+                bg={'#FFFFFF'}
+                m={5}
+                p={5}
+                shadow={2}
+                justifyContent={'space-between'}>
+              <Text>
+                심전도 측정 시 몸을 움직이거나 말하면 {'\n'} 정확한 검사를 할 수
+                없습니다.
               </Text>
-            </Center>
-            <Center>
-              <HStack pb={5}>{renderEmotions()}</HStack>
-            </Center>
-            <Button
-              bgColor={'#2785F4'}
-              onPress={() => {
-                handleSubmit();
-              }}
-              isDisabled={!selectedEmotion}
-              _disabled={{bgColor: '#a9a9a9'}}>
-              {!selectedEmotion && (
-                <Text color="white">감정을 선택해주세요.</Text>
-              )}
-              {selectedEmotion && <Text color="white">선택완료</Text>}
-            </Button>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal>
-
-      {/*측정 완료 다이얼로그*/}
-      <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpens}>
-        <AlertDialog.Content p={'2%'}>
-          <VStack space={3} p={3}>
-            <Center>
-              <Ionicons
-                name={'checkmark-circle-outline'}
-                size={100}
-                color={'#59BCFF'}
-              />
-            </Center>
-            <Center>
-              <Text fontSize={'xl'} fontWeight={'bold'}>
-                측정이 완료되었습니다.
-              </Text>
-            </Center>
-            <Button onPress={handleSummit} w={'100%'} bgColor={'#2785F4'}>
-              <Text fontSize={'lg'} fontWeight={'bold'} color={'white'}>
-                확인
-              </Text>
-            </Button>
-          </VStack>
-        </AlertDialog.Content>
-      </AlertDialog>
-
-      {/*측정 중지 확인 다이얼로그*/}
-      {isMessageOpen ? (
-          <Actionsheet isOpen={isOpen} onClose={onClose} hideDragIndicator>
-            <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"} alignItems={"center"}>
-              <>
-                <Box w="100%" h={60} marginTop={0.5} marginBottom={5} justifyContent="center" alignItems={"center"}>
-                  <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
-                    현재 측정을
-                  </Text>
-                  <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
-                    중지하시겠어요?
-                  </Text>
-                </Box>
-
-                <Text fontSize={14} color="#EB5147">
-                  측정 중인 정보는 기록되지 않아요.
+              <HStack>
+                <WalkingPeopleIcon width={41} height={'100%'}/>
+                <Ionicons name={'close-circle'} color={'#EB5147'}/>
+              </HStack>
+            </HStack>
+            <VStack space={1} bg={'#FFFFFF'} p={5} shadow={2} m={5} mt={0}>
+              {seconds >= 0 &&
+                  <Center>
+                    <Text>{seconds}초 남았습니다.</Text>
+                  </Center>
+              }
+              {seconds < 0 &&
+                  <Center>
+                    <Text>0초 남았습니다.</Text>
+                  </Center>
+              }
+              <Progress value={progressValue} colorScheme={'blue'}/>
+              <Button
+                  onPress={onOpenAnalysisStopMessageBox}
+                  bgColor={'#2785F4'}
+                  mt={2}>
+                <Text fontSize={'15'} fontWeight={'bold'} color={'white'}>
+                  측정중지
                 </Text>
+              </Button>
+            </VStack>
+          </VStack>
+        </ImageBackground>
 
-                <Center width={"100%"} mb={2} mt={4}>
-                  <HStack width={"92%"} space={4} justifyContent={"center"}>
-                    <Button bg={"white"} borderColor={"#2785F4"} onPress={handleAnalysisStopCancel} width={"45%"} variant={"outline"}>
-                      <Text fontWeight={600} fontSize={18} color={"#2785F4"}>취소</Text>
-                    </Button>
-                    <Button bg={"#2785F4"} onPress={handleAnalysisStop} width={"45%"}>
-                      <Text fontWeight={600} fontSize={18} color={"white"}>중지하기</Text>
-                    </Button>
-                  </HStack>
-                </Center>
-              </>
-            </Actionsheet.Content>
-          </Actionsheet>
-          ) : (
-              <></>
-      )}
-    </>
+        {/*Popup select emotion when time reaches 20s, consider using ActionSheet instead*/}
+        <Modal isOpen={showModal} size="full">
+          <Modal.Content
+              borderTopLeftRadius={20}
+              borderTopRightRadius={20}
+              bg="white"
+              p={4}
+              style={{position: 'absolute', bottom: 0, borderRadius: 0}}>
+            <Modal.Body>
+              <Center mb={5}>
+                <Text textAlign="center" bold fontSize="2xl">
+                  현재 기분이 어떠신가요?
+                </Text>
+              </Center>
+              <Center>
+                <HStack pb={5}>{renderEmotions()}</HStack>
+              </Center>
+              <Button
+                  bgColor={'#2785F4'}
+                  onPress={() => {
+                    handleSubmit();
+                  }}
+                  isDisabled={!selectedEmotion}
+                  _disabled={{bgColor: '#a9a9a9'}}>
+                {!selectedEmotion && (
+                    <Text color="white">감정을 선택해주세요.</Text>
+                )}
+                {selectedEmotion && <Text color="white">선택완료</Text>}
+              </Button>
+            </Modal.Body>
+          </Modal.Content>
+        </Modal>
+
+        {/*측정 완료 다이얼로그*/}
+        <AlertDialog leastDestructiveRef={messageRef} isOpen={isOpens}>
+          <AlertDialog.Content p={'2%'}>
+            <VStack space={3} p={3}>
+              <Center>
+                <Ionicons
+                    name={'checkmark-circle-outline'}
+                    size={100}
+                    color={'#59BCFF'}
+                />
+              </Center>
+              <Center>
+                <Text fontSize={'xl'} fontWeight={'bold'}>
+                  측정이 완료되었습니다.
+                </Text>
+              </Center>
+              <Button onPress={handleSummit} w={'100%'} bgColor={'#2785F4'}>
+                <Text fontSize={'lg'} fontWeight={'bold'} color={'white'}>
+                  확인
+                </Text>
+              </Button>
+            </VStack>
+          </AlertDialog.Content>
+        </AlertDialog>
+
+        {/*측정 중지 확인 다이얼로그*/}
+        <AlertDialog
+            leastDestructiveRef={messageRef}
+            isOpen={isMessageOpen}
+            onClose={onCloseAnalysisStopMessageBox}>
+          <AlertDialog.Content p={'2%'}>
+
+            <Center>
+            <VStack space={2} py={3}>
+              <Text fontSize={'xl'} fontWeight={'bold'}>
+                현재 측정을 중지하시겠습니까?</Text>
+
+              <Text color={"#EB5147"}>측정 중인 정보는 기록되지 않아요.</Text>
+            </VStack>
+            </Center>
+
+            <HStack width={"100%"} p={3} space={5}>
+              <Button
+                  flex={1}
+                  borderColor={"#2785F4"}
+                  variant={"outline"}
+                  onPress={handleAnalysisStopCancel}
+              >
+                <Text color={"#2785F4"}>취소</Text>
+              </Button>
+              <Button
+                  flex={1}
+                  borderColor={"#2785F4"} backgroundColor={"#2785F4"}
+                  onPress={handleAnalysisStop}>
+                <Text color={"white"}>중지하기</Text>
+              </Button>
+            </HStack>
+          </AlertDialog.Content>
+        </AlertDialog>
+      </>
+
   );
 };

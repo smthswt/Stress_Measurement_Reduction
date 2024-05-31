@@ -322,7 +322,9 @@ import moment from "moment";
               </Text>
               <Text color={'#ADADAD'}>힐링 전 - 힐링 후</Text>
             </VStack>
-            <Box justifyContent={'center'} alignItems={'center'} flexDir={"row"}>
+
+            <ScrollView horizontal>
+            <HStack justifyContent={'center'} alignItems={'center'}>
               <VictoryChart
                 width={200}
                 height={220}
@@ -387,8 +389,9 @@ import moment from "moment";
                   />
                 </VictoryGroup>
               </VictoryChart>
+            </HStack>
+            </ScrollView>
 
-            </Box>
             <Divider width={'90%'} mb={2} />
             <VStack width={'100%'}>
               <VStack>

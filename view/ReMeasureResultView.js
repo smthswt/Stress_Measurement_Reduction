@@ -118,6 +118,22 @@ export const RemeasureResultView = ({route}) => {
   const sdnnValue = Math.trunc(number)
   console.log("sdnn value: ", sdnnValue)
 
+  // sdnn 값에 따라 progressColor 설정
+  const getProgressColor = (sdnn) => {
+    if (sdnn <= 20 || sdnn >= 450) {
+      return '#EB5147'; // sdnn값이 450이상 또는 20이하인 경우
+    } else if (sdnn >= 80 && sdnn <= 150) {
+      return '#2785F4'; // sdnn값이 80~150인 경우
+    } else if (sdnn > 20 && sdnn < 80) {
+      return '#FF6B18'; // sdnn값이 20초과 80미만인 경우
+    } else {
+      return '#616161'; // 기본값 또는 처리되지 않은 값에 대한 기본 색상
+    }
+  };
+
+
+// progressColor를 동적으로 설정
+  const progressColor = getProgressColor(number);
 
   return (
     <VStack space={1} h={'100%'} justifyContent={'space-between'}>
@@ -133,8 +149,8 @@ export const RemeasureResultView = ({route}) => {
               // percentage={stressIndex === 0 ? 0 : stressIndex === 1 ? 6 : stressIndex === 2 ? 12 : stressIndex === 3 ? 18 : 25}
               currentValue={number}
               minValue={0}
-              maxValue={1000}
-            progressColor={'#2785F4'}
+              maxValue={450}
+            progressColor={progressColor}
             progressWidth={15}
             interiorCircleColor={"#67ADFF"}
             progressShadowColor={'white'}

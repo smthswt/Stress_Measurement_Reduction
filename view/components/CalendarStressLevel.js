@@ -10,54 +10,111 @@ import moment from "moment";
 import firestore from "@react-native-firebase/firestore";
 
 
-export const CalendarStressLevel = ({date, sdnn, sdnn2}) => {
+export const CalendarStressLevel = ({selectedDate}) => {
     const {userId} = useContext(UserContext)
     let now = moment();
     const [stressIndex, setStressIndex] = useState(0)
     const [stressIndex2, setStressIndex2] = useState(0)
+    const [stressIndex3, setStressIndex3] = useState(0)
+    const [stressIndex4, setStressIndex4] = useState(0)
     const [createAt1, setCreateAt1] = useState("");
+    const [createAt2, setCreateAt2] = useState("");
+
+    console.log("selected Date stressLevel:", selectedDate)
+
+    // stress index 데이터 호출
+    const getStressIndexData = async () => {
+        const userRef = firestore().collection("Users").doc(userId);
+        const reportRef = userRef.collection("Report");
+
+        // 현재 날짜를 UTC+9 기준으로 변환하여 생성
+        let Date = moment().format("YYYY-MM-DD");
+        console.log("date:", Date)
+
+        if (selectedDate) {
+            // 선택한 날짜가 있을 경우에만 해당 날짜로 설정
+            const selectedDateString = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+            Date = moment(selectedDateString, "YYYY-MM-DD").format("YYYY-MM-DD");
+        }
+
+        // 현재 날짜를 기준으로 조회
+        const querySnapshot = await reportRef
+            .where('createAt', '>=', moment(Date).toDate())
+            .where('createAt', '<', moment(Date).add(1, 'day').toDate())
+            .orderBy('createAt', 'asc')
+            .limit(2)
+            .get();
+
+        try {
+            if (!querySnapshot.empty) {
+                const docs = querySnapshot.docs;
+                const recentReport = docs[0].data();
+
+                // 데이터가 있는 경우
+                if (recentReport["1st_Report"] && recentReport["2nd_Report"]) {
+                    setStressIndex(recentReport["1st_Report"].stressIndex || 0);
+                    setStressIndex2(recentReport["2nd_Report"].stressIndex || 0);
+                    setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+                } else {
+                    // 데이터가 없는 경우
+                    setStressIndex(0);
+                    setStressIndex2(0);
+                    setCreateAt1("");
+                    setStressIndex3(0);
+                    setStressIndex4(0);
+                    setCreateAt2("");
+                }
+
+                // 데이터가 하나 이상 있는 경우
+                if (docs.length > 1) {
+                    const secondRecentReport = docs[1].data();
+                    if (secondRecentReport["1st_Report"] && secondRecentReport["2nd_Report"]) {
+                        setStressIndex3(secondRecentReport["1st_Report"].stressIndex || 0);
+                        setStressIndex4(secondRecentReport["2nd_Report"].stressIndex || 0);
+                        setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+                    } else {
+                        // 두 번째 데이터가 없는 경우
+                        setStressIndex3(0);
+                        setStressIndex4(0);
+                        setCreateAt2("");
+                    }
+                } else {
+                    // 데이터가 하나만 있는 경우
+                    setStressIndex3(0);
+                    setStressIndex4(0);
+                    setCreateAt2("");
+                }
+            } else {
+                // 데이터가 없는 경우
+                console.log("No reports found");
+                setStressIndex(0);
+                setStressIndex2(0);
+                setStressIndex3(0);
+                setStressIndex4(0);
+                setCreateAt1("");
+                setCreateAt2("");
+            }
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+        }
+    };
+
+    useEffect(() => {
+        getStressIndexData();
+    }, [selectedDate]);
 
 
 
-// // stress index 데이터 호출
-//     const getStressIndexData = async () => {
-//         const userRef = firestore().collection("Users").doc(userId);
-//         const reportRef = userRef.collection("Report");
-//
-//         // 실시간 업데이트
-//         reportRef
-//             .orderBy('createAt', 'desc')
-//             .limit(2)
-//             .onSnapshot((querySnapshot) => {
-//                 if (!querySnapshot.empty) {
-//                     const recentReport = querySnapshot.docs[0].data();
-//                     console.log("Recent Report1:", recentReport["1st_Report"].stressIndex);
-//                     console.log("Recent Report2:", recentReport["2nd_Report"].stressIndex);
-//
-//                     setStressIndex(recentReport["1st_Report"].stressIndex);
-//                     setStressIndex2(recentReport["2nd_Report"].stressIndex);
-//                     console.log("create at:", recentReport.createAt,);
-//                     // moment 객체로 변환하여 상태로 설정
-//                     setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
-//                 } else {
-//                     console.log("No reports found");
-//                 }
-//             }, (error) => {
-//                 console.error("Error fetching data from Firestore:", error);
-//             });
-//     };
-//
-//     useEffect(() => {
-//         getStressIndexData();
-//     }, []);
 
 
     const Data = {
         before: [
-            {date: "date", stressLevel: "sdnn"},
+            {date: createAt1, stressLevel: stressIndex},
+            {date: createAt2 + " ", stressLevel: stressIndex3},
         ],
         after: [
-            {date: "date", stressLevel: "sdnn2"},
+            {date: createAt1, stressLevel: stressIndex2},
+            {date: createAt2 + " ", stressLevel: stressIndex4},
         ],
     };
 

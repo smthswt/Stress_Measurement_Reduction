@@ -69,20 +69,25 @@ export const HomeView_AllStress = ({ navigation }) => {
                         };
                     });
 
-                    const newSdnns = reports.flatMap(report => [
-                        parseFloat(report["1st_Report"].sdnn).toFixed(2),
-                        parseFloat(report["2nd_Report"].sdnn).toFixed(2)
-                    ]);
+                    const newSdnns = [];
+                    const newCreateAts = [];
 
-                    const newCreateAts = reports.map(report => report.createAt);
+                    reports.forEach(report => {
+                        if (report["1st_Report"] && report["2nd_Report"]) {
+                            newSdnns.push(parseFloat(report["1st_Report"].sdnn).toFixed(2));
+                            newSdnns.push(parseFloat(report["2nd_Report"].sdnn).toFixed(2));
+                            newCreateAts.push(report.createAt);
+                        }
+                    });
 
                     setSdnns(newSdnns);
                     setCreateAts(newCreateAts);
                     setIsLoading(false);
 
-                    console.log("report fetch max 10")
+                    console.log("report fetch max 10");
                 } else {
                     console.log("No reports found");
+                    setIsLoading(false);
                 }
             }, (error) => {
                 console.error("Error fetching data from Firestore:", error);

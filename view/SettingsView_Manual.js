@@ -29,7 +29,7 @@ export const SettingsView_Manual = ({ navigation }) => {
     const {userId} = useContext(UserContext)
     // console.log("전역 userId:", userId) //전역관리
 
-    // const [measurementTime, setMeasurementTime] = useState(30);
+    const [selectedManualSong, setSelectedManualSong] = useState("");
     const [time, setTime] = React.useState(null);
     const [stimulation, setStimulation] = useState(null);
     const [initialFetchDone, setInitialFetchDone] = useState(false);
@@ -45,8 +45,9 @@ export const SettingsView_Manual = ({ navigation }) => {
                     .get();
                 const userData = userDoc.data();
                 if (userData) {
+                    setSelectedManualSong(userData.Manual_settings?.userManualSong || 1);  // 사용자가 선택한 메뉴얼 음원, 기본 id 1
                     setTime(userData.Manual_settings?.stimulationTime || 30);  // 기본값 설정, 진동 시간
-                    setStimulation(userData.Manual_settings?.stimulationLvl || 20);  // 기본값 설정, 진동 강도
+                    setStimulation(userData.Manual_settings?.stimulationLvl || 15);  // 기본값 설정, 진동 강도
                     setInitialFetchDone(true);
                     console.log(userData.measurementTime)
                     console.log(userData.stimulationTime)
@@ -66,6 +67,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         const updateUserData = async () => {
             try {
                 const Manual_settings = {
+                    userManualSong : selectedManualSong,
                     stimulationTime: time,
                     stimulationLvl: stimulation,
                 };
@@ -75,7 +77,7 @@ export const SettingsView_Manual = ({ navigation }) => {
                     .update({
                         Manual_settings
                     });
-                console.log("User data updated", {time});
+                console.log("User data updated", {time}, {selectedManualSong},);
             } catch (error) {
                 console.error("Error updating user data: ", error);
             }
@@ -84,7 +86,7 @@ export const SettingsView_Manual = ({ navigation }) => {
         if (initialFetchDone) {
             updateUserData();
         }
-    }, [time, stimulation,]);
+    }, [time, stimulation, selectedManualSong]);
 
 
 
@@ -165,6 +167,10 @@ export const SettingsView_Manual = ({ navigation }) => {
             // options 상태 업데이트
             setOptions([...options, newOption]);
 
+            // options 배열을 itemId에 따라 오름차순으로 정렬
+            const sortedOptions = options.sort((a, b) => a.itemId - b.itemId);
+            setOptions(sortedOptions);
+
             // firestore에 새로운 문서 추가
             await manualMusicRef.add({
                 song: newMusicName,
@@ -180,20 +186,6 @@ export const SettingsView_Manual = ({ navigation }) => {
     };
 
 
-    // const removeOption2 = (valueToRemove) => {
-    //     const updatedOptions = options.filter(option => option.label !== valueToRemove);
-    //     setOptions(updatedOptions);
-    //
-    //     // AsyncStorage에서도 해당 옵션을 제거합니다.
-    //     AsyncStorage.setItem('options', JSON.stringify(updatedOptions)).then(() => {
-    //         console.log("Option removed and updated successfully!");
-    //
-    //         // 제거된 항목이 있을 때마다 options 배열의 길이를 갱신합니다.
-    //         setMusic(updatedOptions.length.toString());
-    //     }).catch(error => {
-    //         console.error("Error removing and updating option:", error);
-    //     });
-    // };
 
     const removeOption = async (valueToRemove) => {
         console.log("음원 삭제 버튼이 클릭 되었습니다.")
@@ -214,9 +206,6 @@ export const SettingsView_Manual = ({ navigation }) => {
     };
 
 
-    // useEffect(() => {
-    //     console.log('Options updated:', options);
-    // }, [options]);
 
 
     const removeMusicAlert = (valueToRemove) => {
@@ -241,48 +230,47 @@ export const SettingsView_Manual = ({ navigation }) => {
     };
 
 
-    const handleMusicChange = async (radioId) => {
-        console.log("radio num:", radioId)
-        setMusicItemId(radioId)
+    // const handleMusicChange = async (radioId) => {
+    //     console.log("radio num:", radioId)
+    //     setMusicItemId(radioId)
+    //
+    //     // try {
+    //     //     // Firestore에서 선택된 음악 데이터 가져오기
+    //     //     const userRef = firestore().collection("Users").doc(userId);
+    //     //     const selectedMusicRef = userRef.collection("Manual_Music");
+    //     //     const musicSnapshot = await selectedMusicRef.where("itemId", '==', radioId).get();
+    //     //
+    //     //     if (!musicSnapshot.empty) {
+    //     //         // 선택된 음악 데이터가 존재하는 경우
+    //     //         const musicData = musicSnapshot.docs[0].data();
+    //     //         const selectedSong = musicData.song;
+    //     //         const selectedUri = musicData.copyfilePath;
+    //     //         console.log("Selected song:", selectedSong);
+    //     //         console.log("Selected song URI:", selectedUri);
+    //     //
+    //     //         // // 선택된 음악을 TrackPlayer에 추가하고 재생
+    //     //         // await TrackPlayer.reset(); // 재생 목록 초기화
+    //     //         // await TrackPlayer.add({
+    //     //         //     title: selectedSong,
+    //     //         //     url: selectedUri,
+    //     //         // });
+    //     //         // await TrackPlayer.play(); // 음원 재생
+    //     //
+    //     //     } else {
+    //     //         // 선택된 음악 데이터가 없는 경우
+    //     //         console.error('Selected music data not found for itemId:', radioId);
+    //     //     }
+    //     // } catch (error) {
+    //     //     console.error('Error updating selected music:', error);
+    //     // }
+    // };
 
-        try {
-            // Firestore에서 선택된 음악 데이터 가져오기
-            const userRef = firestore().collection("Users").doc(userId);
-            const selectedMusicRef = userRef.collection("Manual_Music");
-            const musicSnapshot = await selectedMusicRef.where("itemId", '==', radioId).get();
 
-            if (!musicSnapshot.empty) {
-                // 선택된 음악 데이터가 존재하는 경우
-                const musicData = musicSnapshot.docs[0].data();
-                const selectedSong = musicData.song;
-                const selectedUri = musicData.copyfilePath;
-                console.log("Selected song:", selectedSong);
-                console.log("Selected song URI:", selectedUri);
-
-                // 선택된 음악을 TrackPlayer에 추가하고 재생
-                await TrackPlayer.reset(); // 재생 목록 초기화
-                await TrackPlayer.add({
-                    title: selectedSong,
-                    url: selectedUri,
-                });
-                await TrackPlayer.play(); // 음원 재생
-
-            } else {
-                // 선택된 음악 데이터가 없는 경우
-                console.error('Selected music data not found for itemId:', radioId);
-            }
-        } catch (error) {
-            console.error('Error updating selected music:', error);
-        }
-    };
-
-    const {sendMotorStopPacket} = useBLE()
-
-    const handleMusicPause = async () => {
-        await TrackPlayer.pause();
-        await sendMotorStopPacket();
-        console.log("음악이 중지되었습니다.")
-    };
+    // const handleMusicPause = async () => {
+    //     await TrackPlayer.pause();
+    //     await sendMotorStopPacket();
+    //     console.log("음악이 중지되었습니다.")
+    // };
 
     const optionsLength = options.length;
 
@@ -302,24 +290,27 @@ export const SettingsView_Manual = ({ navigation }) => {
             <VStack bg={"white"} p={5} space={2} shadow={2}>
                 <HStack justifyContent={"space-between"}>
                 <Text bold>음원 선택</Text>
-                    <TouchableOpacity activeOpacity={0.6} onPress={handleMusicPause}>
-                    <MaterialCommunityIcons name={'pause'} size={22} color={"black"} />
-                    </TouchableOpacity>
+                    {/*<TouchableOpacity activeOpacity={0.6} onPress={handleMusicPause}>*/}
+                    {/*<MaterialCommunityIcons name={'pause'} size={22} color={"black"} />*/}
+                    {/*</TouchableOpacity>*/}
                 </HStack>
-                <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={musicItemId} onChange={handleMusicChange}>
+                {/*<Radio.Group name="myRadioGroup" colorScheme={"blue"} value={musicItemId} onChange={handleMusicChange}>*/}
 
                     <ScrollView showsVerticalScrollIndicator style={{height: optionsLength > 6 ? 170 : 'auto', width: "100%"}}>
-                    {options.map(option => (
-                        <Radio key={option.itemId} value={option.itemId} size={"sm"} marginY={1} justifyContent={"space-between"}>
-                            <TouchableOpacity onLongPress={() => removeMusicAlert(option.itemId)} >
-                                <Text>{option.song !== undefined && option.song !== "" ? option.song : "알수없음"}</Text>
-
-                            </TouchableOpacity>
-                        </Radio>
-                    ))}
+                        <Radio.Group name="myRadioGroup" colorScheme={"blue"} value={selectedManualSong} onChange={nextValue => {
+                            setSelectedManualSong(nextValue);
+                        }}>
+                        {options.sort((a, b) => a.itemId - b.itemId).map(option => (
+                            <Radio key={option.itemId} value={option.itemId} size={"sm"} marginY={1} justifyContent={"space-between"}>
+                                <TouchableOpacity onLongPress={() => removeMusicAlert(option.itemId)} >
+                                    <Text>{option.song !== undefined && option.song !== "" ? option.song : "알수없음"}</Text>
+                                </TouchableOpacity>
+                            </Radio>
+                        ))}
+                        </Radio.Group>
                     </ScrollView>
 
-                </Radio.Group>
+                {/*</Radio.Group>*/}
                 <Divider/>
                 <Button variant={"text"} onPress={onOpen}>
                     <Text>음원 추가하기 +</Text>
@@ -332,9 +323,11 @@ export const SettingsView_Manual = ({ navigation }) => {
                     setStimulation(nextValue);
                 }}>
                     {/*//임의로 수정한 선택지*/}
+                    <Radio value={15} my={1} size={"sm"}>15 Hz</Radio>
                     <Radio value={20} my={1} size={"sm"}>20 Hz</Radio>
                     <Radio value={25} my={1} size={"sm"}>25 Hz</Radio>
                     <Radio value={30} my={1} size={"sm"}>30 Hz</Radio>
+                    <Radio value={35} my={1} size={"sm"}>35 Hz</Radio>
 
                     {/*//기존 선택지*/}
                     {/*<Radio value="move_one" my={1} size={"sm"}>60 Hz</Radio>*/}

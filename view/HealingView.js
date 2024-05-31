@@ -49,14 +49,13 @@ export const HealingView = ({route}) => {
    *
    * @returns {object} The navigation object.
    */
-  const {beforeEmotion, reportDocId, stressLevel} = route.params
+  const {beforeEmotion, reportDocId, stressLevel, stimulationTime, vibrate} = route.params
   const navigation = useNavigation();
   // const beforeEmotion = route.params.beforeEmotion;
   const songNumber = stressLevel
   // console.log(route.params)
   // console.log("beforeEmotion :", beforeEmotion)
   // console.log("reportDocId :", reportDocId)
-  // console.log('stresslevel - song number :', songNumber)
 
   /**
    * Sends data.
@@ -79,7 +78,7 @@ export const HealingView = ({route}) => {
    * @type {number}
    */
       //30초
-  const totalTime = 30;
+  const totalTime = stimulationTime;
 
   /**
    * A React useRef hook for storing a reference to the cancel function.
@@ -107,7 +106,8 @@ export const HealingView = ({route}) => {
     console.log(message);
     startAnimation();
     await musicPlay();
-    await sendMotorStartPacket(1, 20);
+    await sendMotorStartPacket({songNumber}, vibrate);
+    console.log('stresslevel :', songNumber)
 
     // sendData(
     //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',
@@ -181,7 +181,7 @@ export const HealingView = ({route}) => {
   const [healingStart, setHealingStart] = useState(false);
 
 //duration 30초로 나중에 늘려놓기. 음원 시간만큼으로 늘려야하나?
-  const animationDuration = 30; // Duration in seconds (same as MusicCircleProgressAnimation)
+  const animationDuration = stimulationTime; // Duration in seconds (same as MusicCircleProgressAnimation)
   const [isCounting, setIsCounting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(animationDuration);
 
@@ -223,7 +223,7 @@ export const HealingView = ({route}) => {
     
     //힐링 모드 재측정으로 이동
     const timer = setTimeout(() => {
-      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId});
+      navigation.navigate('RemeasureStart', {beforeEmotion: beforeEmotion, reportDocId: reportDocId, measurementTime: measurementTime});
       clearTimeout(timer);
     }, );
   };
@@ -232,6 +232,7 @@ export const HealingView = ({route}) => {
 
   const {userId} = useContext(UserContext)
   const [name, setName] = useState(null)
+  const [measurementTime, setMeasurementTime] = useState()
 
   const getUserData = async () => {
     try {
@@ -240,6 +241,7 @@ export const HealingView = ({route}) => {
       const userData = docRef.data()
       console.log("userData :", userData)
 
+      setMeasurementTime(userData.Regular_settings?.measurementTime || 30)
       setName(userData.name)
 
     } catch (error) {

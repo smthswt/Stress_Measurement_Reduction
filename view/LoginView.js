@@ -20,6 +20,10 @@ import SQLite from 'react-native-sqlite-storage';
 import {UserContext} from "./module/UserProvider";
 import TrackPlayer from "react-native-track-player";
 import firestore from "@react-native-firebase/firestore";
+import moment from "moment";
+import {setConnectDevice, setConnectionStatus} from "../data/store";
+import {useDispatch} from "react-redux";
+import {useBLE} from "./module/BLEProvider";
 
 
 
@@ -78,6 +82,10 @@ export const LoginView = ({ navigation, route }) => {
         };
     }, []);
 
+    const [device, setDevice] = useState(null);
+    const dispatch = useDispatch();
+    const {isConnected, connectAndSubscribe} = useBLE();
+
 
     const handleLogin = async () => {
         const isValid = validate();
@@ -100,6 +108,49 @@ export const LoginView = ({ navigation, route }) => {
                         console.log("userDocId: ", userId)
                         // await TrackPlayer.setupPlayer()
                         console.log("setupPlayer 실행")
+
+                        const fetchData = async () => {
+                            const userRef = firestore().collection("Users").doc(userId);
+                            const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(async snapshot => {
+                                const devicesData = snapshot.docs.map(doc => doc.data());
+                                console.log("Device list:", devicesData);
+
+                                const deviceList = devicesData.map(device => ({
+                                    id: device.id,
+                                    name: device.name,
+                                    date: moment(device.registrationDate.toDate()),
+                                }));
+
+                                const subscribeDevice = deviceList.length > 0 ? deviceList[0] : null;
+                                setDevice(subscribeDevice);
+
+                                if (!subscribeDevice) return; // device가 null인 경우 처리
+
+                                console.log("Device Connect", subscribeDevice.id);
+
+                                const deviceRef = userRef.collection("Ble_Devices").where("id", "==", subscribeDevice.id);
+                                const deviceSnapshot = await deviceRef.get();
+
+                                try {
+                                    if (await connectAndSubscribe(subscribeDevice.id)) {
+                                        // updateDevice(device.id, true);
+                                        deviceSnapshot.forEach(async (doc) => {
+                                            await doc.ref.update({
+                                                isConnect: true,
+                                            });
+                                        });
+                                        dispatch(setConnectDevice(subscribeDevice.id));
+                                        dispatch(setConnectionStatus(true));
+                                    }
+                                } catch (e) {
+                                    console.log("catch error :", e);
+                                }
+                            });
+
+                            return unsubscribe; // Return unsubscribe function for cleanup
+                        };
+
+                        await fetchData()
                         navigation.navigate('TabScreens', { screen: 'Home', params: { name: userData.name } });
                     } else {
                         Alert.alert('오류', '비밀번호를 확인해주세요.');

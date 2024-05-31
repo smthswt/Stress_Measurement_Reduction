@@ -20,10 +20,10 @@ import moment from "moment/moment";
 export const BPM = () => {
   const {userId} = useContext(UserContext)
   let now = moment();
-  const [bpm, setbpm] = useState(0)
-  const [bpm2, setbpm2] = useState(0)
-  const [bpm3, setbpm3] = useState(0)
-  const [bpm4, setbpm4] = useState(0)
+  const [bpm, setBpm] = useState(0)
+  const [bpm2, setBpm2] = useState(0)
+  const [bpm3, setBpm3] = useState(0)
+  const [bpm4, setBpm4] = useState(0)
   const [createAt1, setCreateAt1] = useState("");
   const [createAt2, setCreateAt2] = useState("");
 
@@ -31,36 +31,65 @@ export const BPM = () => {
 
 // bpm 데이터 호출
   const getBPMData = async () => {
-      const userRef = firestore().collection("Users").doc(userId);
-      const reportRef = userRef.collection("Report");
+    const userRef = firestore().collection("Users").doc(userId);
+    const reportRef = userRef.collection("Report");
 
-      // 실시간 업데이트
-      reportRef
-          .orderBy('createAt', 'desc')
-          .limit(2)
-          .onSnapshot((querySnapshot) => {
-            if (!querySnapshot.empty) {
-              const recentReport = querySnapshot.docs[0].data();
-              const secondRecentReport = querySnapshot.docs[1].data();
-              console.log("Recent Report1:", recentReport["1st_Report"].avgHr);
-              console.log("Recent Report2:", recentReport["2nd_Report"].avgHr);
-              console.log("Recent Report3:", secondRecentReport["1st_Report"].avgHr);
-              console.log("Recent Report4:", secondRecentReport["2nd_Report"].avgHr);
-              setbpm(recentReport["1st_Report"].avgHr);
-              setbpm2(recentReport["2nd_Report"].avgHr);
-              setbpm3(secondRecentReport["1st_Report"].avgHr);
-              setbpm4(secondRecentReport["2nd_Report"].avgHr);
-              console.log("create at:", recentReport.createAt, secondRecentReport.createAt);
-              // moment 객체로 변환하여 상태로 설정
+    // 실시간 업데이트
+    reportRef
+        .orderBy('createAt', 'desc')
+        .limit(2)
+        .onSnapshot((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            const docs = querySnapshot.docs;
+            const recentReport = docs[0].data();
+
+            // 데이터가 있는 경우
+            if (recentReport["1st_Report"] && recentReport["2nd_Report"]) {
+              setBpm(recentReport["1st_Report"].avgHr || 0);
+              setBpm2(recentReport["2nd_Report"].avgHr || 0);
               setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
-              setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
             } else {
-              console.log("No reports found");
+              // 데이터가 없는 경우
+              setBpm(0);
+              setBpm2(0);
+              setCreateAt1("");
+              setBpm3(0);
+              setBpm4(0);
+              setCreateAt2("");
             }
-          }, (error) => {
-            console.error("Error fetching data from Firestore:", error);
-          });
-    };
+
+            if (docs.length > 1) {
+              const secondRecentReport = docs[1].data();
+              if (secondRecentReport["1st_Report"] && secondRecentReport["2nd_Report"]) {
+                setBpm3(secondRecentReport["1st_Report"].avgHr || 0);
+                setBpm4(secondRecentReport["2nd_Report"].avgHr || 0);
+                setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+              } else {
+                // 두 번째 데이터가 없는 경우
+                setBpm3(0);
+                setBpm4(0);
+                setCreateAt2("");
+              }
+            } else {
+              // 데이터가 하나만 있는 경우
+              setBpm3(0);
+              setBpm4(0);
+              setCreateAt2("");
+            }
+          } else {
+            // 데이터가 없는 경우
+            console.log("No reports found");
+            setBpm(0);
+            setBpm2(0);
+            setBpm3(0);
+            setBpm4(0);
+            setCreateAt1("");
+            setCreateAt2("");
+          }
+        }, (error) => {
+          console.error("Error fetching data from Firestore:", error);
+        });
+  };
 
   useEffect(() => {
     getBPMData();

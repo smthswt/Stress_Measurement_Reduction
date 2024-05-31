@@ -33,22 +33,51 @@ export const StressLevel = () => {
         .limit(2)
         .onSnapshot((querySnapshot) => {
           if (!querySnapshot.empty) {
-            const recentReport = querySnapshot.docs[0].data();
-            const secondRecentReport = querySnapshot.docs[1].data();
-            console.log("Recent Report1:", recentReport["1st_Report"].stressIndex);
-            console.log("Recent Report2:", recentReport["2nd_Report"].stressIndex);
-            console.log("Recent Report3:", secondRecentReport["1st_Report"].stressIndex);
-            console.log("Recent Report4:", secondRecentReport["2nd_Report"].stressIndex);
-            setStressIndex(recentReport["1st_Report"].stressIndex);
-            setStressIndex2(recentReport["2nd_Report"].stressIndex);
-            setStressIndex3(secondRecentReport["1st_Report"].stressIndex);
-            setStressIndex4(secondRecentReport["2nd_Report"].stressIndex);
-            console.log("create at:", recentReport.createAt, secondRecentReport.createAt);
-            // moment 객체로 변환하여 상태로 설정
-            setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
-            setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+            const docs = querySnapshot.docs;
+            const recentReport = docs[0].data();
+
+            // 데이터가 있는 경우
+            if (recentReport["1st_Report"] && recentReport["2nd_Report"]) {
+              setStressIndex(recentReport["1st_Report"].stressIndex || 0);
+              setStressIndex2(recentReport["2nd_Report"].stressIndex || 0);
+              setCreateAt1(moment(recentReport.createAt.toDate()).format("YYYY-MM-DD"));
+            } else {
+              // 데이터가 없는 경우
+              setStressIndex(0);
+              setStressIndex2(0);
+              setCreateAt1("");
+              setStressIndex3(0);
+              setStressIndex4(0);
+              setCreateAt2("");
+            }
+
+            if (docs.length > 1) {
+              const secondRecentReport = docs[1].data();
+              if (secondRecentReport["1st_Report"] && secondRecentReport["2nd_Report"]) {
+                setStressIndex3(secondRecentReport["1st_Report"].stressIndex || 0);
+                setStressIndex4(secondRecentReport["2nd_Report"].stressIndex || 0);
+                setCreateAt2(moment(secondRecentReport.createAt.toDate()).format("YYYY-MM-DD"));
+              } else {
+                // 두 번째 데이터가 없는 경우
+                setStressIndex3(0);
+                setStressIndex4(0);
+                setCreateAt2("");
+              }
+            } else {
+              // 데이터가 하나만 있는 경우
+              setStressIndex3(0);
+              setStressIndex4(0);
+              setCreateAt2("");
+            }
           } else {
+            // 데이터가 없는 경우
             console.log("No reports found");
+            setStressIndex(0);
+            setStressIndex2(0);
+            setStressIndex3(0);
+            setStressIndex4(0);
+            setCreateAt1("");
+            setCreateAt2("");
           }
         }, (error) => {
           console.error("Error fetching data from Firestore:", error);
