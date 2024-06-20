@@ -5,7 +5,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import deviceImagewithBlueBack from "./images/DevaiceImagewithBlue.png";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import DeviceListActionSheet from "./components/DeviceListActionSheet";
-import {updateDevice, deleteDevice, getDevices} from "../data/RealmDatabase";
 import {useDispatch, useSelector} from "react-redux";
 import {useBLE} from "./module/BLEProvider";
 import {fetchDevices, setConnectDevice, setConnectionStatus} from "../data/store";
@@ -16,190 +15,238 @@ import {UserContext} from "./module/UserProvider";
 
 const DeviceListView = ({navigation}) => {
     const {isOpen, onOpen, onClose} = useDisclose();
-    const [device, setDevice] = useState(null);
+    const [device, setDevice] = useState();
     const [deviceData, setDeviceData] = useState([])
-    const [deviceConnection, setDeviceConnection] = useState(true);
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     // Redux store에서 디바이스 정보 가져오기
     const connectDevice = useSelector(state => state.device.connectDevice);
+    const connectedStatus = useSelector(state => state.device.isConnected);
     const dispatch = useDispatch();
     const {connectAndSubscribe, disconnect} = useBLE();
-    console.log("connectDevice info :", connectDevice);
-    console.log("device info id :", device?.id)
+    console.log("----------------")
+    // console.log("connectDevice info :", connectDevice);
+    // console.log("device connection info id :", connectedStatus)
 
     const deviceImageBlueBack = require('./images/DevaiceImagewithBlue.png')
 
     const {userId} = useContext(UserContext)
 
 
+    const [isConnected, setIsConnected] = useState(false)
+    const [bleDocuments, setBleDocuments] = useState([]);
+    const [bleSnapshotSize, setBleSnapshotSize] = useState(0);
+
+    const fetchBleData = async () => {
+        try {
+            const userRef = firestore().collection("Users").doc(userId);
+            const bleRef = userRef.collection("Ble_Devices");
+
+            // Ble_Device 컬렉션에서 문서 가져오기
+            const bleSnapshot = await bleRef.get();
+            const bleDocs = [];
+
+            bleSnapshot.forEach(doc => {
+                const data = doc.data();
+                bleDocs.push({ id: data.id, isConnect: data.isConnect, date: data.registrationDate });
+            });
+
+            setBleDocuments(bleDocs);
+            setBleSnapshotSize(bleSnapshot.size);
+
+            console.log("bleSnapshot size:", bleSnapshot.size);
+            console.log("장치 목록:", bleDocs);
+
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+        } finally {
+            setDataLoaded(true); // 데이터 로딩 완료
+        }
+    };
+
     useEffect(() => {
+        fetchBleData();
+
         const userRef = firestore().collection("Users").doc(userId);
-        const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(snapshot => {
+        const bleRef = userRef.collection("Ble_Devices");
+        const unsubscribe = bleRef.onSnapshot(snapshot => {
             const devicesData = snapshot.docs.map(doc => doc.data());
-            console.log("Device list:", devicesData);
+            console.log("Device list (real-time):", devicesData);
             setDeviceData(devicesData);
-
-            // 데이터를 가져온 후에 device 변수 설정
-            const deviceList = devicesData.map(device => ({
-                id: device.id,
-                name: device.name,
-                date: moment(device.registrationDate.toDate()),
-            }));
-
-            const selectedDevice = deviceList.length > 0 ? deviceList[0] : null;
-            setDevice(selectedDevice);
         });
-        console.log("장치 목록:", device);
 
-        return () => {
-            unsubscribe(); // Cleanup 함수로 사용자 구독 해제
-        };
+        // Cleanup 함수로 사용자 구독 해제
+        return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+            // 디바이스가 있고, isConnect 상태가 true면, setIsConnected true 아니면 디폴트, else return null
+            if (bleDocuments.length > 0 && bleDocuments[0].isConnect === true) {
+                dispatch(setConnectionStatus(true));
+                setIsConnected(true);
+                console.log("BLE 등록 있음, isConnect 상태 true");
+            } else if (bleDocuments.length > 0 && bleDocuments[0].isConnect === false) {
+                dispatch(setConnectionStatus(false));
+                setIsConnected(false);
+                console.log("BLE 등록 있음, isConnect 상태 false");
+            } else if (bleDocuments.length === 0) {
+                console.log("BLE 없음.");
+            }
+    }, [dataLoaded]);
 
-
-    //
-    // console.log("deviceData :", device)
-
-
-    // const devices = getDevices();
 
 
     const handleDeviceConnect = async () => {
-        if (!device) return; // device가 null인 경우 처리
+        if (!bleDocuments) return; // device가 null인 경우 처리
 
-        console.log("Device Connect", device.id);
+        console.log("handleDeviceConnect", bleDocuments[0].id);
 
         const userRef = firestore().collection("Users").doc(userId);
-        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", device.id);
-        const deviceSnapshot  = await deviceRef.get()
+        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", bleDocuments[0].id)
+            .where("isConnect", "==", false);
+        const deviceSnapshot = await deviceRef.get();
 
         try {
-            if (await connectAndSubscribe(device.id)) {
-                // updateDevice(device.id, true);
+            if (await connectAndSubscribe(bleDocuments[0].id)) {
                 deviceSnapshot.forEach(async (doc) => {
                     await doc.ref.update({
                         isConnect: true,
                     });
                 });
-                dispatch(setConnectDevice(device.id));
+                console.log("Dispatching setConnectDevice and setConnectionStatus");
+                dispatch(setConnectDevice(bleDocuments[0].id));
                 dispatch(setConnectionStatus(true));
-                // setDeviceConnection(false)
+                setIsConnected(true);
+
+                console.log("connectDevice info:", connectDevice);
+                console.log("device connection info id:", connectedStatus);
+                console.log("연결 상태로 업데이트");
             }
         } catch (e) {
-            // TODO: 상용화에서는 에러 처리를 구현해야 함.
+            console.error("Error connecting to device:", e);
         }
     };
 
 
     const handleDeviceDisconnect = async () => {
-        if (!device) return; // device가 null인 경우 처리
+        if (!bleDocuments) return; // device가 null인 경우 처리
 
-        console.log("Device Disconnect", device.id);
+
+        const deviceId = bleDocuments[0].id;
+        console.log("handleDeviceDisconnect", deviceId);
 
         const userRef = firestore().collection("Users").doc(userId);
-        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", device.id);
-        const deviceSnapshot  = await deviceRef.get()
+        const deviceRef = userRef.collection("Ble_Devices").where("id", "==", deviceId).where("isConnect", "==", true);
+        const deviceSnapshot = await deviceRef.get();
 
-        if (deviceSnapshot.empty) {
-            console.log("해당 기기를 찾을 수 없습니다.");
-            return;
-        }
+        // Check if the device is the connected device
+        const isConnectedDevice = connectDevice === deviceId;
 
-        if (connectDevice === "") {
-            deviceSnapshot.forEach(async (doc) => {
-                await doc.ref.update({
-                    isConnect: false,
+        try {
+            console.log("Attempting to disconnect from device", deviceId);
+            const disconnectResult = await disconnect();
+            console.log("disconnect result:", disconnectResult);
+
+            if (disconnectResult) {
+                console.log("Device disconnected successfully");
+
+                deviceSnapshot.forEach(async (doc) => {
+                    await doc.ref.update({
+                        isConnect: false,
+                    });
                 });
-            });
-            dispatch(setConnectDevice(""));
-            dispatch(setConnectionStatus(false));
-            // setDeviceConnection(true)
-            return;
-        }
 
-        if (await disconnect()) {
-            deviceSnapshot.forEach(async (doc) => {
-                await doc.ref.update({
-                    isConnect: false,
-                });
-            });
+                dispatch(setConnectDevice(""));
+                dispatch(setConnectionStatus(false));
+                setIsConnected(false);
 
-            dispatch(setConnectDevice(""));
-            dispatch(setConnectionStatus(false));
+                console.log("connectDevice info after disconnect:", connectDevice);
+                console.log("device connection info id after disconnect:", connectedStatus);
+                console.log("연결 해제 상태");
+            } else {
+                console.log("Failed to disconnect from device");
+            }
+        } catch (error) {
+            console.error("Error disconnecting from device:", error);
         }
     };
 
-    // const handleDeviceDelete = async (dev) => {
-    //     //선택에 따른 기기만 삭제하게 세부 구현 필요
-    //     if (!device) return; // device가 null인 경우 처리
-    //
-    //     console.log("블루투스 기기 등록 삭제중...");
-    //     const userRef = firestore().collection("Users").doc(userId);
-    //     const devicesSnapshot = userRef.collection("Ble_Devices");
-    //     const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
-    //
-    //     querySnapshot.forEach(doc => {
-    //         doc.ref.delete();
-    //         console.log("선택된 기기 등록 삭제");
-    //
-    //         //redux 최신 상태로 업데이트
-    //         deleteDevice(device.id);
-    //         dispatch(fetchDevices());
-    //     });
-    // };
+    const handleDeviceDelete = async () => {
+        //추후에 선택에 따른 기기만 삭제하게 세부 구현 필요, 테스트할 기기가 없음
+        if (!bleDocuments) return; // device가 null인 경우 처리
+
+        console.log("블루투스 기기 등록 삭제중...");
+        const userRef = firestore().collection("Users").doc(userId);
+        const devicesSnapshot = userRef.collection("Ble_Devices");
+        const querySnapshot = await devicesSnapshot.where("id", "==", bleDocuments[0].id).get();
+
+        querySnapshot.forEach(doc => {
+            doc.ref.delete();
+            console.log("선택된 기기 등록 삭제");
+
+            //redux 최신 상태로 업데이트
+            dispatch(setConnectDevice(""));
+            dispatch(setConnectionStatus(false));
+            dispatch(fetchDevices(userId));
+
+            console.log("connectDevice info :", connectDevice);
+            console.log("device connection info id :", connectedStatus)
+        });
+    };
 
 
-    const handleOnOpen = (device) => {
+    const handleOnOpen = () => {
         console.log("actionsheet open")
         onOpen();
     };
 
 
     const ConnectedDevice = () => {
-        if (!device) return null; // device가 null인 경우 처리
+        if (!bleDocuments) return null; // device가 null인 경우 처리
 
-        console.log("등록된 블루투스 기기 목록 상태");
-        return connectDevice === device.id ? (
+        console.log("연결 상태로 블루투스 기기 목록 상태");
+        // return connectDevice === bleDocuments[0].id ? (
+        return (
             <Pressable onPress={handleDeviceDisconnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
                        borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
                 <Text color={"#2785F4"} fontSize={12}>연결 해제</Text>
-                <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+                {/*<DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>*/}
             </Pressable>
-        ) : (
-            // <VStack space={2}>
-            //     <Paragraph>연결되지 않은 디바이스</Paragraph>
-            //     <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
-            //         <Button flex={1} disabled backgroundColor={"gray.100"}></Button>
-            //         <Button onPress={handleDeviceDelete}>삭제하기</Button>
-            //     </HStack>
-            // </VStack>
-            <></>
+        // ) : (
+        //     // <VStack space={2}>
+        //     //     <Paragraph>연결되지 않은 디바이스</Paragraph>
+        //     //     <HStack space={1} justifyContent={"space-around"} fullWidth={true}>
+        //     //         <Button flex={1} disabled backgroundColor={"gray.100"}></Button>
+        //     //         <Button onPress={handleDeviceDelete}>삭제하기</Button>
+        //     //     </HStack>
+        //     // </VStack>
+        //     null
+        // );
         );
     };
 
     const DisconnectedDevice = () => {
-        if (!device) return null; // device가 null인 경우 처리
+        if (!bleDocuments) return null; // device가 null인 경우 처리
 
-        console.log("등록된 블루투스 기기 연결해제 상태");
+        console.log("블루투스 기기 연결해제 상태");
         return (
             <HStack space={2}>
                 <Pressable onPress={handleDeviceConnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
                            borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
                     <Text color={"#2785F4"} fontSize={12}>연결 하기</Text>
-                    <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+                    {/*<DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>*/}
                 </Pressable>
                 <Pressable onPress={handleOnOpen} borderWidth={1} alignItems={"center"} justifyContent={"center"}
                            borderRadius={3} width={81} borderColor={"red.700"} backgroundColor={"red.700"} py={1.5}>
                     <Text color={"white"} fontSize={12}>삭제하기</Text>
-                    <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+                    <DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose} handleDeviceDelete={handleDeviceDelete}/>
                 </Pressable>
             </HStack>
         );
     };
 
     // let momentDate = moment(device.createdAt);
-    let momentDate = device ? moment(device?.date) : moment();
+    let momentDate = device ? moment(bleDocuments[0].date) : moment();
 
 
     return(
@@ -232,7 +279,7 @@ const DeviceListView = ({navigation}) => {
                             </HStack>
                         </VStack>
 
-                        {connectDevice === "" ? <DisconnectedDevice/> : <ConnectedDevice/>}
+                        {isConnected ?  <ConnectedDevice/> : <DisconnectedDevice/>}
                         
                     </VStack>
                     <Box>

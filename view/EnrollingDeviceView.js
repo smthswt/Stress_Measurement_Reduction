@@ -7,17 +7,15 @@ import {Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming} from "
 // import {BLEContext} from "./module/BLEProvider";
 import {useBLE} from "./module/BLEProvider";
 import {stat} from "react-native-fs";
+import {useDispatch, useSelector} from "react-redux";
 
 
 const EnrollingDeviceView = ({navigation}) => {
-    const RegistryState = Object.freeze({
-        Init: "Init",
-        Finding: "Finding",
-        Found: "Found",
-    });
 
-    const [devices, setDevices] = useState(null);
-    const [state, setState] = useState(RegistryState.Init);
+
+    const connectDevice = useSelector(state => state.device.connectDevice);
+    const connectedStatus = useSelector(state => state.device.isConnected);
+    console.log("enrolling status :", connectedStatus, connectDevice)
 
 
     const deviceImage = require("./images/RenstDevice.png");
@@ -33,11 +31,10 @@ const EnrollingDeviceView = ({navigation}) => {
             console.log("기기 검색 버튼 클릭")
             //scanALlDevice는 BLEProvider.js에 있고 조건은 Device_ID="Renst" = devices.name하고 일치하는지 확인 (즉 해당 기기만 검색됌.)
             let devices = await scanAllDevices();
-            setDevices(devices);
+            console.log("검색한 기기!!! ", devices)
 
             // 검색이 완료되었을 때만 "Device Found" 로그를 출력하고 이동
             // setState(RegistryState.Found);
-            console.log("state:", state)
             console.log("device:", devices)
             console.log("Device Found")
 

@@ -21,7 +21,7 @@ import {useSharedValue, withTiming} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import deviceImage from './images/Renst_ISO.png';
 import healingbackground from "./images/healingbackground.png";
-import {Alert, ImageBackground} from "react-native";
+import {Alert, BackHandler, ImageBackground} from "react-native";
 import {UserContext} from "./module/UserProvider";
 import SQLite from "react-native-sqlite-storage";
 import firestore from "@react-native-firebase/firestore";
@@ -139,6 +139,7 @@ export const ManualView = ({route}) => {
     console.log(message);
     startAnimation();
     await musicPlay();
+    //manual 모드에서 진동 음원은 1로 고정해둠.
     await sendMotorStartPacket(1, ManualVibrate);
 
     // sendData(
@@ -258,6 +259,26 @@ export const ManualView = ({route}) => {
     getUserData()
   }, []);
 
+  // BackHandler 설정
+  useEffect(() => {
+    const backAction = async () => {
+      if (healingStart) {
+        await TrackPlayer.pause();
+        await sendHealingStop();
+        setIsCounting(false)
+        const timer = setTimeout(() => {
+          navigation.goBack()
+          clearTimeout(timer);
+          // setIsRemeasureOpen(true);
+        }, 500);
+      }
+      return false; // 기본 뒤로가기 동작은 계속 작동하도록 false 반환
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [healingStart]);
 
 
 
@@ -273,6 +294,7 @@ export const ManualView = ({route}) => {
           <VStack bg={'white'} shadow={2} height={"80%"}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
+              seconds={totalTime}
             />
             <HStack
               justifyContent={'space-between'}

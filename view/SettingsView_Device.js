@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import {TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import {useSelector} from "react-redux";
 
 
 /**
@@ -14,6 +15,10 @@ import AntDesign from "react-native-vector-icons/AntDesign";
  */
 
 export const SettingsView_Device = ({ navigation }) => {
+    const connectDevice = useSelector(state => state.device.connectDevice);
+    const connectedStatus = useSelector(state => state.device.isConnected);
+    console.log("setting connectDevice info id:", connectDevice);
+    console.log("setting device connection info :", connectedStatus)
 
     const deviceImage = require('./images/deviceImage.png')
 

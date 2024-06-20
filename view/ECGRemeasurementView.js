@@ -486,7 +486,7 @@ export const ECGRemeasurementView = ({route}) => {
         <Center p={5}>
           <Heading color={'#FFFFFF'}>힐링 후 심전도 측정 중입니다...</Heading>
         </Center>
-        <CircleProgressAnimation />
+        <CircleProgressAnimation seconds={totalTime} />
         <HStack
           space={1}
           bg={'#FFFFFF'}

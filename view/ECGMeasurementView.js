@@ -38,7 +38,6 @@ import DeviceFirstImage from "./images/deviceConnectFirst.png";
  * @returns {JSX.Element} The Electrocardiogram Measurement view component.
  */
 export const ECGMeasurementView = ({route}) => {
-  const {measurementTime} = route.params;
 
   /**
    * Retrieves the navigation object used for navigating within the application.
@@ -62,7 +61,7 @@ export const ECGMeasurementView = ({route}) => {
    * @type {number}
    */
       //측정 분석 시간 50초, 테스트할땐 40초
-  const totalTime = measurementTime ? measurementTime : 60 ;
+  // const totalTime = measurementTime ? measurementTime : 60 ;
 
   /**
    * Reference to a message element used in a React component.
@@ -89,7 +88,7 @@ export const ECGMeasurementView = ({route}) => {
    *
    * @typedef {number} seconds
    */
-  const [seconds, setSeconds] = useState(totalTime);
+  // const [seconds, setSeconds] = useState(totalTime);
 
   /**
    * Determines if the execution of a process is currently paused.
@@ -151,6 +150,9 @@ export const ECGMeasurementView = ({route}) => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState(null)
+  const [measurementTime, setMeasurementTime] = useState()
+  const [totalTime, setTotalTime] = useState();
+  const [seconds, setSeconds] = useState();
   // const [stimulationTime, setStimulationTime] = useState()
   // const [vibrate, setVibrate] = useState()
 
@@ -161,19 +163,16 @@ export const ECGMeasurementView = ({route}) => {
       const userData = docRef.data()
       console.log("userData :", userData)
 
-      // setMeasurementTime(userData.Regular_settings?.measurementTime || 1)
-      // setStimulationTime(userData.Regular_settings?.stimulationTime || 30)
-      // setVibrate(userData.Regular_settings?.stimulationLvl || 15)
+      const measurementTime = userData.Regular_settings?.measurementTime || 60;
+      setMeasurementTime(measurementTime);
+      setTotalTime(measurementTime);
+      setSeconds(measurementTime);
       setName(userData.name)
 
     } catch (error) {
       console.error("Error fetching data from Firestore:", error)
     }
   }
-
-  useEffect(() => {
-    getUserData()
-  }, []);
 
 
   const endAnalysis = async () => {
@@ -227,21 +226,40 @@ export const ECGMeasurementView = ({route}) => {
   /**
    * Event called when the page is activated
    */
-  useEffect(() => {
-    startAnalysis();
-
-    interval.current = setInterval(() => {
-      setSeconds(prevState => prevState - 1);
-    }, 1000);
-
-    return () => clearInterval(interval.current);
-  }, []);
-
-  /**
-   * Event called when seconds changes
-   */
 
   const [showModal, setShowModal] = useState(false);
+
+
+  useEffect(() => {
+    const fetchDataAndStartAnalysis = async () => {
+      try {
+        await getUserData();
+        console.log("measurement Time:", measurementTime);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchDataAndStartAnalysis();
+  }, []); // Run only once on component mount
+
+  useEffect(() => {
+    if (measurementTime !== undefined) {
+
+      const delayStart = setTimeout(() => {
+        startAnalysis();
+
+        interval.current = setInterval(() => {
+          setSeconds(prevState => prevState - 1);
+        }, 1000);
+      }, 500); // 0.5초 후에 실행
+
+      return () => {
+        clearTimeout(delayStart);
+        clearInterval(interval.current);
+      };
+    }
+  }, [measurementTime]); // Run when measurementTime is updated
 
   useEffect(() => {
     console.log('Time: ' + seconds);
@@ -250,23 +268,18 @@ export const ECGMeasurementView = ({route}) => {
       setShowModal(true);
     }
 
-    // seconds가 0이 되면 clearInterval 호출
     if (seconds <= 0) {
       clearInterval(interval.current);
-      // if (!hasEndedAnalysis.current) { // 이전에 종료된 적이 없을 때만 실행
-      //   hasEndedAnalysis.current = true; // 종료 처리를 했음을 표시
       endAnalysis().then(() => {
+        if (isEmotionSelected) {
+          setIsOpens(true);
+        } else {
+          console.log("기분 이모티콘을 선택해주세요.");
+        }
       }).catch(error => {
         console.error("endAnalysis 오류:", error);
       });
-
-      if (isEmotionSelected) { // 감정이 선택되었는지 확인
-        setIsOpens(true);
-      } else {
-        console.log("기분 이모티콘을 선택해주세요.")
-      }
     }
-
   }, [seconds]);
 
 
@@ -450,44 +463,6 @@ export const ECGMeasurementView = ({route}) => {
 
   const background = require('./images/measurebackground.png')
 
-  const {isOpen, onOpen, onClose} = useDisclose();
-
-  // actionsheet 코드 수정
-  // const ActionsheetComponent = () => {
-  //   const { isOpen , onOpen, onClose } = useDisclose();
-  //
-  //   return (
-  //       <Actionsheet isOpen={isOpen} onClose={onClose} hideDragIndicator>
-  //         <Actionsheet.Content paddingBottom={5} paddingTop={4} justifyContent={"center"} alignItems={"center"}>
-  //           <>
-  //             <Box w="100%" h={60} marginTop={0.5} marginBottom={5} justifyContent="center" alignItems={"center"}>
-  //               <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
-  //                 현재 측정을
-  //               </Text>
-  //               <Text fontSize={20} color="black" fontWeight={"bold"} lineHeight={32}>
-  //                 중지하시겠어요?
-  //               </Text>
-  //             </Box>
-  //
-  //             <Text fontSize={14} color="#EB5147">
-  //               측정 중인 정보는 기록되지 않아요.
-  //             </Text>
-  //
-  //             <Center width={"100%"} mb={2} mt={4}>
-  //               <HStack width={"92%"} space={4} justifyContent={"center"}>
-  //                 <Button bg={"white"} borderColor={"#2785F4"} onPress={handleAnalysisStopCancel} width={"45%"} variant={"outline"}>
-  //                   <Text fontWeight={600} fontSize={18} color={"#2785F4"}>취소</Text>
-  //                 </Button>
-  //                 <Button bg={"#2785F4"} onPress={handleAnalysisStop} width={"45%"}>
-  //                   <Text fontWeight={600} fontSize={18} color={"white"}>중지하기</Text>
-  //                 </Button>
-  //               </HStack>
-  //             </Center>
-  //           </>
-  //         </Actionsheet.Content>
-  //       </Actionsheet>
-  //   );
-  // };
 
   return (
       <>
@@ -498,7 +473,9 @@ export const ECGMeasurementView = ({route}) => {
               justifyContent={'space-between'}
           >
             <Center p={5}><Heading color={'#FFFFFF'}>심전도 측정 중입니다...</Heading></Center>
-            <CircleProgressAnimation/>
+
+            <CircleProgressAnimation seconds={totalTime}/>
+
             <HStack
                 space={1}
                 bg={'#FFFFFF'}

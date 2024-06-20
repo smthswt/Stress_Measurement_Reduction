@@ -1,13 +1,8 @@
-import {Dimensions, View} from 'react-native';
-import {Box, Text, VStack} from 'native-base';
-import React, {useEffect, useRef} from 'react';
+import {Dimensions} from 'react-native';
+import {Box, VStack} from 'native-base';
+import React, {useEffect, useState} from 'react';
 import Svg, {Circle} from 'react-native-svg';
-import Animated, {
-  Easing,
-  useAnimatedProps,
-  useSharedValue, withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, {Easing, useAnimatedProps, useSharedValue, withRepeat, withTiming,} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 /**
@@ -30,14 +25,30 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const AnimatedEllipse = Animated.createAnimatedComponent(Circle);
 
-export const CircleProgressAnimation = ({navigation}) => {
+export const CircleProgressAnimation = ({navigation, seconds}) => {
+  const [isAnimationStarted, setIsAnimationStarted] = useState(false);
   const progress = useSharedValue(0);
   const scaleValue =  useSharedValue(0.8)
 
+  const duration = seconds * 1000;
+
   useEffect(() => {
-    progress.value = withTiming(1, {duration: 50000});
-    scaleValue.value = withRepeat(withTiming(2, {duration:1000, easing:Easing.linear}), -1)
-  }, []);
+    if (!isNaN(duration) && duration > 0) {
+      const timer = setTimeout(() => {
+        setIsAnimationStarted(true);
+      }, 200); // 200밀리초 지연
+      return () => clearTimeout(timer);
+    }
+  }, [duration]);
+
+  useEffect(() => {
+    if (isAnimationStarted) {
+      console.log("duration start", duration);
+      // 애니메이션 duration 밀리초
+      progress.value = withTiming(1, {duration: duration});
+      scaleValue.value = withRepeat(withTiming(2, {duration: 1300, easing: Easing.linear}), -1);
+    }
+  }, [isAnimationStarted]);
 
   const animatedProps = useAnimatedProps(() => {
     return {

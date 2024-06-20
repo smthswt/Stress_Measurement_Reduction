@@ -80,6 +80,7 @@ export const BLEProvider = ({children}) => {
                 }
 
                 if (device && device.name) {
+                    console.log("bleProvider Scanning :", devices, device.id, device.name)
                     // 발견된 장치를 배열에 추가. 중복 방지 로직 필요할 수 있음
                     if (device.name === DEVICE_ID && devices.findIndex(d => d.id === device.id) === -1) {
                         devices.push(device);

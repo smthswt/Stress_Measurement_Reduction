@@ -323,11 +323,11 @@ export const SettingsView_Manual = ({ navigation }) => {
                     setStimulation(nextValue);
                 }}>
                     {/*//임의로 수정한 선택지*/}
-                    <Radio value={15} my={1} size={"sm"}>15 Hz</Radio>
-                    <Radio value={20} my={1} size={"sm"}>20 Hz</Radio>
-                    <Radio value={25} my={1} size={"sm"}>25 Hz</Radio>
-                    <Radio value={30} my={1} size={"sm"}>30 Hz</Radio>
-                    <Radio value={35} my={1} size={"sm"}>35 Hz</Radio>
+                    <Radio value={15} my={1} size={"sm"}>15 Intensity</Radio>
+                    <Radio value={20} my={1} size={"sm"}>20 Intensity</Radio>
+                    <Radio value={25} my={1} size={"sm"}>25 Intensity</Radio>
+                    <Radio value={30} my={1} size={"sm"}>30 Intensity</Radio>
+                    <Radio value={35} my={1} size={"sm"}>35 Intensity</Radio>
 
                     {/*//기존 선택지*/}
                     {/*<Radio value="move_one" my={1} size={"sm"}>60 Hz</Radio>*/}

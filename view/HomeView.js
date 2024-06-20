@@ -49,7 +49,7 @@ const AnalysisDataNotFound = () => (
  */
 
 
-export const HomeView = ({navigation, route}) => {
+export const HomeView = ({navigation}) => {
     /**
      * Represents a boolean variable indicating the connection status.
      *
@@ -72,72 +72,6 @@ export const HomeView = ({navigation, route}) => {
 
 
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const userRef = firestore().collection("Users").doc(userId);
-    //         const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(async snapshot => {
-    //             const devicesData = snapshot.docs.map(doc => doc.data());
-    //             console.log("Device list:", devicesData);
-    //
-    //             const deviceList = devicesData.map(device => ({
-    //                 id: device.id,
-    //                 name: device.name,
-    //                 date: moment(device.registrationDate.toDate()),
-    //             }));
-    //
-    //             const subscribeDevice = deviceList.length > 0 ? deviceList[0] : null;
-    //             setDevice(subscribeDevice);
-    //
-    //             if (!subscribeDevice) return; // device가 null인 경우 처리
-    //
-    //             console.log("Device Connect", subscribeDevice.id);
-    //
-    //             const deviceRef = userRef.collection("Ble_Devices").where("id", "==", subscribeDevice.id);
-    //             const deviceSnapshot = await deviceRef.get();
-    //
-    //             try {
-    //                 if (await connectAndSubscribe(subscribeDevice.id)) {
-    //                     // updateDevice(device.id, true);
-    //                     deviceSnapshot.forEach(async (doc) => {
-    //                         await doc.ref.update({
-    //                             isConnect: true,
-    //                         });
-    //                     });
-    //                     dispatch(setConnectDevice(subscribeDevice.id));
-    //                     dispatch(setConnectionStatus(true));
-    //                 }
-    //             } catch (e) {
-    //                 console.log("catch error :", e);
-    //             }
-    //         });
-    //
-    //         return unsubscribe; // Return unsubscribe function for cleanup
-    //     };
-    //
-    //     fetchData();
-    //     console.log("장치 목록:", device);
-    //     console.log("isConnect 1: ", isConnected);
-    //     console.log("connect status 1: ", connectStatus);
-    //
-    //     return () => {
-    //         if (unsubscribe) unsubscribe(); // Cleanup function to unsubscribe
-    //     };
-    // }, []);
-
-
-
-
-    const handleAnalysisStart = () => {
-
-        if (!connectStatus) {
-            console.log("There are no devices connected.");
-            alert("연결된 기기가 없습니다.")
-            return false;
-        } else {
-        navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: measurementTime }});
-        }
-    };
-
     /**
      * Represents a component to display a message when the device is not found.
      * @function DeviceNotFound
@@ -155,7 +89,14 @@ export const HomeView = ({navigation, route}) => {
      * @return {Component} A component with a button for analysis start.
      */
     const DeviceConnected = () => (
-        <Button onPress={handleAnalysisStart} pl={5} pr={5} bg={'white'}>
+        <Button
+            onPress={() => {
+                setTimeout(handleAnalysisStart, 500); // 500밀리초 지연 후 handleAnalysisStart 호출
+            }}
+            pl={5}
+            pr={5}
+            bg={'white'}
+        >
             <Text fontWeight={'bold'} color={'#2785F4'}>측정하기</Text>
         </Button>
     );
@@ -261,11 +202,25 @@ export const HomeView = ({navigation, route}) => {
     }, []);
 
     const {userId} = useContext(UserContext)
-    console.log("userId:", userId) //전역관리
-    const connectStatus = useSelector(state => state.device.isConnected);
-    console.log("isConnect :", connectStatus)
+    console.log("userId--:", userId) //전역관리
     const [name, setName] = useState(null)
     const [measurementTime, setMeasurementTime] = useState()
+    const [bleConnected, setBleConnected] = useState();
+    // const connectStatus = useSelector(state => state.device.isConnected);
+    // console.log("connectStatus :", connectStatus)
+
+    const handleAnalysisStart = () => {
+        console.log("bleConnected 상태 확인d:", bleConnected); // 추가 로그
+
+        if (!bleConnected) {
+            console.log("There are no devices connected.");
+            alert("연결된 기기가 없습니다.")
+            return false;
+        } else {
+            navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: "measurementTime" }
+            });
+        }
+    };
 
     const getUserData = async () => {
         try {
@@ -273,10 +228,39 @@ export const HomeView = ({navigation, route}) => {
             const docRef = await userRef.doc(userId).get();
             const userData = docRef.data()
             console.log("userData :", userData)
-
-            setMeasurementTime(userData.Regular_settings?.measurementTime || 60)
+            
             setName(userData.name)
-            console.log("measurement Time:", measurementTime)
+
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error)
+        }
+    }
+
+    const getBleData = () => {
+        try {
+            const userRef = firestore().collection("Users");
+            const docRef = userRef.doc(userId);
+
+            const bleRef = docRef.collection("Ble_Devices");
+
+            // Firestore listener for real-time updates
+            const unsubscribe = bleRef.onSnapshot((bleSnapshot) => {
+                const bleDocuments = [];
+
+                bleSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    bleDocuments.push({isConnect: data.isConnect});
+                });
+
+                if (bleDocuments.length > 0) {
+                    setBleConnected(bleDocuments[0].isConnect);
+                    console.log("bleConnected 상태:", bleDocuments[0].isConnect);
+                } else {
+                    console.log("ble 없음");
+                }
+            });
+
+            return () => unsubscribe(); // Cleanup subscription on unmount
 
         } catch (error) {
             console.error("Error fetching data from Firestore:", error)
@@ -287,6 +271,12 @@ export const HomeView = ({navigation, route}) => {
     useEffect(() => {
         getUserData()
     }, []);
+
+    useEffect(() => {
+        const unsubscribe = getBleData();
+        return () => unsubscribe(); // Cleanup subscription on unmount
+    }, []);
+
 
     const ECGwidth = useRef(new Animated.Value(0)).current;
 

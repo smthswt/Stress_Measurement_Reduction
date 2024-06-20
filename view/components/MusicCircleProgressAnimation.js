@@ -29,15 +29,17 @@ const strokeColor = '#2785F4';
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedEllipse = Animated.createAnimatedComponent(Circle);
 
-export const MusicCircleProgressAnimation = ({startAnimationRef}) => {
+export const MusicCircleProgressAnimation = ({startAnimationRef, seconds}) => {
   const progress = useSharedValue(0);
   const animationStarted = useRef(false);
   const scaleValue =  useSharedValue(0.8)
 
+  const duration = (seconds * 1000) + 5000
+
   const startAnimation = () => {
     if (!animationStarted.current) {
-      progress.value = withTiming(1, { duration: 34000 });
-      scaleValue.value = withRepeat(withTiming(2, {duration:1000, easing:Easing.linear}), -1)
+      progress.value = withTiming(1, { duration: duration });
+      scaleValue.value = withRepeat(withTiming(2, {duration:1300, easing:Easing.linear}), -1)
       animationStarted.current = true;
     }
   };

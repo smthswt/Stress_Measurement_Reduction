@@ -33,8 +33,8 @@ import {UserContext} from "./module/UserProvider";
  */
 export const AnalysisResultView = ({route}) => {
   const {beforeEmotion, reportDocId} = route.params;
-  console.log("beforeEmotion :", beforeEmotion)
-  console.log("reportDocId :", reportDocId)
+  // console.log("beforeEmotion :", beforeEmotion)
+  // console.log("reportDocId :", reportDocId)
 
   // const test = useRoute();
   // console.log("bb :", test)
@@ -113,6 +113,11 @@ export const AnalysisResultView = ({route}) => {
 
   useEffect(() => {
     getUserData()
+    console.log("beforeEmotion :", beforeEmotion)
+    console.log("reportDocId :", reportDocId)
+    console.log("sdnn value: ", sdnnValue)
+    console.log("스트레스 레벨 :", getStressIndex())
+
   }, []);
 
 
@@ -143,8 +148,6 @@ export const AnalysisResultView = ({route}) => {
   const stressLevel = getStressIndex()
   const number = getSDNN()
   const sdnnValue = Math.trunc(number)
-  console.log("sdnn value: ", sdnnValue)
-  console.log("스트레스 레벨 :", getStressIndex())
 
   // sdnn 값에 따라 progressColor 설정
   const getProgressColor = (sdnn) => {

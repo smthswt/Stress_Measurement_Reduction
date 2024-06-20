@@ -6,7 +6,7 @@ import {
     Platform,
     SafeAreaView,
 } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NativeBaseProvider, VStack} from 'native-base';
@@ -286,6 +286,26 @@ const App = () => {
         SplashScreen.hide()
     }, []);
 
+    // const [initialRoute, setInitialRoute] = useState(null);
+    //
+    // const checkAutoLogin = async () => {
+    //     try {
+    //         const savedUsername = await AsyncStorage.getItem('autoUsername');
+    //         const savedPassword = await AsyncStorage.getItem('autoPassword');
+    //         if (savedUsername && savedPassword) {
+    //             setInitialRoute('TabScreens');
+    //         } else {
+    //             setInitialRoute('LoginScreens');
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to load saved login info: ', error);
+    //         setInitialRoute('LoginScreens');
+    //     }
+    // };
+    //
+    // useEffect(() => {
+    //     checkAutoLogin();
+    // }, []);
 
 
     const LoginScreens = () => {

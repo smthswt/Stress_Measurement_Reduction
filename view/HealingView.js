@@ -19,7 +19,7 @@ import {MusicCircleProgressAnimation} from './components/MusicCircleProgressAnim
 import {useSharedValue, withTiming} from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import deviceImage from './images/Renst_ISO.png';
-import {Alert, ImageBackground} from "react-native";
+import {Alert, BackHandler, ImageBackground} from "react-native";
 import SQLite from "react-native-sqlite-storage";
 import {UserContext} from "./module/UserProvider";
 import firestore from "@react-native-firebase/firestore";
@@ -233,6 +233,7 @@ export const HealingView = ({route}) => {
   const {userId} = useContext(UserContext)
   const [name, setName] = useState(null)
   const [measurementTime, setMeasurementTime] = useState()
+  // const [healingTime, setHealingTime] = useState()
 
   const getUserData = async () => {
     try {
@@ -241,7 +242,8 @@ export const HealingView = ({route}) => {
       const userData = docRef.data()
       console.log("userData :", userData)
 
-      setMeasurementTime(userData.Regular_settings?.measurementTime || 30)
+      setMeasurementTime(userData.Regular_settings?.measurementTime || 60)
+      // setHealingTime(userData.Regular_settings?.stimulationTime || 30)
       setName(userData.name)
 
     } catch (error) {
@@ -253,6 +255,27 @@ export const HealingView = ({route}) => {
   useEffect(() => {
     getUserData()
   }, []);
+
+  // BackHandler 설정
+  useEffect(() => {
+    const backAction = async () => {
+      if (healingStart) {
+        await TrackPlayer.pause();
+        await sendHealingStop();
+        setIsCounting(false)
+        const timer = setTimeout(() => {
+          navigation.goBack()
+          clearTimeout(timer);
+          // setIsRemeasureOpen(true);
+        }, 500);
+      }
+      return false; // 기본 뒤로가기 동작은 계속 작동하도록 false 반환
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [healingStart]);
 
 
   return (
@@ -267,6 +290,7 @@ export const HealingView = ({route}) => {
           <VStack bg={'white'} shadow={2} height={'80%'}>
             <MusicCircleProgressAnimation
               startAnimationRef={startAnimationRef}
+              seconds={totalTime}
             />
             <HStack
               justifyContent={'space-between'}

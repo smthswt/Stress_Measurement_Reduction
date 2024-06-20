@@ -5,12 +5,11 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {useBLE} from "./module/BLEProvider";
 import {useDispatch} from "react-redux";
-import {addDevice, getDeviceById} from "../data/RealmDatabase";
 import {setConnectDevice, setConnectionStatus} from "../data/store";
 // import moment from "moment/moment";
 import moment from "moment";
 import {Paragraph} from "react-native-paper";
-import {DeviceItem} from "./components/DeviceItem";
+// import {DeviceItem} from "./components/DeviceItem";
 import DeviceListView from "./DeviceListView";
 import firestore from "@react-native-firebase/firestore";
 import {UserContext} from "./module/UserProvider";
@@ -144,11 +143,11 @@ const CompleteSearchingDevice = ({navigation, route}) => {
 
 
     //이건 빼자
-    const  handleSearchAgain = () => {
-        console.log("다시 검색하기 = 새로고침")
-        onRefresh();
-
-    };
+    // const  handleSearchAgain = () => {
+    //     console.log("다시 검색하기 = 새로고침")
+    //     onRefresh();
+    //
+    // };
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -239,24 +238,24 @@ const CompleteSearchingDevice = ({navigation, route}) => {
 
                 <Center flex={0.33} bg={"white"}>
                     <VStack flex={1} width={"92%"} justifyContent={"center"} alignItems={"center"} pb={3}>
-                        <View flex={1} justifyContent={"center"} mb={1}>
+                        <View flex={1} justifyContent={"flex-end"} mb={4}>
                             {/*<Text>{data.length}개의 디바이스가 확인되었습니다.</Text>*/}
-                            <Paragraph>{devices != null ? devices.length : 0}개의 디바이스가 확인되었습니다.</Paragraph>
+                            <Text>{devices != null ? devices.length : 0}개의 디바이스가 확인되었습니다.</Text>
                         </View>
 
-                        <View flex={1} width={"100%"} justifyContent={"flex-end"}>
-                            <Button width={"100%"} bg={"#2785F4"} size={"lg"}
+                        {/*<View flex={1} width={"100%"} justifyContent={"flex-end"} mb={2}>*/}
+                            <Button width={"100%"} bg={"#2785F4"} size={"lg"} mb={2}
                                     onPress={handleEnroll}>
                                 <Text fontWeight={700} color={"white"} fontSize={18}>등록하기</Text>
                             </Button>
-                        </View>
+                        {/*</View>*/}
 
-                        <Center flex={1} mt={2} width={"100%"}>
-                            <Button width={"100%"} my={1} variant={"outline"} borderColor={"#2785F4"}
-                                    size={"lg"} onPress={handleSearchAgain}>
-                                <Text fontWeight={700} color={"#2785F4"} fontSize={18}>다시 검색하기</Text>
-                            </Button>
-                        </Center>
+                        {/*<Center flex={1} mt={2} width={"100%"}>*/}
+                        {/*    <Button width={"100%"} my={1} variant={"outline"} borderColor={"#2785F4"}*/}
+                        {/*            size={"lg"} onPress={handleSearchAgain}>*/}
+                        {/*        <Text fontWeight={700} color={"#2785F4"} fontSize={18}>다시 검색하기</Text>*/}
+                        {/*    </Button>*/}
+                        {/*</Center>*/}
 
                     </VStack>
                 </Center>

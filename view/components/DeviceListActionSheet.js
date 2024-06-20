@@ -5,12 +5,14 @@ import {fetchDevices} from "../../data/store";
 import {UserContext} from "../module/UserProvider";
 import {useDispatch, useSelector} from "react-redux";
 import {useBLE} from "../module/BLEProvider";
-import {deleteDevice} from "../../data/RealmDatabase";
 
 
-const DeviceListActionSheet  = ({onOpen, onClose, isOpen,}) => {
+const DeviceListActionSheet  = ({onOpen, onClose, isOpen, handleDeviceDelete}) => {
     const [device, setDevice] = useState(null);
     const [deviceData, setDeviceData] = useState([])
+    // Redux store에서 디바이스 정보 가져오기
+    const connectDevice = useSelector(state => state.device.connectDevice);
+    const connectedStatus = useSelector(state => state.device.isConnected);
     const {userId} = useContext(UserContext)
 
     // const handleCancelConnection = () => {
@@ -23,53 +25,51 @@ const DeviceListActionSheet  = ({onOpen, onClose, isOpen,}) => {
         onClose();
     };
 
-    useEffect(() => {
-        const userRef = firestore().collection("Users").doc(userId);
-        const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(snapshot => {
-            const devicesData = snapshot.docs.map(doc => doc.data());
-            console.log("devicelist :", devicesData);
-            setDeviceData(devicesData);
+    // useEffect(() => {
+    //     const userRef = firestore().collection("Users").doc(userId);
+    //     const unsubscribe = userRef.collection("Ble_Devices").onSnapshot(snapshot => {
+    //         const devicesData = snapshot.docs.map(doc => doc.data());
+    //         console.log("devicelist :", devicesData);
+    //         setDeviceData(devicesData);
+    //
+    //         // 데이터를 가져온 후에 device 변수 설정
+    //         const deviceList = devicesData.map(device => ({
+    //             id: device.id,
+    //             name: device.name
+    //         }));
+    //
+    //         const selectedDevice = deviceList.length > 0 ? deviceList[0] : null;
+    //         setDevice(selectedDevice);
+    //     });
+    //
+    //     return () => {
+    //         unsubscribe(); // Cleanup 함수로 사용자 구독 해제
+    //     };
+    // }, []);
 
-            // 데이터를 가져온 후에 device 변수 설정
-            const deviceList = devicesData.map(device => ({
-                id: device.id,
-                name: device.name
-            }));
 
-            const selectedDevice = deviceList.length > 0 ? deviceList[0] : null;
-            setDevice(selectedDevice);
-        });
-
-        return () => {
-            unsubscribe(); // Cleanup 함수로 사용자 구독 해제
-        };
-    }, []);
-
-    // Redux store에서 디바이스 정보 가져오기
-    const connectDevice = useSelector(state => state.device.connectDevice);
     const dispatch = useDispatch();
     const {connectAndSubscribe, disconnect} = useBLE();
-    console.log("connectDevice info :", connectDevice);
-    console.log("device info id :", device?.id)
+    // console.log("connectDevice info :", connectDevice);
+    // console.log("device info id :", device?.id)
 
-    const handleDeviceDelete = async (dev) => {
-        //선택에 따른 기기만 삭제하게 세부 구현 필요
-        if (!device) return; // device가 null인 경우 처리
-
-        console.log("블루투스 기기 등록 삭제중...");
-        const userRef = firestore().collection("Users").doc(userId);
-        const devicesSnapshot = userRef.collection("Ble_Devices");
-        const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
-
-        querySnapshot.forEach(doc => {
-            doc.ref.delete();
-            console.log("선택된 기기 등록 삭제");
-
-            //redux 최신 상태로 업데이트
-            deleteDevice(device.id);
-            dispatch(fetchDevices());
-        });
-    };
+    // const handleDeviceDelete = async (dev) => {
+    //     //선택에 따른 기기만 삭제하게 세부 구현 필요
+    //     if (!device) return; // device가 null인 경우 처리
+    //
+    //     console.log("블루투스 기기 등록 삭제중...");
+    //     const userRef = firestore().collection("Users").doc(userId);
+    //     const devicesSnapshot = userRef.collection("Ble_Devices");
+    //     const querySnapshot = await devicesSnapshot.where("id", "==", device.id).get();
+    //
+    //     querySnapshot.forEach(doc => {
+    //         doc.ref.delete();
+    //         console.log("선택된 기기 등록 삭제");
+    //
+    //         //redux 최신 상태로 업데이트
+    //         dispatch(fetchDevices());
+    //     });
+    // };
 
     return(
 

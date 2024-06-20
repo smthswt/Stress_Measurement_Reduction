@@ -56,7 +56,6 @@ export const SettingsView = ({navigation}) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log("Home useEffect");
 
         async function deviceConnect() {
             let device = await getConnectedDevices();

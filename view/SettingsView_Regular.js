@@ -21,7 +21,7 @@ import firestore from "@react-native-firebase/firestore";
 
 export const SettingsView_Regular = ({ navigation }) => {
 
-    const [vibrate, setVibrate] = useState(0);
+    const [vibrates, setVibrates] = useState(0);
     const [measurementTime, setMeasurementTime] = useState(0);
     const [stimulationTime, setStimulationTime] = useState(0);
     const [initialFetchDone, setInitialFetchDone] = useState(false);
@@ -38,7 +38,7 @@ export const SettingsView_Regular = ({ navigation }) => {
                     .get();
                 const userData = userDoc.data();
                 if (userData) {
-                    setVibrate(userData.Regular_settings?.vibrate || 15);  // 기본값 설정
+                    setVibrates(userData.Regular_settings?.vibrate || 15);  // 기본값 설정
                     setMeasurementTime(userData.Regular_settings?.measurementTime || 60);  // 기본값 설정
                     setStimulationTime(userData.Regular_settings?.stimulationTime || 30);  // 기본값 설정
                     setInitialFetchDone(true);
@@ -59,7 +59,7 @@ export const SettingsView_Regular = ({ navigation }) => {
         const updateUserData = async () => {
             try {
                 const Regular_settings = {
-                    vibrate: vibrate,
+                    vibrate: vibrates,
                     measurementTime: measurementTime,
                     stimulationTime: stimulationTime,
                 };
@@ -78,7 +78,7 @@ export const SettingsView_Regular = ({ navigation }) => {
         if (initialFetchDone) {
             updateUserData();
         }
-    }, [measurementTime, stimulationTime, vibrate]);
+    }, [measurementTime, stimulationTime, vibrates]);
 
 
 
@@ -112,9 +112,9 @@ export const SettingsView_Regular = ({ navigation }) => {
                 <Text bold>진동 세기</Text>
                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                     <MaterialCommunityIcons name={"volume-vibrate"} color={"#2785F4"} size={25}/>
-                    <Text pr={2.5}>{vibrate ? vibrate + 'HZ' : "15HZ"}</Text>
-                    <Slider width={"77%"} minValue={15} maxValue={35} step={5} colorScheme={"light"}
-                            onChange={v => setVibrate(Math.floor(v))}
+                    <Text pr={2.5} ml={0.5}>{vibrates ? vibrates + ' Intensity' : "15 Intensity"}</Text>
+                    <Slider width={"67%"} value={vibrates} minValue={15} maxValue={35} step={5} colorScheme={"light"}
+                            onChange={v => setVibrates(Math.floor(v))}
                     >
                         <Slider.Track>
                             <Slider.FilledTrack bg={"#2785F4"}/>
