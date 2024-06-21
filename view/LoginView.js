@@ -93,7 +93,7 @@ export const LoginView = ({ navigation, route }) => {
                 if (isLoggedIn) {
                     setTimeout(() => {
                         navigation.navigate('TabScreens', { screen: 'Home', params: { name: savedUsername } });
-                    }, 300);
+                    }, 100);
                     console.log("자동 로그인 설정 유");
                 } else {
                     console.log("자동 로그인 설정 무.");

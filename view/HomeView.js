@@ -64,7 +64,7 @@ export const HomeView = ({navigation}) => {
      * @name handleAnalysisStart
      * @returns {void}
      */
-    // const connectStatus = useSelector(state => state.device.isConnected);
+    const connectStatus = useSelector(state => state.device.isConnected);
     // console.log("connectStatus :", connectStatus)
 
     const [device, setDevice] = useState(null);
@@ -204,38 +204,114 @@ export const HomeView = ({navigation}) => {
     const {userId} = useContext(UserContext)
     console.log("userId--:", userId) //전역관리
     const [name, setName] = useState(null)
-    const [measurementTime, setMeasurementTime] = useState()
     const [bleConnected, setBleConnected] = useState();
+    const [bleId, setBleId] = useState()
+
     // const connectStatus = useSelector(state => state.device.isConnected);
     // console.log("connectStatus :", connectStatus)
 
-    const handleAnalysisStart = () => {
-        console.log("bleConnected 상태 확인d:", bleConnected); // 추가 로그
+    // const handleAnalysisStart = () => {
+    //     console.log("bleConnected 상태 확인:", bleConnected); // 추가 로그
+    //
+    //     if (!bleConnected) {
+    //         console.log("There are no devices connected.");
+    //         alert("연결된 기기가 없습니다.")
+    //         return false;
+    //     } else {
+    //
+    //         navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: "measurementTime" }
+    //         });
+    //     }
+    // };
+
+    const handleAnalysisStart = async () => {
+        console.log("bleConnected 상태 확인:", bleConnected, connectStatus); // 추가 로그
 
         if (!bleConnected) {
             console.log("There are no devices connected.");
-            alert("연결된 기기가 없습니다.")
+            alert("연결된 기기가 없습니다.");
             return false;
         } else {
-            navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: "measurementTime" }
-            });
+            // 이동하기 전에 기기 연결 확인해주고 시작
+            if (bleConnected) {
+                try {
+                    const isConnected = await connectAndSubscribe(bleId);
+
+                    if (isConnected) {
+                        navigation.navigate("AnalysisStart", { params: { name: name, measurementTime: "measurementTime" } });
+                    } else {
+                        console.log("기기 연결 실패");
+                        alert("기기 연결에 실패했습니다.");
+                    }
+                } catch (error) {
+                    console.error("Error connecting and subscribing:", error);
+                    alert("기기 연결 중 오류가 발생했습니다.");
+                }
+            }
         }
     };
+
+
+    // const getUserData = async () => {
+    //     try {
+    //         const userRef = firestore().collection("Users");
+    //         const docRef = await userRef.doc(userId).get();
+    //         const userData = docRef.data();
+    //
+    //         // Ble_Devices 컬렉션에서 첫 번째 문서 가져오기
+    //         const bleDevicesSnapshot = await userRef.doc(userId).collection("Ble_Devices").limit(1).get();
+    //         let bleData = null;
+    //         if (!bleDevicesSnapshot.empty) {
+    //             bleData = bleDevicesSnapshot.docs[0].data(); // 첫 번째 문서의 데이터
+    //         }
+    //
+    //         console.log("bleData :", bleData);
+    //         console.log("userData :", userData);
+    //
+    //         setName(userData.name);
+    //         setBleId(bleData["id"])
+    //
+    //     } catch (error) {
+    //         console.error("Error fetching data from Firestore:", error);
+    //     }
+    // };
 
     const getUserData = async () => {
         try {
             const userRef = firestore().collection("Users");
             const docRef = await userRef.doc(userId).get();
-            const userData = docRef.data()
-            console.log("userData :", userData)
-            
-            setName(userData.name)
+            const userData = docRef.data();
+
+            // Ble_Devices 컬렉션에서 첫 번째 문서 가져오기
+            const bleDevicesSnapshot = await userRef.doc(userId).collection("Ble_Devices").limit(1).get();
+            let bleData = null;
+            if (!bleDevicesSnapshot.empty) {
+                bleData = bleDevicesSnapshot.docs[0].data(); // 첫 번째 문서의 데이터
+            }
+
+            console.log("bleData :", bleData);
+            console.log("userData :", userData);
+
+            if (userData && userData.name) {
+                setName(userData.name);
+            } else {
+                console.error("사용자 데이터에 이름이 없습니다.");
+            }
+
+            if (bleData && bleData["id"]) {
+                setBleId(bleData["id"]);
+            } else {
+                console.error("Ble_Devices 데이터에 ID가 없습니다.");
+            }
 
         } catch (error) {
-            console.error("Error fetching data from Firestore:", error)
+            console.error("Error fetching data from Firestore:", error);
         }
-    }
+    };
 
+
+
+    //실시간 업데이트...필요없으면 제거 ㄱ
     const getBleData = () => {
         try {
             const userRef = firestore().collection("Users");

@@ -212,18 +212,20 @@ import moment from "moment";
 
             setEmotion(beforeEmotion);
             setEmotion2(afterEmotion);
-            setBpm(reportData["1st_Report"].avgHr);
-            setBpm2(reportData["2nd_Report"].avgHr);
-            setSdnn(reportData["1st_Report"].sdnn);
-            setSdnn2(reportData["2nd_Report"].sdnn);
-            setStressLevel(reportData["1st_Report"].stressIndex);
-            setStressLevel2(reportData["2nd_Report"].stressIndex);
+            // 데이터가 NaN인지 확인하고 기본값으로 설정
+            setBpm(isNaN(reportData["1st_Report"].avgHr) ? 0 : reportData["1st_Report"].avgHr);
+            setBpm2(isNaN(reportData["2nd_Report"].avgHr) ? 0 : reportData["2nd_Report"].avgHr);
+            setSdnn(isNaN(reportData["1st_Report"].sdnn) ? 0 : reportData["1st_Report"].sdnn);
+            setSdnn2(isNaN(reportData["2nd_Report"].sdnn) ? 0 : reportData["2nd_Report"].sdnn);
+            setStressLevel(isNaN(reportData["1st_Report"].stressIndex) ? 0 : reportData["1st_Report"].stressIndex);
+            setStressLevel2(isNaN(reportData["2nd_Report"].stressIndex) ? 0 : reportData["2nd_Report"].stressIndex);
+
             setCreateAt(moment(reportData.createAt));
             setCreateAt2(moment(reportData.createAt));
-            setHrList(reportData["1st_Report"].hrList);
-            setHrList2(reportData["2nd_Report"].hrList);
-            setRrList(reportData["1st_Report"].rrList);
-            setRrList2(reportData["2nd_Report"].rrList);
+            setHrList(reportData["1st_Report"].hrList || []);
+            setHrList2(reportData["2nd_Report"].hrList || []);
+            setRrList(reportData["1st_Report"].rrList || []);
+            setRrList2(reportData["2nd_Report"].rrList || []);
           } else {
             console.log("힐링 전 또는 후 데이터가 없습니다.");
           }

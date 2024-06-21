@@ -101,7 +101,7 @@ export const AnalysisResultView = ({route}) => {
 
       // setMeasurementTime(userData.Regular_settings?.measurementTime || 1)
       setStimulationTime(userData.Regular_settings?.stimulationTime || 30)
-      setVibrate(userData.Regular_settings?.stimulationLvl || 15)
+      setVibrate(userData.Regular_settings?.vibrate || 15)
       setSongNum(userData.Manual_settings?.userManualSong || 1)
       setStimulationTime2(userData.Manual_settings?.stimulationTime || 30)
       setStimulationLvl(userData.Manual_settings?.stimulationLvl || 15)

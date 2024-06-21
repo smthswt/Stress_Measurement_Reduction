@@ -108,6 +108,7 @@ export const HealingView = ({route}) => {
     await musicPlay();
     await sendMotorStartPacket({songNumber}, vibrate);
     console.log('stresslevel :', songNumber)
+    console.log("vibrate lvl :", vibrate)
 
     // sendData(
     //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',

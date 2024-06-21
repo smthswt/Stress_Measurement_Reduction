@@ -269,13 +269,10 @@ const DeviceListView = ({navigation}) => {
                             <Box borderWidth={0.5} height={2} borderColor={"#ADADAD"} />
                             <Text color={'#ADADAD'} fontSize={12}>{momentDate.format('YYYY/MM/DD')}</Text>
                         </HStack>
-                        {/*<HStack space={2} alignItems={"center"}>*/}
-                        {/*    <AntDesign name={device.connectState ? "checkcircle" : "exclamationcircle"} size={13} color={device.connectState ? "#3DC061" : "#EB5147"} />*/}
-                        {/*    <Text color={device.connectState ? "#3DC061" : "#EB5147"} fontSize={12}>{device.connectState ? "연결" : "연결 오류"}</Text>*/}
-                        {/*</HStack>*/}
+
                             <HStack space={2} alignItems={"center"}>
-                                <AntDesign name={"checkcircle"} size={13} color={"#3DC061"} />
-                                <Text color={"#3DC061"} fontSize={12}>{"연결"}</Text>
+                                <AntDesign name={isConnected ? "checkcircle" : "exclamationcircle"} size={13} color={isConnected ? "#3DC061" : "#EB5147"} />
+                                <Text color={isConnected ? "#3DC061" : "#EB5147"} fontSize={12}>{isConnected ? "연결" : "연결 해제"}</Text>
                             </HStack>
                         </VStack>
 

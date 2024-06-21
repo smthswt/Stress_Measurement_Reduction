@@ -87,12 +87,63 @@ export const RegisterView = ({navigation}) => {
   };
 
 
+  // const validate = async () => {
+  //   let valid = true;
+  //   const errors = {};
+  //
+  //   if (!formData.username || formData.username.trim() === '') {
+  //     errors.username = 'Username is required';
+  //     valid = false;
+  //   } else {
+  //     const isUserIdExists = await checkUserIdExists(formData.username);
+  //     if (isUserIdExists) {
+  //       errors.username = 'Username already exists';
+  //       valid = false;
+  //     }
+  //   }
+  //
+  //   if (!formData.password || formData.password.trim() === '') {
+  //     errors.password = 'Password is required';
+  //     valid = false;
+  //   }
+  //
+  //   if (!formData.passwordConfirm || formData.passwordConfirm.trim() === '') {
+  //     errors.passwordConfirm = 'Password confirmation is required';
+  //     valid = false;
+  //   } else if (formData.password !== formData.passwordConfirm) {
+  //     errors.passwordConfirm = 'Passwords do not match';
+  //     valid = false;
+  //   }
+  //
+  //   if (!formData.name || formData.name.trim() === '') {
+  //     errors.name = 'Name is required';
+  //     valid = false;
+  //   }
+  //
+  //   if (
+  //     !formData.age ||
+  //     isNaN(formData.age) ||
+  //     formData.age <= 0 ||
+  //     formData.age >= 100
+  //   ) {
+  //     errors.age = 'Please enter a valid age';
+  //     valid = false;
+  //   }
+  //
+  //   setErrors(errors);
+  //
+  //   return valid;
+  // };
+
   const validate = async () => {
     let valid = true;
     const errors = {};
 
     if (!formData.username || formData.username.trim() === '') {
       errors.username = 'Username is required';
+      valid = false;
+    } else if (formData.username.length < 3) {
+      errors.username = 'Username must be at least 3 characters';
       valid = false;
     } else {
       const isUserIdExists = await checkUserIdExists(formData.username);
@@ -104,6 +155,9 @@ export const RegisterView = ({navigation}) => {
 
     if (!formData.password || formData.password.trim() === '') {
       errors.password = 'Password is required';
+      valid = false;
+    } else if (formData.password.length < 8 || !/[!@#$%^&*]/.test(formData.password)) {
+      errors.password = 'Password must be at least 8 characters and contain at least one special character';
       valid = false;
     }
 
@@ -121,10 +175,10 @@ export const RegisterView = ({navigation}) => {
     }
 
     if (
-      !formData.age ||
-      isNaN(formData.age) ||
-      formData.age <= 0 ||
-      formData.age >= 100
+        !formData.age ||
+        isNaN(formData.age) ||
+        formData.age <= 0 ||
+        formData.age >= 100
     ) {
       errors.age = 'Please enter a valid age';
       valid = false;
@@ -134,6 +188,7 @@ export const RegisterView = ({navigation}) => {
 
     return valid;
   };
+
 
   const {setUserId} = useContext(UserContext)
 
