@@ -6,6 +6,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {getConnectedDevices} from "../data/RealmDatabase";
 import {fetchReports, setConnectDevice, setConnectionStatus} from "../data/store";
 import {useBLE} from "./module/BLEProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * Component for displaying settings view.
@@ -36,9 +37,25 @@ export const SettingsView = ({navigation}) => {
         setLogOutOpen(true)
     };
 
-    const handleLogoutConfirm = () => {
-        navigation.navigate("LoginScreens", {screen:"Login"})
-        setLogOutOpen(false)
+    // const handleLogoutConfirm = () => {
+    //     navigation.navigate("LoginScreens", {screen:"Login"})
+    //     setLogOutOpen(false)
+    // };
+
+    const handleLogoutConfirm = async () => {
+        try {
+            // AsyncStorage에서 autoUsername과 autoPassword 제거
+            await AsyncStorage.removeItem('autoUsername');
+            await AsyncStorage.removeItem('autoPassword');
+
+            // 로그인 화면으로 이동
+            navigation.navigate("LoginScreens", { screen: "Login" });
+            setLogOutOpen(false);
+
+            console.log("자동 로그인 정보가 삭제되었습니다.");
+        } catch (error) {
+            console.error('Failed to remove saved login info: ', error);
+        }
     };
 
     const handleLogoutCancel = () => {

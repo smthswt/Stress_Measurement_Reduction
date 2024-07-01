@@ -59,6 +59,7 @@ export const RegisterView = ({navigation}) => {
         password: formData.password,
         age: formData.age,
         gender: gender,
+        createdAt: firestore.Timestamp.now()
       });
 
       console.log('User registered successfully!');

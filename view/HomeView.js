@@ -55,7 +55,7 @@ export const HomeView = ({navigation}) => {
      *
      * @type {boolean}
      */
-    const {isConnected, connectAndSubscribe} = useBLE();
+    const {connectAndSubscribe, disconnect} = useBLE();
 
     /**
      * This function handles the analysis start event by navigating to the "AnalysisStart" screen.
@@ -64,8 +64,7 @@ export const HomeView = ({navigation}) => {
      * @name handleAnalysisStart
      * @returns {void}
      */
-    const connectStatus = useSelector(state => state.device.isConnected);
-    // console.log("connectStatus :", connectStatus)
+    const connectedStatus = useSelector(state => state.device.isConnected);
 
     const [device, setDevice] = useState(null);
     const dispatch = useDispatch();
@@ -90,9 +89,7 @@ export const HomeView = ({navigation}) => {
      */
     const DeviceConnected = () => (
         <Button
-            onPress={() => {
-                setTimeout(handleAnalysisStart, 500); // 500밀리초 지연 후 handleAnalysisStart 호출
-            }}
+            onPress={handleAnalysisStart}
             pl={5}
             pr={5}
             bg={'white'}
@@ -204,28 +201,15 @@ export const HomeView = ({navigation}) => {
     const {userId} = useContext(UserContext)
     console.log("userId--:", userId) //전역관리
     const [name, setName] = useState(null)
-    const [bleConnected, setBleConnected] = useState();
-    const [bleId, setBleId] = useState()
+    // const [bleId, setBleId] = useState()
 
-    // const connectStatus = useSelector(state => state.device.isConnected);
-    // console.log("connectStatus :", connectStatus)
-
-    // const handleAnalysisStart = () => {
-    //     console.log("bleConnected 상태 확인:", bleConnected); // 추가 로그
-    //
-    //     if (!bleConnected) {
-    //         console.log("There are no devices connected.");
-    //         alert("연결된 기기가 없습니다.")
-    //         return false;
-    //     } else {
-    //
-    //         navigation.navigate("AnalysisStart", {params: {name:name, measurementTime: "measurementTime" }
-    //         });
-    //     }
-    // };
 
     const handleAnalysisStart = async () => {
-        console.log("bleConnected 상태 확인:", bleConnected, connectStatus); // 추가 로그
+        // 측정 시작 시 매번 구독 여부를 확인하고 측정 시작하는 로직으로 변경.
+        const { isConnected: bleConnected, bleId } = await fetchBleData();
+
+        // 500밀리초 지연
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         if (!bleConnected) {
             console.log("There are no devices connected.");
@@ -233,48 +217,26 @@ export const HomeView = ({navigation}) => {
             return false;
         } else {
             // 이동하기 전에 기기 연결 확인해주고 시작
-            if (bleConnected) {
-                try {
-                    const isConnected = await connectAndSubscribe(bleId);
+            try {
+                console.log("ble Id :", bleId)
+                const isConnected = await connectAndSubscribe(bleId);
+                dispatch(setConnectionStatus(true));
 
-                    if (isConnected) {
-                        navigation.navigate("AnalysisStart", { params: { name: name, measurementTime: "measurementTime" } });
-                    } else {
-                        console.log("기기 연결 실패");
-                        alert("기기 연결에 실패했습니다.");
-                    }
-                } catch (error) {
-                    console.error("Error connecting and subscribing:", error);
-                    alert("기기 연결 중 오류가 발생했습니다.");
+                if (isConnected) {
+                    navigation.navigate("AnalysisStart", { params: { name: name, measurementTime: "measurementTime" } });
+                } else {
+                    console.log("기기 연결 실패");
+                    alert("기기 연결에 실패했습니다.");
                 }
+            } catch (error) {
+                console.error("Error connecting and subscribing:", error);
+                alert("기기 연결 중 오류가 발생했습니다.");
             }
         }
     };
 
 
-    // const getUserData = async () => {
-    //     try {
-    //         const userRef = firestore().collection("Users");
-    //         const docRef = await userRef.doc(userId).get();
-    //         const userData = docRef.data();
-    //
-    //         // Ble_Devices 컬렉션에서 첫 번째 문서 가져오기
-    //         const bleDevicesSnapshot = await userRef.doc(userId).collection("Ble_Devices").limit(1).get();
-    //         let bleData = null;
-    //         if (!bleDevicesSnapshot.empty) {
-    //             bleData = bleDevicesSnapshot.docs[0].data(); // 첫 번째 문서의 데이터
-    //         }
-    //
-    //         console.log("bleData :", bleData);
-    //         console.log("userData :", userData);
-    //
-    //         setName(userData.name);
-    //         setBleId(bleData["id"])
-    //
-    //     } catch (error) {
-    //         console.error("Error fetching data from Firestore:", error);
-    //     }
-    // };
+
 
     const getUserData = async () => {
         try {
@@ -298,11 +260,11 @@ export const HomeView = ({navigation}) => {
                 console.error("사용자 데이터에 이름이 없습니다.");
             }
 
-            if (bleData && bleData["id"]) {
-                setBleId(bleData["id"]);
-            } else {
-                console.error("Ble_Devices 데이터에 ID가 없습니다.");
-            }
+            // if (bleData && bleData["id"]) {
+            //     setBleId(bleData["id"]);
+            // } else {
+            //     console.error("Ble_Devices 데이터에 ID가 없습니다.");
+            // }
 
         } catch (error) {
             console.error("Error fetching data from Firestore:", error);
@@ -310,48 +272,46 @@ export const HomeView = ({navigation}) => {
     };
 
 
-
-    //실시간 업데이트...필요없으면 제거 ㄱ
-    const getBleData = () => {
+    const fetchBleData = async () => {
         try {
             const userRef = firestore().collection("Users");
             const docRef = userRef.doc(userId);
-
             const bleRef = docRef.collection("Ble_Devices");
+            // Firestore에서 한 번 데이터 가져오기
+            const bleSnapshot = await bleRef.get();
+            const bleDocuments = [];
 
-            // Firestore listener for real-time updates
-            const unsubscribe = bleRef.onSnapshot((bleSnapshot) => {
-                const bleDocuments = [];
-
-                bleSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    bleDocuments.push({isConnect: data.isConnect});
-                });
-
-                if (bleDocuments.length > 0) {
-                    setBleConnected(bleDocuments[0].isConnect);
-                    console.log("bleConnected 상태:", bleDocuments[0].isConnect);
-                } else {
-                    console.log("ble 없음");
-                }
+            bleSnapshot.forEach(doc => {
+                const data = doc.data();
+                bleDocuments.push({isConnect: data.isConnect, id: data.id});
             });
 
-            return () => unsubscribe(); // Cleanup subscription on unmount
-
+            if (bleDocuments.length > 0) {
+                const isConnected = bleDocuments[0].isConnect;
+                const bleId = bleDocuments[0].id;
+                console.log("firestore bleConnected 상태:", isConnected, bleId);
+                console.log("redux bleConnected 상태 확인:", connectedStatus);
+                return { isConnected, bleId };
+            } else {
+                console.log("ble 없음");
+                return { isConnected: false, bleId: null };
+            }
         } catch (error) {
-            console.error("Error fetching data from Firestore:", error)
+            console.error("Error fetching data from Firestore:", error);
+            return false;
         }
-    }
+    };
+
 
 
     useEffect(() => {
         getUserData()
     }, []);
 
-    useEffect(() => {
-        const unsubscribe = getBleData();
-        return () => unsubscribe(); // Cleanup subscription on unmount
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = getBleData();
+    //     return () => unsubscribe(); // Cleanup subscription on unmount
+    // }, []);
 
 
     const ECGwidth = useRef(new Animated.Value(0)).current;
@@ -383,7 +343,8 @@ export const HomeView = ({navigation}) => {
                                 <Text color={'white'} fontSize={'lg'}>안녕하세요</Text>
                             </Box>
                             <>
-                                {isConnected ? DeviceConnected() : DeviceConnected()}
+                                {/*{isConnected ? DeviceConnected() : DeviceConnected()}*/}
+                                {DeviceConnected()}
                             </>
                         </HStack>
                     </VStack>

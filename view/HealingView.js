@@ -103,12 +103,14 @@ export const HealingView = ({route}) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sendHealingStart = async () => {
     const message = 'HealingStart';
+    const HealingVibrateLvl = vibrate || 20
+    const HealingStressLvl = songNumber || 1
     console.log(message);
     startAnimation();
     await musicPlay();
-    await sendMotorStartPacket({songNumber}, vibrate);
-    console.log('stresslevel :', songNumber)
-    console.log("vibrate lvl :", vibrate)
+    await sendMotorStartPacket(HealingStressLvl, HealingVibrateLvl);
+    console.log('stresslevel :', HealingStressLvl)
+    console.log("vibrate lvl :", HealingVibrateLvl)
 
     // sendData(
     //   'b3a4529f-acc1-4f4e-949b-b4b7a2376f4f',

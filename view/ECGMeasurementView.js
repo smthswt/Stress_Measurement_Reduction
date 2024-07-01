@@ -234,7 +234,7 @@ export const ECGMeasurementView = ({route}) => {
     const fetchDataAndStartAnalysis = async () => {
       try {
         await getUserData();
-        console.log("measurement Time:", measurementTime);
+        // console.log("measurement Time:", measurementTime);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }

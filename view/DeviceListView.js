@@ -1,5 +1,18 @@
 import React, {useContext, useEffect, useState} from "react";
-import {Box, Button, Center, HStack, Image, Pressable, Text, useDisclose, View, VStack} from "native-base";
+import {
+    Box,
+    Button,
+    Center,
+    Heading,
+    HStack,
+    Image,
+    Pressable,
+    Spinner,
+    Text,
+    useDisclose,
+    View,
+    VStack
+} from "native-base";
 import {TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import deviceImagewithBlueBack from "./images/DevaiceImagewithBlue.png";
@@ -18,6 +31,7 @@ const DeviceListView = ({navigation}) => {
     const [device, setDevice] = useState();
     const [deviceData, setDeviceData] = useState([])
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
 
     // Redux store에서 디바이스 정보 가져오기
     const connectDevice = useSelector(state => state.device.connectDevice);
@@ -36,6 +50,14 @@ const DeviceListView = ({navigation}) => {
     const [isConnected, setIsConnected] = useState(false)
     const [bleDocuments, setBleDocuments] = useState([]);
     const [bleSnapshotSize, setBleSnapshotSize] = useState(0);
+
+    const LoadingSpinner = () => {
+        return (
+            <Center flex={1} marginY={2.5}>
+                <Spinner color={"blue.500"} accessibilityLabel="Loading posts" size='sm'/>
+            </Center>
+        );
+    };
 
     const fetchBleData = async () => {
         try {
@@ -75,8 +97,8 @@ const DeviceListView = ({navigation}) => {
             setDeviceData(devicesData);
         });
 
-        // Cleanup 함수로 사용자 구독 해제
-        return () => unsubscribe();
+        // // Cleanup 함수로 사용자 구독 해제
+        // return () => unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -97,6 +119,7 @@ const DeviceListView = ({navigation}) => {
 
 
     const handleDeviceConnect = async () => {
+        setIsLoading(true)
         if (!bleDocuments) return; // device가 null인 경우 처리
 
         console.log("handleDeviceConnect", bleDocuments[0].id);
@@ -117,6 +140,7 @@ const DeviceListView = ({navigation}) => {
                 dispatch(setConnectDevice(bleDocuments[0].id));
                 dispatch(setConnectionStatus(true));
                 setIsConnected(true);
+                setIsLoading(false)
 
                 console.log("connectDevice info:", connectDevice);
                 console.log("device connection info id:", connectedStatus);
@@ -129,6 +153,7 @@ const DeviceListView = ({navigation}) => {
 
 
     const handleDeviceDisconnect = async () => {
+        setIsLoading(true)
         if (!bleDocuments) return; // device가 null인 경우 처리
 
 
@@ -159,6 +184,7 @@ const DeviceListView = ({navigation}) => {
                 dispatch(setConnectDevice(""));
                 dispatch(setConnectionStatus(false));
                 setIsConnected(false);
+                setIsLoading(false)
 
                 console.log("connectDevice info after disconnect:", connectDevice);
                 console.log("device connection info id after disconnect:", connectedStatus);
@@ -209,7 +235,8 @@ const DeviceListView = ({navigation}) => {
         return (
             <Pressable onPress={handleDeviceDisconnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
                        borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
-                <Text color={"#2785F4"} fontSize={12}>연결 해제</Text>
+                {isLoading ? <LoadingSpinner /> : <Text color={"#2785F4"} fontSize={12}>연결 해제</Text> }
+
                 {/*<DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>*/}
             </Pressable>
         // ) : (
@@ -233,7 +260,8 @@ const DeviceListView = ({navigation}) => {
             <HStack space={2}>
                 <Pressable onPress={handleDeviceConnect} borderWidth={1} alignItems={"center"} justifyContent={"center"}
                            borderRadius={3} width={81} borderColor={"#2785F4"} py={1.5}>
-                    <Text color={"#2785F4"} fontSize={12}>연결 하기</Text>
+                    {isLoading ? <LoadingSpinner /> : <Text color={"#2785F4"} fontSize={12}>연결 하기</Text> }
+
                     {/*<DeviceListActionSheet isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>*/}
                 </Pressable>
                 <Pressable onPress={handleOnOpen} borderWidth={1} alignItems={"center"} justifyContent={"center"}
@@ -260,7 +288,7 @@ const DeviceListView = ({navigation}) => {
 
             <VStack flex={1} margin={5} space={4}>
                 {deviceData.map((device, index) => (
-                <HStack backgroundColor={"white"} p={4} shadow={2} justifyContent={"space-between"} alignItems={"center"}>
+                <HStack key={device.id} backgroundColor={"white"} p={4} shadow={2} justifyContent={"space-between"} alignItems={"center"}>
                     <VStack space={6} justifyContent={"space-between"} pb={1}>
                         <VStack space={1.5} pt={1}>
                         <Text fontSize={16} fontWeight={"bold"}>{device.name}</Text>
