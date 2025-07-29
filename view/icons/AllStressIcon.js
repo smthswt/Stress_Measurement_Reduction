@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 import {View} from "native-base";
 
 const xml = `
@@ -14,9 +14,7 @@ const xml = `
 </g>
 <path d="M50.2909 8.84749L45.1317 4.22333L51.7159 2.06743L50.2909 8.84749Z" fill="#2785F4"/>
 </svg>
-`
+`;
 export default AllStressIcon = ({width, height}) => {
-    return (
-        <SvgXml xml={xml} width={width} height={height}/>
-    )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};

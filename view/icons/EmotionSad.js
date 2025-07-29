@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
-const xml =`
+const xml = `
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M19.99 39.98C31.0302 39.98 39.98 31.0302 39.98 19.99C39.98 8.94983 31.0302 0 19.99 0C8.94983 0 0 8.94983 0 19.99C0 31.0302 8.94983 39.98 19.99 39.98Z" fill="#FFC35F"/>
 <path d="M40.0001 19.99C40.0001 31.04 31.0401 40 19.9801 40C13.8001 40 8.28012 37.2001 4.62012 32.8C8.07012 35.66 12.5201 37.3801 17.3501 37.3801C28.4001 37.3801 37.3701 28.42 37.3701 17.37C37.3701 12.49 35.6201 8.02005 32.7101 4.55005C37.1701 8.20005 40.0001 13.76 40.0001 19.98V19.99Z" fill="#F2B95A"/>
@@ -12,10 +12,8 @@ const xml =`
 <path d="M29.62 19.1301L25.97 17.0701" stroke="#6E4200" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round"/>
 <path d="M11.0402 22.68C11.0402 22.68 10.8702 26.78 10.3302 28.63C9.81015 30.44 8.32015 31.78 6.46015 31.51C4.60015 31.24 3.31015 29.5 3.58015 27.64C3.74015 26.52 4.50015 25.68 5.38015 25.11C7.50015 23.73 10.7702 22.48 10.7702 22.48C10.8602 22.43 10.9702 22.47 11.0202 22.56C11.0402 22.6 11.0402 22.64 11.0402 22.67V22.68Z" fill="#59BCFF"/>
 </svg>
-`
+`;
 
 export default EmotionSad = ({width, height}) => {
-    return (
-        <SvgXml xml={xml} width={width} height={height}/>
-    )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
-const xml =`
+const xml = `
 <svg width="124" height="328" viewBox="0 0 124 328" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M27.2396 91.1162C26.7003 92.1696 23.0847 131.472 25.9282 136.639C28.7594 141.805 42.1431 126.782 42.4741 101.412C42.756 80.0428 27.2396 91.1162 27.2396 91.1162Z" fill="#FFB27D"/>
 <path d="M0.803537 152.265L53.6833 169.035L65.2396 130.883L12.3598 114.114L0.803537 152.265Z" fill="#233862"/>
@@ -26,10 +26,8 @@ const xml =`
 <path d="M92.8951 153.657C92.8951 153.657 90.3335 152.466 89.1692 151.638C88.0049 150.81 87.3062 152.29 89.1692 153.657C91.0321 155.024 91.694 154.409 91.694 154.409L92.8828 153.657H92.8951Z" fill="#FFB27D"/>
 <path d="M2.67761 152.822C2.67761 152.822 10.2519 149.147 11.7962 153.273C13.3405 157.399 10.6809 160.86 8.14388 160.045C5.60685 159.23 1.0843 156.471 2.68987 152.822H2.67761Z" fill="#FFB27D"/>
 </svg>
-`
+`;
 
 export default Onboarding2 = ({width, height}) => {
-  return (
-    <SvgXml xml={xml} width={width} height={height}/>
-  )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};

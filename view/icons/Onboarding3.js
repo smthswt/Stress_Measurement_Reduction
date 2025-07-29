@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
-const xml =`
+const xml = `
 <svg width="122" height="326" viewBox="0 0 122 326" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1_450)">
 <path d="M91.2747 324.536H73.418C73.5538 323.594 74.0107 320.731 74.8381 318.104C75.1221 317.187 75.4679 316.294 75.8507 315.526C77.5919 312.043 88.6196 314.262 88.6196 314.262C88.6196 314.262 89.6446 315.142 90.4473 318.513C90.8054 320 91.1142 321.958 91.2747 324.548V324.536Z" fill="#233862"/>
@@ -32,10 +32,8 @@ const xml =`
 </clipPath>
 </defs>
 </svg>
-`
+`;
 
 export default Onboarding3 = ({width, height}) => {
-  return (
-    <SvgXml xml={xml} width={width} height={height}/>
-  )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};

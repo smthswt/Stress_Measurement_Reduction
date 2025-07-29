@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
 const xml = `
 <svg viewBox="0 0 92 97" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,10 +27,8 @@ const xml = `
 <feBlend mode="normal" in2="shape" result="effect2_innerShadow_470_2749"/>
 </filter>
 </defs>
-</svg>`
+</svg>`;
 
 export default AllResultsIcon = ({width, height}) => {
-    return (
-        <SvgXml xml={xml} width={width} height={height}/>
-    )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};

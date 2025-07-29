@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
-const xml =`
+const xml = `
 <svg viewBox="0 0 320 69" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect opacity="0.2" y="18.2571" width="8" height="58.9714" rx="4" fill="url(#paint0_linear_1_1727)"/>
 <rect opacity="0.2" x="312" y="31.5144" width="8" height="45.7143" rx="4" fill="url(#paint1_linear_1_1727)"/>
@@ -76,11 +76,9 @@ const xml =`
 </linearGradient>
 </defs>
 </svg>
-`
+`;
 
 const HomeBarWave = ({width, height}) => {
-    return (
-        <SvgXml xml={xml} width={width} height={height}/>
-    )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};
 export default HomeBarWave;

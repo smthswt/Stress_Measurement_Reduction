@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { SvgXml } from 'react-native-svg';
+import {SvgXml} from 'react-native-svg';
 
-const xml =`
+const xml = `
 <svg width="60" height="77" viewBox="0 0 60 77" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect opacity="0.5" y="9" width="60" height="60" rx="30" fill="#59BCFF"/>
 <g clip-path="url(#clip0_10_3665)">
@@ -41,10 +41,8 @@ const xml =`
 </clipPath>
 </defs>
 </svg>
-`
+`;
 
 export default WalkingPeopleIcon = ({width, height}) => {
-  return (
-    <SvgXml xml={xml} width={width} height={height}/>
-  )
-}
+  return <SvgXml xml={xml} width={width} height={height} />;
+};
